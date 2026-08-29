@@ -6,20 +6,24 @@ export function PublicPageHero({
   title,
   description,
   breadcrumbs = [],
+  hideBackdrop = false,
 }: {
   eyebrow: string;
   title: string;
   description: string;
   breadcrumbs?: Array<{ label: string; href?: string }>;
+  hideBackdrop?: boolean;
 }) {
   return (
-    <section className="relative overflow-hidden px-4 pb-3 pt-16 sm:px-6 sm:pb-4 sm:pt-20">
-      {/* Seamless full hero backdrop ambient glow */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/35 via-accent/20 to-transparent blur-3xl" />
-
-      {/* Atmosphere Orbs */}
-      <div className="orb -left-20 -top-24 size-[36rem] bg-primary/35" />
-      <div className="orb right-[-10%] -top-12 size-[36rem] bg-accent/25" />
+    <section className="relative px-4 pb-3 pt-16 sm:px-6 sm:pb-4 sm:pt-20">
+      {!hideBackdrop && (
+        <>
+          {/* Full height hero backdrop glow */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[35rem] bg-gradient-to-b from-primary/40 via-accent/20 to-transparent blur-3xl" />
+          <div className="orb -left-20 -top-24 size-[38rem] bg-primary/40" />
+          <div className="orb right-[-10%] -top-12 size-[38rem] bg-accent/30" />
+        </>
+      )}
 
       <div className="relative mx-auto max-w-7xl">
         <nav className="mb-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground" aria-label="Breadcrumb">
