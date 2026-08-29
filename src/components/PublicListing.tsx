@@ -27,22 +27,22 @@ export function PublicListing({
   return (
     <PublicPageFrame>
       <PublicPageHero eyebrow={eyebrow} title={title} description={description} breadcrumbs={breadcrumbs} />
-      <section className="px-4 pb-16 sm:px-6">
+      <section className="relative px-4 pb-12 pt-2 sm:px-6 sm:pb-16">
         <div className="mx-auto max-w-7xl">
           {toolbar.length ? (
-            <div className="mb-6 flex flex-wrap items-center gap-2">
+            <div className="mb-4 flex flex-wrap items-center gap-2">
               {toolbar.map((item) => (
                 <Link
                   key={item.href + item.label}
                   href={item.href}
-                  className="focus-ring inline-flex min-h-9 items-center rounded-full border border-glass-border bg-glass px-4 text-xs font-semibold text-muted-foreground hover:border-accent/60 hover:text-accent transition"
+                  className="focus-ring inline-flex min-h-8 items-center rounded-full border border-glass-border bg-glass px-3.5 text-xs font-semibold text-muted-foreground hover:border-accent/60 hover:text-accent transition"
                 >
                   {item.label}
                 </Link>
               ))}
             </div>
           ) : null}
-          {note ? <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{note}</p> : null}
+          {note ? <p className="mb-3 text-xs leading-relaxed text-muted-foreground">{note}</p> : null}
           {children ? children : <EmptyState title={emptyTitle} description={emptyDescription} />}
         </div>
       </section>

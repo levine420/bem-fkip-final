@@ -19,12 +19,9 @@ export function PublicNavbar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-2.5 sm:px-6 sm:pt-3.5">
-      {/* Top seamless background glow matching hero backdrop */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#6b0f2e] via-[#4a0a1f]/80 to-transparent" />
-
       <div
         className={`relative mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-2xl px-3.5 py-2.5 transition-all duration-300 sm:px-5 ${
-          scrolled ? "glass-strong shadow-xl border border-glass-border" : "glass"
+          scrolled ? "glass-strong shadow-2xl border border-glass-border bg-slate-950/80" : "glass bg-slate-950/40"
         }`}
       >
         <Link href="/" className="focus-ring flex min-w-0 items-center gap-2.5 rounded-xl">
