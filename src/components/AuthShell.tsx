@@ -16,7 +16,7 @@ export function AuthShell({
   footer?: ReactNode;
 }) {
   return (
-    <main className="grain relative min-h-screen w-full overflow-x-hidden bg-background px-4 py-12 flex flex-col items-center justify-center">
+    <main className="grain relative min-h-dvh w-full bg-background px-4 py-12 flex flex-col items-center justify-center">
       {/* Background Glow Atmosphere */}
       <div className="orb left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 size-[36rem] bg-primary/20" />
       <div className="orb left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[28rem] bg-accent/15" />

@@ -7,7 +7,7 @@ const quickIcons = [Newspaper, CalendarDays, MessageSquareText, FileText] as con
 
 export function HomeHero() {
   return (
-    <section id="home" className="relative overflow-hidden px-4 pb-10 pt-16 sm:px-6 sm:pb-16 sm:pt-20">
+    <section id="home" className="relative px-4 pb-10 pt-16 sm:px-6 sm:pb-16 sm:pt-20">
       {/* Top ambient backdrop glow */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/35 via-accent/20 to-transparent blur-3xl" />
 

@@ -47,13 +47,26 @@
 }
 
 * { box-sizing: border-box; border-color: var(--border); }
-html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+  /* Prevent horizontal scroll AND overscroll-x on all browsers incl. Chrome Android */
+  overflow-x: clip;
+  /* Prevent pull-to-overscroll gap above navbar on Chrome Android */
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: none;
+}
 body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  overflow-x: hidden;
+  /* clip is stronger than hidden: doesn't create scroll container, works with position:absolute orbs */
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: none;
+  /* Use dynamic viewport height so mobile address-bar doesn't cause gap */
+  min-height: 100dvh;
 }
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; }
@@ -99,15 +112,23 @@ button, input, select, textarea { font: inherit; }
   filter: blur(80px);
   pointer-events: none;
   z-index: 0;
+  /* Critical: prevent orb from expanding page bounding box on mobile */
+  /* overflow:clip on the parent container handles this, but we also set will-change
+     to keep orb on its own compositing layer without affecting scroll width */
+  will-change: transform;
 }
-.grain { position: relative; }
+.grain {
+  position: relative;
+  /* clip (not hidden) so orbs positioned outside bounds don't expand scroll width */
+  overflow-x: clip;
+}
 .grain::after {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
   pointer-events: none;
   opacity: 0.025;
-  z-index: 0;
+  z-index: 9999;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 .grain > * { position: relative; z-index: 1; }

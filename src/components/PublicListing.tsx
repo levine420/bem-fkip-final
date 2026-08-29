@@ -26,7 +26,7 @@ export function PublicListing({
 }) {
   return (
     <PublicPageFrame>
-      <div className="relative overflow-hidden">
+      <div className="relative">
         {/* Full-height seamless backdrop ambient glow covering hero AND cards */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[48rem] bg-gradient-to-b from-primary/40 via-accent/25 to-transparent blur-3xl" />
         <div className="orb -left-24 -top-24 size-[44rem] bg-primary/40" />
