@@ -1,0 +1,450 @@
+// Reconciled Admin domain. See docs/SOURCE_AUDIT_2026-08-28.md.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+enum user_role {
+  MAHASISWA
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum user_account_status {
+  AKTIF
+  NONAKTIF
+  BELUM_VERIFIKASI
+}
+
+enum period_status {
+  AKTIF
+  NONAKTIF
+  ARSIP
+}
+
+enum content_status {
+  DRAF
+  MENUNGGU_REVIEW
+  TERBIT
+  REVISI
+}
+
+enum content_category {
+  BERITA
+  PENGUMUMAN
+  KAJIAN
+  RILIS_PERS
+  LAINNYA
+}
+
+enum work_program_status {
+  BELUM_MULAI
+  BERJALAN
+  SELESAI
+  DITUNDA
+  DIBATALKAN
+}
+
+enum event_status {
+  DRAF
+  TERBIT
+  BERJALAN
+  SELESAI
+  DIBATALKAN
+  DIARSIPKAN
+}
+
+enum registration_status {
+  SEGERA_DIBUKA
+  TERBUKA
+  PENUH
+  TUTUP
+}
+
+enum event_registration_status {
+  MENUNGGU
+  DITERIMA
+  DITOLAK
+  HADIR
+  TIDAK_HADIR
+}
+
+enum aspiration_category {
+  AKADEMIK
+  FASILITAS
+  LAYANAN_KAMPUS
+  LAINNYA
+}
+
+enum aspiration_status {
+  MASUK
+  DIPROSES
+  SELESAI
+  DITOLAK
+}
+
+enum document_category {
+  LPJ
+  PROPOSAL
+  SK
+  AD_ART
+  LAPORAN
+  ARSIP
+}
+
+model study_programs {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  version Int @default(1)
+  deleted_at DateTime? @db.Timestamptz(6)
+  code String @unique @db.Citext
+  name String @unique @db.Citext
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  users_study_program users[] @relation("users_study_program")
+}
+
+model users {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  version Int @default(1)
+  name String @db.VarChar(100)
+  email String @unique @db.Citext
+  password String @db.VarChar(255)
+  email_verified_at DateTime? @db.Timestamptz(6)
+  nim String? @unique @db.VarChar(20)
+  angkatan Int? @db.SmallInt
+  program_studi_id String? @db.Uuid
+  avatar_url String? @db.VarChar(1024)
+  role user_role @default(MAHASISWA)
+  account_status user_account_status @default(BELUM_VERIFIKASI)
+  must_change_password Boolean @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  study_program study_programs? @relation("users_study_program", fields: [program_studi_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "users_study_program_fkey")
+  admin_assignments_user admin_assignments? @relation("admin_assignments_user")
+  board_members_user board_members[] @relation("board_members_user")
+  department_members_user department_members[] @relation("department_members_user")
+  contents_author contents[] @relation("contents_author")
+  contents_reviewer contents[] @relation("contents_reviewer")
+  events_creator events[] @relation("events_creator")
+  event_registrations_user event_registrations[] @relation("event_registrations_user")
+  aspirations_submitter aspirations[] @relation("aspirations_submitter")
+  aspirations_handler aspirations[] @relation("aspirations_handler")
+  documents_uploader documents[] @relation("documents_uploader")
+  activity_logs_actor activity_logs[] @relation("activity_logs_actor")
+  admin_sessions_user admin_sessions? @relation("admin_sessions_user")
+  @@index([program_studi_id])
+}
+
+// Internal singleton, maintained by SQL triggers; never exposed in Admin APIs.
+model admin_access_state {
+  id Int @id @default(1)
+  active_super_admins Int @default(0)
+  initialized Boolean @default(false)
+}
+
+model periods {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String @unique @db.Citext
+  visi String @db.VarChar(500)
+  misi String @db.Text
+  photo_url String? @db.VarChar(1024)
+  year_start Int @db.SmallInt
+  year_end Int @db.SmallInt
+  status period_status @default(NONAKTIF)
+  version Int @default(1)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  departments_period departments[] @relation("departments_period")
+  admin_assignments_period admin_assignments[] @relation("admin_assignments_period")
+  board_members_period board_members[] @relation("board_members_period")
+  department_members_period department_members[] @relation("department_members_period")
+  aspirations_period aspirations[] @relation("aspirations_period")
+  contents_period contents[] @relation("contents_period")
+  work_programs_period work_programs[] @relation("work_programs_period")
+  events_period events[] @relation("events_period")
+  documents_period documents[] @relation("documents_period")
+}
+
+model departments {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  version Int @default(1)
+  name String @db.Citext
+  slug String @db.VarChar(150)
+  description String? @db.Text
+  logo_url String? @db.VarChar(1024)
+  period_id String @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  period periods @relation("departments_period", fields: [period_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "departments_period_fkey")
+  admin_assignments_department admin_assignments[] @relation("admin_assignments_department")
+  board_members_department board_members[] @relation("board_members_department")
+  department_members_department department_members[] @relation("department_members_department")
+  contents_department contents[] @relation("contents_department")
+  work_programs_department work_programs[] @relation("work_programs_department")
+  events_department events[] @relation("events_department")
+  documents_department documents[] @relation("documents_department")
+  @@unique([period_id, name])
+  @@unique([period_id, slug])
+  @@unique([id, period_id])
+  @@index([period_id])
+}
+
+model admin_assignments {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id String @unique @db.Uuid
+  department_id String @db.Uuid
+  period_id String @db.Uuid
+  revoked_at DateTime? @db.Timestamptz(6)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  user users @relation("admin_assignments_user", fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "admin_assignments_user_fkey")
+  department departments @relation("admin_assignments_department", fields: [department_id, period_id], references: [id, period_id], onDelete: Restrict, onUpdate: Restrict, map: "admin_assignments_department_fkey")
+  period periods @relation("admin_assignments_period", fields: [period_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "admin_assignments_period_fkey")
+  @@index([user_id])
+  @@index([department_id, period_id])
+  @@index([period_id])
+}
+
+model board_members {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  version Int @default(1)
+  name String @db.VarChar(100)
+  position String @db.VarChar(100)
+  photo_url String? @db.VarChar(1024)
+  display_order Int @default(1)
+  department_id String? @db.Uuid
+  period_id String @db.Uuid
+  user_id String? @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  department departments? @relation("board_members_department", fields: [department_id, period_id], references: [id, period_id], onDelete: Restrict, onUpdate: Restrict, map: "board_members_department_fkey")
+  period periods @relation("board_members_period", fields: [period_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "board_members_period_fkey")
+  user users? @relation("board_members_user", fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "board_members_user_fkey")
+  @@unique([period_id, user_id])
+  @@index([department_id, period_id])
+  @@index([period_id])
+  @@index([user_id])
+}
+
+model department_members {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  version Int @default(1)
+  name String @db.VarChar(100)
+  position String @db.VarChar(100)
+  photo_url String? @db.VarChar(1024)
+  display_order Int @default(1)
+  department_id String @db.Uuid
+  period_id String @db.Uuid
+  user_id String? @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  department departments @relation("department_members_department", fields: [department_id, period_id], references: [id, period_id], onDelete: Restrict, onUpdate: Restrict, map: "department_members_department_fkey")
+  period periods @relation("department_members_period", fields: [period_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "department_members_period_fkey")
+  user users? @relation("department_members_user", fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "department_members_user_fkey")
+  @@unique([department_id, user_id])
+  @@index([department_id, period_id])
+  @@index([period_id])
+  @@index([user_id])
+}
+
+model contents {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title String @db.VarChar(200)
+  slug String @unique @db.Citext
+  seo_slug String? @db.Citext
+  meta_title String? @db.VarChar(255)
+  meta_description String? @db.Text
+  excerpt String? @db.Text
+  reading_time Int?
+  body String @db.Text
+  thumbnail_url String? @db.VarChar(1024)
+  view_count Int @default(0)
+  category content_category @default(BERITA)
+  status content_status @default(DRAF)
+  tags String[] @default([])
+  review_note String? @db.Text
+  reviewer_id String? @db.Uuid
+  reviewed_at DateTime? @db.Timestamptz(6)
+  author_id String @db.Uuid
+  department_id String? @db.Uuid
+  period_id String @db.Uuid
+  published_at DateTime? @db.Timestamptz(6)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  author users @relation("contents_author", fields: [author_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "contents_author_fkey")
+  reviewer users? @relation("contents_reviewer", fields: [reviewer_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "contents_reviewer_fkey")
+  department departments? @relation("contents_department", fields: [department_id, period_id], references: [id, period_id], onDelete: Restrict, onUpdate: Restrict, map: "contents_department_fkey")
+  period periods @relation("contents_period", fields: [period_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "contents_period_fkey")
+  @@index([author_id])
+  @@index([reviewer_id])
+  @@index([department_id, period_id])
+  @@index([period_id])
+}
+
+model work_programs {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String @db.VarChar(150)
+  slug String @db.VarChar(150)
+  description String @db.VarChar(500)
+  target_time String? @db.VarChar(150)
+  success_indicator String? @db.VarChar(300)
+  progress_notes String? @db.Text
+  status work_program_status @default(BELUM_MULAI)
+  display_order Int @default(0)
+  department_id String? @db.Uuid
+  period_id String @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  department departments? @relation("work_programs_department", fields: [department_id, period_id], references: [id, period_id], onDelete: Restrict, onUpdate: Restrict, map: "work_programs_department_fkey")
+  period periods @relation("work_programs_period", fields: [period_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "work_programs_period_fkey")
+  @@unique([period_id, slug])
+  @@unique([period_id, department_id, name])
+  @@index([department_id, period_id])
+  @@index([period_id])
+}
+
+model events {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String @db.VarChar(200)
+  slug String @unique @db.VarChar(150)
+  description String @db.Text
+  location String @db.VarChar(200)
+  poster_url String? @db.VarChar(1024)
+  start_time DateTime @db.Timestamptz(6)
+  end_time DateTime? @db.Timestamptz(6)
+  registration_deadline DateTime? @db.Timestamptz(6)
+  max_participants Int?
+  registration_schema Json @default("[]") @db.JsonB
+  status event_status @default(DRAF)
+  registration_status registration_status @default(TUTUP)
+  created_by_user_id String @db.Uuid
+  department_id String @db.Uuid
+  period_id String @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  creator users @relation("events_creator", fields: [created_by_user_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "events_creator_fkey")
+  event_registrations_event event_registrations[] @relation("event_registrations_event")
+  department departments @relation("events_department", fields: [department_id, period_id], references: [id, period_id], onDelete: Restrict, onUpdate: Restrict, map: "events_department_fkey")
+  period periods @relation("events_period", fields: [period_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "events_period_fkey")
+  @@index([created_by_user_id])
+  @@index([department_id, period_id])
+  @@index([period_id])
+}
+
+model event_registrations {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id String @db.Uuid
+  event_id String @db.Uuid
+  status event_registration_status @default(MENUNGGU)
+  registration_data Json? @db.JsonB
+  decision_note String? @db.Text
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  user users @relation("event_registrations_user", fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "event_registrations_user_fkey")
+  event events @relation("event_registrations_event", fields: [event_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "event_registrations_event_fkey")
+  @@unique([user_id, event_id])
+  @@index([user_id])
+  @@index([event_id])
+}
+
+model aspirations {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title String @db.VarChar(150)
+  body String @db.VarChar(2000)
+  category aspiration_category
+  status aspiration_status @default(MASUK)
+  response String? @db.VarChar(1000)
+  is_anonymous Boolean @default(false)
+  user_id String @db.Uuid
+  handler_id String? @db.Uuid
+  responded_at DateTime? @db.Timestamptz(6)
+  period_id String @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  submitter users @relation("aspirations_submitter", fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "aspirations_submitter_fkey")
+  handler users? @relation("aspirations_handler", fields: [handler_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "aspirations_handler_fkey")
+  period periods @relation("aspirations_period", fields: [period_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "aspirations_period_fkey")
+  @@index([user_id])
+  @@index([handler_id])
+  @@index([period_id])
+}
+
+model documents {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String @db.VarChar(255)
+  original_filename String @db.VarChar(255)
+  storage_key String @unique @db.VarChar(1024)
+  file_type String @db.VarChar(100)
+  file_size BigInt
+  download_count Int @default(0)
+  is_public Boolean @default(false)
+  checksum String? @db.VarChar(128)
+  category document_category @default(ARSIP)
+  uploader_id String @db.Uuid
+  department_id String? @db.Uuid
+  period_id String @db.Uuid
+  uploaded_at DateTime @default(now()) @db.Timestamptz(6)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  uploader users @relation("documents_uploader", fields: [uploader_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "documents_uploader_fkey")
+  department departments? @relation("documents_department", fields: [department_id, period_id], references: [id, period_id], onDelete: Restrict, onUpdate: Restrict, map: "documents_department_fkey")
+  period periods @relation("documents_period", fields: [period_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "documents_period_fkey")
+  @@index([uploader_id])
+  @@index([department_id, period_id])
+  @@index([period_id])
+}
+
+model activity_logs {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id String? @db.Uuid
+  action String @db.VarChar(100)
+  target_type String? @db.VarChar(100)
+  target_id String? @db.Uuid
+  details Json? @db.JsonB
+  ip_address String? @db.VarChar(45)
+  user_agent String? @db.VarChar(500)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  actor users? @relation("activity_logs_actor", fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "activity_logs_actor_fkey")
+  @@index([user_id])
+  @@index([created_at])
+  @@index([action, created_at])
+  @@index([target_type, target_id])
+}
+
+model admin_sessions {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id String @unique @db.Uuid
+  token_hash String @unique @db.VarChar(64)
+  csrf_hash String @db.VarChar(64)
+  last_seen_at DateTime @db.Timestamptz(6)
+  expires_at DateTime @db.Timestamptz(6)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  user users @relation("admin_sessions_user", fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "admin_sessions_user_fkey")
+  @@index([user_id])
+  @@index([expires_at])
+}
+
+model admin_login_attempts {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key String @unique @db.VarChar(64)
+  failures Int @default(0)
+  window_start DateTime @db.Timestamptz(6)
+  locked_until DateTime? @db.Timestamptz(6)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  @@index([updated_at])
+}

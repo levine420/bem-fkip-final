@@ -1,0 +1,35 @@
+{
+  "name": "platform-digital-bem-fkip-uika",
+  "version": "0.4.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "db:validate": "prisma validate",
+    "db:generate": "prisma generate",
+    "db:deploy": "prisma migrate deploy",
+    "admin:bootstrap": "node scripts/bootstrap-admin.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "^0.575.0",
+    "next": "16.2.9",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "@prisma/client": "6.19.0",
+    "bcryptjs": "3.0.3",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.1",
+    "@types/node": "^22.16.5",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.8.3",
+    "prisma": "6.19.0"
+  },
+  "type": "module"
+}
