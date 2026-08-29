@@ -27,10 +27,12 @@ export function PublicListing({
   return (
     <PublicPageFrame>
       <div className="relative">
-        {/* Full-height seamless backdrop ambient glow covering hero AND cards */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[48rem] bg-gradient-to-b from-primary/40 via-accent/25 to-transparent blur-3xl" />
-        <div className="orb -left-24 -top-24 size-[44rem] bg-primary/40" />
-        <div className="orb right-[-10%] top-0 size-[44rem] bg-accent/30" />
+        {/* Orb container: overflow:clip prevents bleeding above y=0 */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[48rem]" style={{ overflow: 'clip', zIndex: 0 }}>
+          <div className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-primary/40 via-accent/25 to-transparent blur-3xl" />
+          <div className="orb left-[-6rem] top-0 size-[44rem] bg-primary/40" />
+          <div className="orb right-[-10%] top-0 size-[44rem] bg-accent/30" />
+        </div>
 
         <PublicPageHero
           eyebrow={eyebrow}
