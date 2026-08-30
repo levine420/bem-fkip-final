@@ -16,17 +16,6 @@ export function PublicPageHero({
 }) {
   return (
     <section className="relative px-4 pb-3 pt-16 sm:px-6 sm:pb-4 sm:pt-20">
-      {!hideBackdrop && (
-        <>
-          {/* Orb container: overflow:clip prevents bleeding above y=0 */}
-          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-full" style={{ overflow: 'clip', zIndex: 0 }}>
-            <div className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-primary/35 via-accent/20 to-transparent blur-3xl" />
-            <div className="orb left-[-5rem] top-0 size-[38rem] bg-primary/40" />
-            <div className="orb right-[-10%] top-0 size-[38rem] bg-accent/30" />
-          </div>
-        </>
-      )}
-
       <div className="relative mx-auto max-w-7xl">
         <nav className="mb-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground" aria-label="Breadcrumb">
           <Link className="focus-ring rounded hover:text-accent" href="/">Beranda</Link>

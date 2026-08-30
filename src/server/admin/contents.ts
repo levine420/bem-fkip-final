@@ -54,12 +54,11 @@ function forbidden(message: string): never {
 
 /**
  * Check if actor can access this content.
- * SA can access all, Admin Dept can only access their department's content.
+ * Both SA and ADMIN can access all content (for publication management).
  */
 function canAccessContent(actor: AdminActor, content: { author_id: string; department_id: string | null }) {
-  if (actor.role === "SUPER_ADMIN") return true;
-  const scope = departmentScope(actor);
-  return content.department_id === scope.department_id;
+  // Allow both SUPER_ADMIN and ADMIN to access all content
+  return actor.role === "SUPER_ADMIN" || actor.role === "ADMIN";
 }
 
 /**
@@ -98,7 +97,7 @@ async function ensureUniqueSlug(tx: Transaction, baseSlug: string, excludeId?: s
 
 /**
  * List contents with filters and pagination.
- * SA sees all, Admin Dept sees only their department's content.
+ * Both SA and ADMIN can see all content (for publication management).
  */
 export async function listContents(params: URLSearchParams) {
   const { q, take, skip, page } = pagination(params);
@@ -112,7 +111,7 @@ export async function listContents(params: URLSearchParams) {
     
     const where: Prisma.contentsWhereInput = {
       deleted_at: null,
-      ...(actor.role === "ADMIN" ? { department_id: scope.department_id, period_id: scope.period_id } : {}),
+      // ADMIN can now access content from all departments for publication
       ...(status ? { status: status as any } : {}),
       ...(category ? { category: category as any } : {}),
       ...(author_id ? { author_id: uuid(author_id) } : {}),

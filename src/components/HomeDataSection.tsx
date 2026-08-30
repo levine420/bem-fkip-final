@@ -31,23 +31,27 @@ export function HomeDepartments() {
         />
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {departments.map((dept, i) => (
-            <div key={dept.id} className="glass rounded-3xl overflow-hidden transition duration-300 hover:border-accent/50 flex flex-col">
+            <Link
+              key={dept.id}
+              href={`/organisasi/departemen/${dept.id}`}
+              className="glass rounded-3xl overflow-hidden transition duration-300 hover:border-accent/50 flex flex-col group"
+            >
               {/* Decorative gradient top strip */}
               <div className={`h-2 w-full bg-gradient-to-r ${deptGradients[i % deptGradients.length]}`} />
               <div className="p-6 flex flex-col flex-1 justify-between">
                 <div>
-                  <div className={`size-14 rounded-2xl bg-gradient-to-br ${deptGradients[i % deptGradients.length]} border border-white/10 flex items-center justify-center mb-4 font-black text-2xl ${deptAccents[i % deptAccents.length]}`}>
+                  <div className={`size-14 rounded-2xl bg-gradient-to-br ${deptGradients[i % deptGradients.length]} border border-white/10 flex items-center justify-center mb-4 font-black text-2xl ${deptAccents[i % deptAccents.length]} transition-transform group-hover:scale-110`}>
                     {dept.name.slice(0, 1).toUpperCase()}
                   </div>
                   <h3 className="text-lg font-semibold text-white">{dept.name}</h3>
                   <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{dept.description}</p>
                 </div>
-                <div className={`mt-6 border-t border-glass-border pt-4 flex justify-between items-center text-xs ${deptAccents[i % deptAccents.length]}`}>
+                <div className={`mt-6 border-t border-glass-border pt-4 flex justify-between items-center text-xs ${deptAccents[i % deptAccents.length]} transition-transform group-hover:translate-x-1`}>
                   <span>Lihat Profil Departemen</span>
                   <ArrowUpRight className="size-4" />
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

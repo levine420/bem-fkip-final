@@ -32,11 +32,11 @@
   --accent-foreground: #0b0710;
   --soft: #ffb6d5;
   --muted: #241526;
-  --muted-foreground: #b9aab5;
+  --muted-foreground: #c9bac5;
   --border: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.14);
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-bg-strong: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-bg: rgba(18, 9, 20, 0.68);
+  --glass-bg-strong: rgba(18, 9, 20, 0.82);
   --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
@@ -55,7 +55,28 @@ html {
 }
 body {
   margin: 0;
-  background: var(--background);
+  /* Consolidated global ambient background system */
+  background:
+    radial-gradient(
+      circle at 15% 8%,
+      rgba(233, 30, 99, 0.14) 0%,
+      rgba(233, 30, 99, 0.06) 26%,
+      transparent 52%
+    ),
+    radial-gradient(
+      circle at 85% 18%,
+      rgba(255, 77, 157, 0.11) 0%,
+      rgba(255, 77, 157, 0.04) 30%,
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      #130a13 0%,
+      #0d0810 36%,
+      #0b0710 100%
+    );
+  background-color: var(--background);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans);
   /* overflow-x:clip on body only (not html) so Chrome picks the right scroll container */
@@ -69,13 +90,13 @@ button, input, select, textarea { font: inherit; }
 
 .glass {
   background: var(--glass-bg);
-  backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(125%);
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-glass);
 }
 .glass-strong {
   background: var(--glass-bg-strong);
-  backdrop-filter: blur(26px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(130%);
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-glass);
 }
@@ -104,7 +125,8 @@ button, input, select, textarea { font: inherit; }
 .orb {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(80px);
+  filter: blur(110px);
+  opacity: 0.14;
   pointer-events: none;
   z-index: 0;
 }
@@ -119,7 +141,7 @@ button, input, select, textarea { font: inherit; }
   z-index: 0;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.grain > * { position: relative; z-index: 1; }
+
 .reveal { animation: reveal-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 .float-soft { animation: float-soft 7s ease-in-out infinite; }
 

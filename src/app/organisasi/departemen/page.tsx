@@ -73,13 +73,14 @@ export default function DepartmentsPage() {
               const kadep = boardMembers.find((bm) => bm.department_id === dept.id);
 
               return (
-                <div
+                <Link
                   key={dept.id}
+                  href={`/organisasi/departemen/${dept.id}`}
                   className="glass group flex flex-col rounded-3xl p-6 shadow-lg transition hover:border-accent/40 hover:shadow-xl"
                 >
                   {/* Dept Header */}
                   <div className="flex items-start gap-4 mb-5">
-                    <div className={`flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${colorClass} font-display text-[11px] font-black text-black shadow-md`}>
+                    <div className={`flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${colorClass} font-display text-[11px] font-black text-black shadow-md transition-transform group-hover:scale-110`}>
                       {abbrev}
                     </div>
                     <div className="min-w-0">
@@ -122,7 +123,7 @@ export default function DepartmentsPage() {
                     <Users className="size-3.5 text-muted-foreground" />
                     <span className="text-[11px] text-muted-foreground">Staff departemen dikelola via Admin Panel</span>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
