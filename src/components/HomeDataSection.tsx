@@ -189,7 +189,9 @@ export function HomeEvents() {
   );
 }
 
-export function HomeNews() {
+export function HomeNews({ contents }: { contents?: any[] }) {
+  const newsList = contents && contents.length > 0 ? contents : publishedContents;
+
   return (
     <section id="berita" className="relative px-4 py-24 sm:px-6">
       <div className="relative mx-auto max-w-7xl">
@@ -204,34 +206,31 @@ export function HomeNews() {
           }
         />
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
-          {publishedContents.map((news) => (
-            <Link key={news.id} href={`/berita/${news.slug}`} className="glass rounded-3xl overflow-hidden transition duration-300 hover:border-accent/50 flex flex-col">
-              {/* Thumbnail */}
-              {news.thumbnail_url ? (
+          {newsList.slice(0, 3).map((news: any) => {
+            const thumbnail = news.thumbnail_url || "/images/news-scholarship.png";
+
+            return (
+              <Link key={news.id} href={`/berita/${news.slug}`} className="glass rounded-3xl overflow-hidden transition duration-300 hover:border-accent/50 flex flex-col justify-between shadow-lg">
                 <div className="relative h-44 w-full overflow-hidden">
-                  <Image src={news.thumbnail_url} alt={news.title} fill className="object-cover brightness-75 transition duration-500 hover:scale-105" />
+                  <Image src={thumbnail} alt={news.title} fill className="object-cover brightness-75 transition duration-500 hover:scale-105" unoptimized />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                  <span className="absolute bottom-3 left-4 rounded-full bg-accent/90 text-white text-[10px] font-bold px-2.5 py-0.5">
+                  <span className="absolute bottom-3 left-4 rounded-full bg-accent/90 text-white text-[10px] font-bold px-2.5 py-0.5 uppercase">
                     {news.category}
                   </span>
                 </div>
-              ) : (
-                <div className="h-44 w-full bg-gradient-to-br from-accent/20 to-brand/10 flex items-center justify-center">
-                  <Tag className="size-10 text-accent/40" />
+                <div className="p-5 flex flex-col flex-1 justify-between">
+                  <div>
+                    <h3 className="text-base font-semibold text-white line-clamp-2 leading-snug">{news.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{news.excerpt}</p>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-glass-border flex justify-between items-center text-xs text-muted-foreground">
+                    <span>{news.published_at ? new Date(news.published_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Terbaru"}</span>
+                    <span className="text-accent flex items-center gap-1 font-medium">{news.reading_time || 3} min <ArrowUpRight className="size-3" /></span>
+                  </div>
                 </div>
-              )}
-              <div className="p-5 flex flex-col flex-1 justify-between">
-                <div>
-                  <h3 className="text-base font-semibold text-white line-clamp-2 leading-snug">{news.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{news.excerpt}</p>
-                </div>
-                <div className="mt-4 pt-3 border-t border-glass-border flex justify-between items-center text-xs text-muted-foreground">
-                  <span>{new Date(news.published_at!).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span>
-                  <span className="text-accent flex items-center gap-1 font-medium">{news.reading_time} min <ArrowUpRight className="size-3" /></span>
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
