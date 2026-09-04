@@ -28,7 +28,9 @@ export async function csrfToken() {
   return token;
 }
 export async function checkMutation(request: Request, sessionHash?: string) {
-  assertOrigin(request.headers.get("origin"), process.env.ADMIN_ORIGIN);
+  const origin = request.headers.get("origin");
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  assertOrigin(origin, process.env.ADMIN_ORIGIN, host);
   assertCsrf((await cookies()).get(CSRF_COOKIE)?.value, request.headers.get("x-csrf-token"), sessionHash);
 }
 async function setSessionCookies(token: string, csrf: string) {

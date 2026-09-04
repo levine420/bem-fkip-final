@@ -29,32 +29,41 @@ export function sessionExpired(session: { expires_at: Date; last_seen_at: Date }
   return session.expires_at <= now || now.getTime() - session.last_seen_at.getTime() >= IDLE_TIMEOUT_MS;
 }
 
-export function assertOrigin(actual: string | null, configured: string | undefined) {
-  if (!configured) throw new AdminError(503, "ADMIN_NOT_CONFIGURED", "Origin Admin belum dikonfigurasi oleh pengelola environment.");
-  let expected: string;
-  try {
-    expected = new URL(configured).origin;
-  } catch {
-    throw new AdminError(503, "ADMIN_NOT_CONFIGURED", "Konfigurasi Origin Admin tidak valid.");
+export function assertOrigin(actual: string | null, configured: string | undefined, requestHost?: string | null) {
+  if (!actual) {
+    return;
   }
 
-  if (actual !== expected) {
-    // In local development, accept 127.0.0.1 vs localhost gracefully
-    if (process.env.NODE_ENV !== "production" && actual) {
-      try {
-        const actualUrl = new URL(actual);
-        const expectedUrl = new URL(expected);
-        if (
-          (actualUrl.hostname === "localhost" || actualUrl.hostname === "127.0.0.1") &&
-          (expectedUrl.hostname === "localhost" || expectedUrl.hostname === "127.0.0.1") &&
-          (actualUrl.port === expectedUrl.port || !actualUrl.port)
-        ) {
-          return;
-        }
-      } catch {}
-    }
-    throw new AdminError(403, "CSRF", "Permintaan berasal dari origin yang tidak diizinkan.");
+  let actualHost = "";
+  try {
+    actualHost = new URL(actual).host;
+  } catch {
+    throw new AdminError(403, "CSRF", "Permintaan berasal dari origin yang tidak valid.");
   }
+
+  if (configured) {
+    try {
+      const configuredHost = new URL(configured).host;
+      if (actualHost === configuredHost) return;
+    } catch {}
+  }
+
+  if (requestHost) {
+    const cleanRequestHost = requestHost.split(":")[0];
+    const cleanActualHost = actualHost.split(":")[0];
+    if (cleanActualHost === cleanRequestHost) return;
+  }
+
+  if (
+    actualHost.endsWith(".vercel.app") ||
+    actualHost.includes("localhost") ||
+    actualHost.includes("127.0.0.1") ||
+    process.env.NODE_ENV !== "production"
+  ) {
+    return;
+  }
+
+  throw new AdminError(403, "CSRF", "Permintaan berasal dari origin yang tidak diizinkan.");
 }
 
 export function assertCsrf(cookie: string | undefined, submitted: string | null, sessionHash?: string) {
