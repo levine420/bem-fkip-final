@@ -7,6 +7,7 @@ import { AdminError } from "@/lib/admin/errors";
 import { assertVersion, assertWritablePeriod, departmentScope, type AdminActor } from "@/lib/admin/policy";
 import { departmentInput, deleteInput, memberDepartment, memberInput, organizationScope, requireOrganizationAccess, type OrganizationKind } from "@/lib/admin/organization";
 import { integer, pagination, uuid } from "@/lib/admin/validation";
+import { revalidatePath } from "next/cache";
 
 const periodSelect = { id: true, name: true, status: true } as const;
 const departmentSelect = { id: true, name: true, slug: true, description: true, logo_url: true, version: true } as const;
@@ -82,6 +83,9 @@ export async function createDepartment(request: Request, value: unknown) {
     await periodFor(tx, period_id, true);
     const item = await tx.departments.create({ data: { name: data.name, slug: data.slug, description: data.description, logo_url: data.logo_url, period_id }, select: departmentSelect });
     await audit(tx, actor.id, "department.created", "department", item.id, { period_id, name: item.name, slug: item.slug });
+    revalidatePath("/");
+    revalidatePath("/organisasi");
+    revalidatePath("/organisasi/departemen");
     return item;
   });
 }
@@ -96,6 +100,9 @@ export async function editDepartment(request: Request, id: string, value: unknow
     const result = await tx.departments.updateMany({ where: { id, version, deleted_at: null, AND: [scopedDepartments(actor)] }, data: { ...data, version: { increment: 1 } } });
     if (result.count !== 1) stale();
     await audit(tx, actor.id, "department.updated", "department", id, { period_id: item.period_id, changed_fields: Object.keys(data) });
+    revalidatePath("/");
+    revalidatePath("/organisasi");
+    revalidatePath("/organisasi/departemen");
     return { id };
   });
 }
@@ -121,6 +128,9 @@ export async function deleteDepartment(request: Request, id: string, value: unkn
     const result = await tx.departments.updateMany({ where: { id, version, deleted_at: null }, data: { deleted_at: new Date(), version: { increment: 1 } } });
     if (result.count !== 1) stale();
     await audit(tx, actor.id, "department.deleted", "department", id, { period_id: item.period_id, name: item.name, soft_delete: true });
+    revalidatePath("/");
+    revalidatePath("/organisasi");
+    revalidatePath("/organisasi/departemen");
     return { id };
   });
 }
@@ -138,6 +148,11 @@ export async function createMember(request: Request, kind: MemberKind, value: un
       ? await tx.board_members.create({ data: { ...data, period_id, department_id }, select: memberSelect })
       : await tx.department_members.create({ data: { ...data, period_id, department_id: uuid(department_id, "department_id") }, select: memberSelect });
     await audit(tx, actor.id, board ? "board_member.created" : "department_member.created", kind, item.id, { period_id, department_id, name: item.name });
+    revalidatePath("/");
+    revalidatePath("/organisasi");
+    revalidatePath("/organisasi/struktur-kepengurusan");
+    revalidatePath("/organisasi/departemen");
+    revalidatePath("/tentang");
     return item;
   });
 }
@@ -161,6 +176,11 @@ export async function editMember(request: Request, kind: MemberKind, id: string,
     if (result.count !== 1) stale();
     await audit(tx, actor.id, board ? "board_member.updated" : "department_member.updated", kind, id,
       { period_id: item.period_id, department_id, previous_department_id: item.department_id, changed_fields: Object.keys(data) });
+    revalidatePath("/");
+    revalidatePath("/organisasi");
+    revalidatePath("/organisasi/struktur-kepengurusan");
+    revalidatePath("/organisasi/departemen");
+    revalidatePath("/tentang");
     return { id };
   });
 }
@@ -177,6 +197,11 @@ export async function deleteMember(request: Request, kind: MemberKind, id: strin
     if (result.count !== 1) stale();
     await audit(tx, actor.id, board ? "board_member.deleted" : "department_member.deleted", kind, id,
       { period_id: item.period_id, department_id: item.department_id, name: item.name, soft_delete: true });
+    revalidatePath("/");
+    revalidatePath("/organisasi");
+    revalidatePath("/organisasi/struktur-kepengurusan");
+    revalidatePath("/organisasi/departemen");
+    revalidatePath("/tentang");
     return { id };
   });
 }

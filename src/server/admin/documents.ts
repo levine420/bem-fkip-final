@@ -5,6 +5,7 @@ import { audit } from "./audit";
 import { AdminError } from "@/lib/admin/errors";
 import { departmentScope } from "@/lib/admin/policy";
 import { pagination, uuid, textField, integer } from "@/lib/admin/validation";
+import { revalidatePath } from "next/cache";
 
 const documentSelect = {
   id: true,
@@ -117,6 +118,10 @@ export async function createDocument(request: Request, input: {
     });
 
     await audit(tx, actor.id, "DOCUMENT_CREATE", "documents", doc.id, { name: doc.name });
+    
+    revalidatePath("/");
+    revalidatePath("/dokumen");
+
     return { ...doc, file_size: Number(doc.file_size) };
   });
 }
@@ -155,6 +160,10 @@ export async function updateDocument(request: Request, id: string, input: {
     });
 
     await audit(tx, actor.id, "DOCUMENT_UPDATE", "documents", doc.id, { name: doc.name, is_public: doc.is_public });
+
+    revalidatePath("/");
+    revalidatePath("/dokumen");
+
     return { ...doc, file_size: Number(doc.file_size) };
   });
 }
@@ -183,6 +192,10 @@ export async function deleteDocument(request: Request, id: string) {
     });
 
     await audit(tx, actor.id, "DOCUMENT_DELETE", "documents", id, { name: existing.name });
+
+    revalidatePath("/");
+    revalidatePath("/dokumen");
+
     return { success: true };
   });
 }

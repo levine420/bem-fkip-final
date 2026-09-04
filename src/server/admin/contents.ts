@@ -245,6 +245,9 @@ export async function createContent(request: Request, input: {
       category: content.category,
     });
 
+    revalidatePath("/");
+    revalidatePath("/berita");
+
     return content;
   });
 }

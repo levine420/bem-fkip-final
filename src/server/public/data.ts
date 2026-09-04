@@ -1,12 +1,5 @@
 import "server-only";
 import { db } from "./db";
-import {
-  activePeriod as seedPeriod,
-  boardMembers as seedBoard,
-  contents as seedContents,
-  departments as seedDepartments,
-  workPrograms as seedWorkPrograms,
-} from "@/lib/data/public-data";
 
 export async function getActivePeriod() {
   try {
@@ -23,20 +16,11 @@ export async function getActivePeriod() {
       },
     });
 
-    if (period) return period;
+    return period ?? null;
   } catch (err) {
-    console.warn("DB getActivePeriod fallback:", err);
+    console.error("DB getActivePeriod error:", err);
+    return null;
   }
-
-  return {
-    id: seedPeriod.id,
-    name: seedPeriod.name,
-    visi: seedPeriod.visi || "",
-    misi: seedPeriod.misi || "",
-    photo_url: null,
-    year_start: seedPeriod.year_start,
-    year_end: seedPeriod.year_end,
-  };
 }
 
 export async function getPublishedContents(params: {
@@ -83,34 +67,11 @@ export async function getPublishedContents(params: {
       db.contents.count({ where }),
     ]);
 
-    if (items.length > 0) return { items, total };
+    return { items, total };
   } catch (err) {
-    console.warn("DB getPublishedContents fallback:", err);
+    console.error("DB getPublishedContents error:", err);
+    return { items: [], total: 0 };
   }
-
-  // Fallback to seed contents
-  let filtered = seedContents.filter((c) => c.status === "TERBIT");
-  if (category) filtered = filtered.filter((c) => c.category === category);
-  if (search) filtered = filtered.filter((c) => c.title.toLowerCase().includes(search.toLowerCase()));
-
-  const mapped = filtered.map((c) => ({
-    id: c.id,
-    title: c.title,
-    slug: c.slug,
-    excerpt: c.excerpt,
-    thumbnail_url: c.thumbnail_url,
-    category: c.category,
-    tags: [],
-    reading_time: c.reading_time,
-    published_at: c.published_at,
-    author: { name: "Tim Redaksi BEM" },
-    department: { name: "BEM FKIP UIKA" },
-  }));
-
-  return {
-    items: mapped.slice(offset, offset + limit),
-    total: mapped.length,
-  };
 }
 
 export async function getPublishedContentBySlug(slug: string) {
@@ -142,228 +103,266 @@ export async function getPublishedContentBySlug(slug: string) {
     });
 
     if (content) {
-      await db.contents.update({
+      db.contents.update({
         where: { id: content.id },
         data: { view_count: { increment: 1 } },
       }).catch(() => {});
-      return content;
     }
+
+    return content ?? null;
   } catch (err) {
-    console.warn("DB getPublishedContentBySlug fallback:", err);
+    console.error("DB getPublishedContentBySlug error:", err);
+    return null;
   }
-
-  const found = seedContents.find((c) => c.slug === slug);
-  if (!found) return null;
-
-  return {
-    id: found.id,
-    title: found.title,
-    slug: found.slug,
-    seo_slug: found.seo_slug,
-    meta_title: found.meta_title,
-    meta_description: found.meta_description,
-    excerpt: found.excerpt,
-    body: found.body,
-    thumbnail_url: found.thumbnail_url,
-    category: found.category,
-    tags: [],
-    reading_time: found.reading_time,
-    view_count: found.view_count,
-    published_at: found.published_at,
-    author: { name: "Tim Redaksi BEM" },
-    department: { name: "BEM FKIP UIKA" },
-  };
 }
 
 export async function getActiveBoardMembers() {
   try {
     const period = await getActivePeriod();
-    if (period) {
-      const members = await db.board_members.findMany({
-        where: {
-          period_id: period.id,
-          deleted_at: null,
-        },
-        select: {
-          id: true,
-          name: true,
-          position: true,
-          photo_url: true,
-          display_order: true,
-          department: { select: { name: true } },
-        },
-        orderBy: { display_order: "asc" },
-      });
+    if (!period) return [];
 
-      if (members.length > 0) return members;
-    }
+    const members = await db.board_members.findMany({
+      where: {
+        period_id: period.id,
+        deleted_at: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        position: true,
+        photo_url: true,
+        display_order: true,
+        department_id: true,
+        department: { select: { name: true } },
+      },
+      orderBy: { display_order: "asc" },
+    });
+
+    return members;
   } catch (err) {
-    console.warn("DB getActiveBoardMembers fallback:", err);
+    console.error("DB getActiveBoardMembers error:", err);
+    return [];
   }
-
-  return seedBoard.map((bm) => ({
-    id: bm.id,
-    name: bm.name,
-    position: bm.position,
-    photo_url: bm.photo_url,
-    display_order: bm.display_order,
-    department: { name: "BEM FKIP UIKA" },
-  }));
 }
 
 export async function getActiveDepartments() {
   try {
     const period = await getActivePeriod();
-    if (period) {
-      const departments = await db.departments.findMany({
-        where: {
-          period_id: period.id,
-          deleted_at: null,
-        },
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          description: true,
-          logo_url: true,
-        },
-        orderBy: { name: "asc" },
-      });
+    if (!period) return [];
 
-      if (departments.length > 0) return departments;
-    }
+    const departments = await db.departments.findMany({
+      where: {
+        period_id: period.id,
+        deleted_at: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        logo_url: true,
+      },
+      orderBy: { name: "asc" },
+    });
+
+    return departments;
   } catch (err) {
-    console.warn("DB getActiveDepartments fallback:", err);
+    console.error("DB getActiveDepartments error:", err);
+    return [];
   }
-
-  return seedDepartments.map((d) => ({
-    id: d.id,
-    name: d.name,
-    slug: d.id,
-    description: d.description,
-    logo_url: d.logo_url,
-  }));
 }
 
 export async function getDepartmentBySlug(slug: string) {
   try {
     const period = await getActivePeriod();
-    if (period) {
-      const department = await db.departments.findFirst({
-        where: {
-          slug,
-          period_id: period.id,
-          deleted_at: null,
-        },
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          description: true,
-          logo_url: true,
-          department_members_department: {
-            where: { deleted_at: null },
-            select: {
-              id: true,
-              name: true,
-              position: true,
-              photo_url: true,
-              display_order: true,
-            },
-            orderBy: { display_order: "asc" },
+    if (!period) return null;
+
+    const department = await db.departments.findFirst({
+      where: {
+        OR: [{ slug }, { id: slug }],
+        period_id: period.id,
+        deleted_at: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        logo_url: true,
+        department_members_department: {
+          where: { deleted_at: null },
+          select: {
+            id: true,
+            name: true,
+            position: true,
+            photo_url: true,
+            display_order: true,
           },
+          orderBy: { display_order: "asc" },
         },
-      });
+      },
+    });
 
-      if (department) return department;
-    }
+    return department ?? null;
   } catch (err) {
-    console.warn("DB getDepartmentBySlug fallback:", err);
+    console.error("DB getDepartmentBySlug error:", err);
+    return null;
   }
-
-  const found = seedDepartments.find((d) => d.id === slug || d.name.toLowerCase().includes(slug.toLowerCase()));
-  if (!found) return null;
-
-  return {
-    id: found.id,
-    name: found.name,
-    slug: found.id,
-    description: found.description,
-    logo_url: found.logo_url,
-    department_members_department: [],
-  };
 }
 
 export async function getPublicStats() {
   try {
     const period = await getActivePeriod();
-    if (period) {
-      const [departments, programs, contents, events] = await Promise.all([
-        db.departments.count({ where: { period_id: period.id, deleted_at: null } }),
-        db.work_programs.count({ where: { period_id: period.id, deleted_at: null } }),
-        db.contents.count({ where: { status: "TERBIT", deleted_at: null } }),
-        db.events.count({ where: { period_id: period.id, deleted_at: null, status: { in: ["TERBIT", "BERJALAN", "SELESAI"] } } }),
-      ]);
+    if (!period) return { departments: 0, programs: 0, contents: 0, events: 0 };
 
-      if (departments > 0 || programs > 0 || contents > 0 || events > 0) {
-        return { departments, programs, contents, events };
-      }
-    }
+    const [departments, programs, contents, events] = await Promise.all([
+      db.departments.count({ where: { period_id: period.id, deleted_at: null } }),
+      db.work_programs.count({ where: { period_id: period.id, deleted_at: null } }),
+      db.contents.count({ where: { status: "TERBIT", deleted_at: null } }),
+      db.events.count({ where: { period_id: period.id, deleted_at: null, status: { in: ["TERBIT", "BERJALAN", "SELESAI"] } } }),
+    ]);
+
+    return { departments, programs, contents, events };
   } catch (err) {
-    console.warn("DB getPublicStats fallback:", err);
+    console.error("DB getPublicStats error:", err);
+    return { departments: 0, programs: 0, contents: 0, events: 0 };
   }
-
-  return {
-    departments: seedDepartments.length,
-    programs: 4,
-    contents: seedContents.length,
-    events: 2,
-  };
 }
 
 export async function getPublicWorkPrograms() {
   try {
     const period = await getActivePeriod();
-    if (period) {
-      const items = await db.work_programs.findMany({
-        where: {
-          period_id: period.id,
-          deleted_at: null,
-        },
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          description: true,
-          target_time: true,
-          success_indicator: true,
-          status: true,
-          display_order: true,
-          department_id: true,
-          department: { select: { id: true, name: true, slug: true } },
-        },
-        orderBy: [{ display_order: "asc" }, { id: "asc" }],
-      });
+    if (!period) return [];
 
-      if (items.length > 0) {
-        return items.map((p) => ({
-          id: p.id,
-          name: p.name,
-          description: p.description,
-          status: p.status as any,
-          display_order: p.display_order,
-          department_id: p.department?.slug || p.department_id || "",
-          period_id: period.id,
-          target_waktu: p.target_time || "Periode Aktif (2026–2027)",
-          sasaran: p.success_indicator || "Mahasiswa FKIP UIKA",
-          created_at: "2026-08-01T00:00:00Z",
-          updated_at: "2026-08-28T00:00:00Z",
-        }));
-      }
-    }
+    const items = await db.work_programs.findMany({
+      where: {
+        period_id: period.id,
+        deleted_at: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        target_time: true,
+        success_indicator: true,
+        status: true,
+        display_order: true,
+        department_id: true,
+        department: { select: { id: true, name: true, slug: true } },
+      },
+      orderBy: [{ display_order: "asc" }, { id: "asc" }],
+    });
+
+    return items.map((p) => ({
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      status: p.status as any,
+      display_order: p.display_order,
+      department_id: p.department?.slug || p.department_id || "",
+      period_id: period.id,
+      target_waktu: p.target_time || "Periode Aktif",
+      sasaran: p.success_indicator || "Mahasiswa FKIP UIKA",
+    }));
   } catch (err) {
-    console.warn("DB getPublicWorkPrograms fallback:", err);
+    console.error("DB getPublicWorkPrograms error:", err);
+    return [];
   }
+}
 
-  return seedWorkPrograms;
+export async function getPublicEvents(params?: { limit?: number }) {
+  try {
+    const items = await db.events.findMany({
+      where: {
+        status: { in: ["TERBIT", "BERJALAN", "SELESAI"] },
+        deleted_at: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        location: true,
+        poster_url: true,
+        start_time: true,
+        end_time: true,
+        registration_deadline: true,
+        max_participants: true,
+        registration_status: true,
+        status: true,
+        department: { select: { name: true } },
+      },
+      orderBy: { start_time: "asc" },
+      ...(params?.limit ? { take: params.limit } : {}),
+    });
+
+    return items;
+  } catch (err) {
+    console.error("DB getPublicEvents error:", err);
+    return [];
+  }
+}
+
+export async function getPublicEventByIdOrSlug(idOrSlug: string) {
+  try {
+    const event = await db.events.findFirst({
+      where: {
+        OR: [{ id: idOrSlug }, { slug: idOrSlug }],
+        status: { in: ["TERBIT", "BERJALAN", "SELESAI"] },
+        deleted_at: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        location: true,
+        poster_url: true,
+        start_time: true,
+        end_time: true,
+        registration_deadline: true,
+        max_participants: true,
+        registration_status: true,
+        status: true,
+        department: { select: { name: true } },
+      },
+    });
+
+    return event ?? null;
+  } catch (err) {
+    console.error("DB getPublicEventByIdOrSlug error:", err);
+    return null;
+  }
+}
+
+export async function getPublicDocuments(params?: { category?: string }) {
+  try {
+    const items = await db.documents.findMany({
+      where: {
+        is_public: true,
+        deleted_at: null,
+        ...(params?.category ? { category: params.category as any } : {}),
+      },
+      select: {
+        id: true,
+        name: true,
+        original_filename: true,
+        file_type: true,
+        file_size: true,
+        download_count: true,
+        category: true,
+        created_at: true,
+      },
+      orderBy: { created_at: "desc" },
+    });
+
+    return items.map((doc) => ({
+      ...doc,
+      file_size: Number(doc.file_size),
+    }));
+  } catch (err) {
+    console.error("DB getPublicDocuments error:", err);
+    return [];
+  }
 }

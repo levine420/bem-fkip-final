@@ -55,28 +55,7 @@ html {
 }
 body {
   margin: 0;
-  /* Consolidated global ambient background system */
-  background:
-    radial-gradient(
-      circle at 15% 8%,
-      rgba(233, 30, 99, 0.14) 0%,
-      rgba(233, 30, 99, 0.06) 26%,
-      transparent 52%
-    ),
-    radial-gradient(
-      circle at 85% 18%,
-      rgba(255, 77, 157, 0.11) 0%,
-      rgba(255, 77, 157, 0.04) 30%,
-      transparent 58%
-    ),
-    linear-gradient(
-      180deg,
-      #130a13 0%,
-      #0d0810 36%,
-      #0b0710 100%
-    );
   background-color: var(--background);
-  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans);
   /* overflow-x:clip on body only (not html) so Chrome picks the right scroll container */
@@ -178,7 +157,31 @@ textarea.form-control { min-height: 130px; padding-top: 12px; resize: vertical; 
   outline-offset: 3px;
 }
 
+/* Unified public website background system */
+.public-shell {
+  position: relative;
+  min-height: 100dvh;
+  background-color: #0b0710;
+  background-image:
+    radial-gradient(
+      ellipse 80% 38% at 48% 15%,
+      rgba(190, 30, 100, 0.18) 0%,
+      rgba(110, 20, 70, 0.11) 38%,
+      transparent 68%
+    ),
+    linear-gradient(
+      180deg,
+      #0b0710 0%,
+      #100a11 12rem,
+      #1a0d19 32rem,
+      #100a11 52rem,
+      #0b0710 72rem
+    );
+  background-repeat: no-repeat;
+}
+
 @media (prefers-reduced-motion: reduce) {
+
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;

@@ -18,10 +18,10 @@ export function PublicNavbar() {
   }, []);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 sm:px-6" style={{ top: 0 }}>
+    <header className="fixed inset-x-0 top-0 z-50 bg-transparent px-3 sm:px-6" style={{ top: 0 }}>
       <div
         className={`relative mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-2xl px-3.5 py-2.5 transition-all duration-300 sm:px-5 ${
-          scrolled ? "glass-strong shadow-2xl border border-glass-border bg-slate-950/80" : "glass bg-slate-950/40"
+          scrolled ? "border border-white/10 bg-[#0d0810]/80 backdrop-blur-xl shadow-2xl" : "border border-white/8 bg-[#0d0810]/70 backdrop-blur-xl"
         }`}
       >
         <Link href="/" className="focus-ring flex min-w-0 items-center gap-2.5 rounded-xl">

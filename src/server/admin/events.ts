@@ -6,6 +6,7 @@ import { AdminError } from "@/lib/admin/errors";
 import { departmentScope } from "@/lib/admin/policy";
 import { pagination, uuid, textField, integer } from "@/lib/admin/validation";
 import { generateSlug } from "@/lib/admin/slug";
+import { revalidatePath } from "next/cache";
 
 const eventSelect = {
   id: true,
@@ -132,6 +133,11 @@ export async function createEvent(request: Request, input: {
     });
 
     await audit(tx, actor.id, "EVENT_CREATE", "events", event.id, { name: event.name });
+    
+    revalidatePath("/");
+    revalidatePath("/kegiatan/kalender");
+    revalidatePath("/kegiatan");
+
     return event;
   });
 }
@@ -151,7 +157,7 @@ export async function updateEvent(request: Request, id: string, input: {
   return adminMutation(request, async (tx, actor) => {
     const existing = await tx.events.findFirst({
       where: { id: uuid(id), deleted_at: null },
-      select: { id: true, department_id: true, name: true },
+      select: { id: true, department_id: true, name: true, slug: true },
     });
 
     if (!existing) {
@@ -184,6 +190,11 @@ export async function updateEvent(request: Request, id: string, input: {
     });
 
     await audit(tx, actor.id, "EVENT_UPDATE", "events", event.id, { name: event.name });
+
+    revalidatePath("/");
+    revalidatePath("/kegiatan/kalender");
+    revalidatePath("/kegiatan");
+
     return event;
   });
 }
@@ -192,7 +203,7 @@ export async function deleteEvent(request: Request, id: string) {
   return adminMutation(request, async (tx, actor) => {
     const existing = await tx.events.findFirst({
       where: { id: uuid(id), deleted_at: null },
-      select: { id: true, department_id: true, name: true },
+      select: { id: true, department_id: true, name: true, slug: true },
     });
 
     if (!existing) {
@@ -212,6 +223,11 @@ export async function deleteEvent(request: Request, id: string) {
     });
 
     await audit(tx, actor.id, "EVENT_DELETE", "events", id, { name: existing.name });
+
+    revalidatePath("/");
+    revalidatePath("/kegiatan/kalender");
+    revalidatePath("/kegiatan");
+
     return { success: true };
   });
 }

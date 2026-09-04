@@ -6,6 +6,7 @@ import { AdminError } from "@/lib/admin/errors";
 import { departmentScope } from "@/lib/admin/policy";
 import { pagination, uuid, textField, integer } from "@/lib/admin/validation";
 import { generateSlug } from "@/lib/admin/slug";
+import { revalidatePath } from "next/cache";
 
 const workProgramSelect = {
   id: true,
@@ -111,6 +112,11 @@ export async function createWorkProgram(request: Request, input: {
     });
 
     await audit(tx, actor.id, "WORK_PROGRAM_CREATE", "work_programs", program.id, { name: program.name });
+
+    revalidatePath("/");
+    revalidatePath("/organisasi");
+    revalidatePath("/organisasi/program-kerja");
+
     return program;
   });
 }
@@ -157,6 +163,11 @@ export async function updateWorkProgram(request: Request, id: string, input: {
     });
 
     await audit(tx, actor.id, "WORK_PROGRAM_UPDATE", "work_programs", program.id, { name: program.name });
+
+    revalidatePath("/");
+    revalidatePath("/organisasi");
+    revalidatePath("/organisasi/program-kerja");
+
     return program;
   });
 }
@@ -185,6 +196,11 @@ export async function deleteWorkProgram(request: Request, id: string) {
     });
 
     await audit(tx, actor.id, "WORK_PROGRAM_DELETE", "work_programs", id, { name: existing.name });
+
+    revalidatePath("/");
+    revalidatePath("/organisasi");
+    revalidatePath("/organisasi/program-kerja");
+
     return { success: true };
   });
 }

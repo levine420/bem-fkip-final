@@ -136,6 +136,9 @@ export async function submitStudentAspiration(userId: string, input: {
   }
 
   const period = await getActivePeriod();
+  if (!period) {
+    throw new Error("Tidak ada periode aktif yang tersedia.");
+  }
 
   return await db.aspirations.create({
     data: {

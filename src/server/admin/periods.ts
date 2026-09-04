@@ -5,6 +5,7 @@ import { audit } from "./audit";
 import { AdminError } from "@/lib/admin/errors";
 import { assertActivation, assertVersion, assertWritablePeriod, requireSuperAdmin } from "@/lib/admin/policy";
 import { integer, objectInput, pagination, periodInput, uuid } from "@/lib/admin/validation";
+import { revalidatePath } from "next/cache";
 
 export async function listPeriods(params: URLSearchParams) {
   const { q, take, skip, page } = pagination(params);
@@ -30,6 +31,9 @@ export async function createPeriod(request: Request, value: unknown) {
     requireSuperAdmin(actor);
     const item = await tx.periods.create({ data });
     await audit(tx, actor.id, "period.created", "period", item.id, { name: item.name, status: item.status });
+    revalidatePath("/");
+    revalidatePath("/tentang");
+    revalidatePath("/organisasi");
     return item;
   });
 }
@@ -49,6 +53,10 @@ export async function editPeriod(request: Request, id: string, value: unknown) {
       before: { name: item.name, visi: item.visi, misi: item.misi, year_start: item.year_start, year_end: item.year_end, photo_url: item.photo_url },
       after: data,
     });
+    revalidatePath("/");
+    revalidatePath("/tentang");
+    revalidatePath("/tentang/visi-misi");
+    revalidatePath("/organisasi");
     return { id };
   });
 }
@@ -66,13 +74,15 @@ export async function activatePeriod(request: Request, id: string, value: unknow
     const active = await tx.periods.findFirst({ where: { status: "AKTIF" } });
     assertActivation(item.status, active?.id ?? null, expectedActive); assertVersion(item.version, version);
     if (active) {
-      // BEFORE trigger revokes assignments, disables department users and drops
-      // their sessions while old period is writable. All roll back with audit.
       await tx.periods.update({ where: { id: active.id }, data: { status: "ARSIP", version: { increment: 1 } } });
     }
     const updated = await tx.periods.update({ where: { id }, data: { status: "AKTIF", version: { increment: 1 } } });
     await audit(tx, actor.id, "period.activated", "period", id,
       { new_period: item.name, archived_period_id: active?.id ?? null, archived_period: active?.name ?? null });
+    revalidatePath("/");
+    revalidatePath("/tentang");
+    revalidatePath("/tentang/visi-misi");
+    revalidatePath("/organisasi");
     return updated;
   });
 }

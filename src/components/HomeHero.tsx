@@ -11,11 +11,8 @@ export function HomeHero() {
   return (
     <section
       id="home"
-      className="relative isolate overflow-x-clip bg-[#0b0710] bg-[radial-gradient(circle_at_15%_5%,rgba(233,30,99,0.24),transparent_42%),radial-gradient(circle_at_95%_38%,rgba(255,77,157,0.12),transparent_38%),linear-gradient(180deg,#160a16_0%,#0d0810_55%,#0b0710_100%)] lg:min-h-[88svh] lg:flex lg:items-center"
+      className="relative isolate overflow-x-clip bg-transparent lg:min-h-[88svh] lg:flex lg:items-center"
     >
-      {/* Overlay gelap bawah untuk transisi mulus ke section berikutnya */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-[#0b0710]/10 via-transparent to-[#0b0710]" />
-
       {/* Foto kepengurusan — hanya tampil di lg (1024px+) */}
       <div className="absolute inset-y-0 right-0 -z-20 hidden w-[68%] lg:block">
         <Image
@@ -28,11 +25,11 @@ export function HomeHero() {
         />
       </div>
 
-      {/* Overlay kiri gelap — hanya desktop */}
+      {/* Overlay kiri gelap — hanya desktop, lebih tipis */}
       <div
         className="
           pointer-events-none absolute inset-0 -z-10 hidden lg:block
-          bg-[linear-gradient(90deg,#0b0710_0%,#0b0710_30%,rgba(11,7,16,0.94)_46%,rgba(11,7,16,0.58)_72%,rgba(11,7,16,0.18)_100%)]
+          bg-[linear-gradient(90deg,rgba(11,7,16,0.92)_0%,rgba(11,7,16,0.82)_24%,rgba(11,7,16,0.55)_48%,rgba(11,7,16,0.20)_72%,transparent_100%)]
         "
       />
 
