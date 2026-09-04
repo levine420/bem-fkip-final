@@ -29,9 +29,7 @@ export function HomeAbout() {
               <p className="font-display text-lg font-bold text-foreground">Kabinet Altiora 2026–2027</p>
               <p className="text-xs text-amber-400 font-medium italic mt-0.5">"Menyatukan Asa, Menggapai Altiora"</p>
             </div>
-            <div className="absolute inset-x-5 bottom-4 glass rounded-2xl p-3 text-[11px] text-center leading-relaxed text-muted-foreground">
-              Foto dan profil kabinet dikelola melalui Admin Panel dan secara otomatis memperbarui tampilan publik.
-            </div>
+
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {pillars.map(({ icon: Icon, title, text }) => (

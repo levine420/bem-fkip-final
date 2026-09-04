@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, FileText, MessageSquareText, Newspaper, ShieldCheck } from "lucide-react";
+import { ArrowRight, CalendarDays, FileText, MessageSquareText, Newspaper } from "lucide-react";
 import { siteConfig } from "@/config/site";
 
 const quickIcons = [Newspaper, CalendarDays, MessageSquareText, FileText] as const;
@@ -11,9 +11,7 @@ export function HomeHero() {
       <div className="relative mx-auto grid max-w-7xl items-center gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
         {/* Left Column */}
         <div className="reveal">
-          <span className="glass inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-soft">
-            <ShieldCheck className="size-3.5 text-amber-400" /> Website Resmi & Layanan Digital Mahasiswa
-          </span>
+
           <h1 className="mt-4 font-display text-[2.2rem] font-extrabold leading-[1.05] sm:text-6xl xl:text-[4.4rem]">
             Platform Digital
             <span className="text-gradient block">BEM FKIP UIKA</span>
