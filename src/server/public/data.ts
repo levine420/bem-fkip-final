@@ -5,6 +5,7 @@ import {
   boardMembers as seedBoard,
   contents as seedContents,
   departments as seedDepartments,
+  workPrograms as seedWorkPrograms,
 } from "@/lib/data/public-data";
 
 export async function getActivePeriod() {
@@ -318,4 +319,51 @@ export async function getPublicStats() {
     contents: seedContents.length,
     events: 2,
   };
+}
+
+export async function getPublicWorkPrograms() {
+  try {
+    const period = await getActivePeriod();
+    if (period) {
+      const items = await db.work_programs.findMany({
+        where: {
+          period_id: period.id,
+          deleted_at: null,
+        },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          target_time: true,
+          success_indicator: true,
+          status: true,
+          display_order: true,
+          department_id: true,
+          department: { select: { id: true, name: true, slug: true } },
+        },
+        orderBy: [{ display_order: "asc" }, { id: "asc" }],
+      });
+
+      if (items.length > 0) {
+        return items.map((p) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description,
+          status: p.status as any,
+          display_order: p.display_order,
+          department_id: p.department?.slug || p.department_id || "",
+          period_id: period.id,
+          target_waktu: p.target_time || "Periode Aktif (2026–2027)",
+          sasaran: p.success_indicator || "Mahasiswa FKIP UIKA",
+          created_at: "2026-08-01T00:00:00Z",
+          updated_at: "2026-08-28T00:00:00Z",
+        }));
+      }
+    }
+  } catch (err) {
+    console.warn("DB getPublicWorkPrograms fallback:", err);
+  }
+
+  return seedWorkPrograms;
 }

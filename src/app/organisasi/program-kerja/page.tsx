@@ -1,7 +1,13 @@
 import { PublicListing } from "@/components/PublicListing";
-import { workPrograms, departments } from "@/lib/data/public-data";
+import { departments as seedDepartments } from "@/lib/data/public-data";
+import { getPublicWorkPrograms, getActiveDepartments } from "@/server/public/data";
 
-export default function ProgramsPage() {
+export default async function ProgramsPage() {
+  const [workPrograms, depts] = await Promise.all([
+    getPublicWorkPrograms(),
+    getActiveDepartments().catch(() => seedDepartments),
+  ]);
+
   return (
     <PublicListing
       eyebrow="Organisasi"
@@ -17,7 +23,12 @@ export default function ProgramsPage() {
     >
       <div className="grid gap-6 sm:grid-cols-2">
         {workPrograms.map((proker) => {
-          const dept = departments.find((d) => d.id === proker.department_id);
+          const dept = depts.find(
+            (d) =>
+              d.id === proker.department_id ||
+              ("slug" in d && d.slug === proker.department_id) ||
+              d.name.toLowerCase().includes(proker.department_id.toLowerCase())
+          );
           return (
             <div
               key={proker.id}
