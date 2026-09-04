@@ -131,9 +131,14 @@ export function ContentManager() {
               Kelola berita, pengumuman, dan kajian. Admin Departemen membuat draf, Super Admin mereview dan menerbitkan.
             </p>
           </div>
-          <Link href="/admin/konten/baru" className={`${actionClass} bg-brand`}>
-            Buat Konten Baru
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/konten/review" className={`${actionClass} bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30 border border-yellow-500/40`}>
+              Review &amp; Terbitkan
+            </Link>
+            <Link href="/admin/konten/baru" className={`${actionClass} bg-brand`}>
+              Buat Konten Baru
+            </Link>
+          </div>
         </div>
       </section>
 
