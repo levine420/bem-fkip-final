@@ -8,8 +8,24 @@ import { assertVersion, departmentScope, type AdminActor } from "@/lib/admin/pol
 import { pagination, uuid, textField, integer } from "@/lib/admin/validation";
 import { generateSlug, generateUniqueSlug, isValidSlug } from "@/lib/admin/slug";
 import { sanitizeHtml, stripHtml, calculateReadingTime } from "@/lib/admin/sanitize";
+import { revalidatePath, revalidateTag } from "next/cache";
 
-const contentSelect = {
+// List view - optimized for table display without heavy fields
+const contentListSelect = {
+  id: true,
+  title: true,
+  slug: true,
+  category: true,
+  status: true,
+  published_at: true,
+  created_at: true,
+  review_note: true, // Only to show indicator
+  author: { select: { id: true, name: true } },
+  department: { select: { id: true, name: true } },
+} as const;
+
+// Detail view - all fields including body
+const contentDetailSelect = {
   id: true,
   title: true,
   slug: true,
@@ -127,7 +143,7 @@ export async function listContents(params: URLSearchParams) {
     const [items, total] = await Promise.all([
       tx.contents.findMany({
         where,
-        select: contentSelect,
+        select: contentListSelect,
         take,
         skip,
         orderBy: [{ created_at: "desc" }, { id: "asc" }],
@@ -146,7 +162,7 @@ export async function getContent(id: string) {
   return adminRead(async (tx, actor) => {
     const content = await tx.contents.findFirst({
       where: { id: uuid(id), deleted_at: null },
-      select: contentSelect,
+      select: contentDetailSelect,
     });
 
     if (!content) return missing();
@@ -221,7 +237,7 @@ export async function createContent(request: Request, input: {
         department_id: actor.role === "ADMIN" ? scope.department_id : null,
         period_id,
       },
-      select: contentSelect,
+      select: contentDetailSelect,
     });
 
     await audit(tx, actor.id, "CONTENT_CREATE", "contents", content.id, {
@@ -251,7 +267,7 @@ export async function updateContent(request: Request, id: string, input: {
   return adminMutation(request, async (tx, actor) => {
     const existing = await tx.contents.findFirst({
       where: { id: uuid(id), deleted_at: null },
-      select: { id: true, status: true, author_id: true, department_id: true },
+      select: { id: true, status: true, author_id: true, department_id: true, slug: true },
     });
 
     if (!existing) return missing();
@@ -313,12 +329,21 @@ export async function updateContent(request: Request, id: string, input: {
     const content = await tx.contents.update({
       where: { id: uuid(id) },
       data: updates,
-      select: contentSelect,
+      select: contentDetailSelect,
     });
 
     await audit(tx, actor.id, "CONTENT_UPDATE", "contents", content.id, {
       title: content.title,
     });
+
+    // Invalidate public cache if slug changed
+    if (updates.slug && existing.slug !== content.slug) {
+      // Invalidate both old and new slugs
+      revalidatePath("/");
+      revalidatePath("/berita");
+      revalidatePath(`/berita/${existing.slug}`);
+      revalidatePath(`/berita/${content.slug}`);
+    }
 
     return content;
   });
@@ -347,7 +372,7 @@ export async function submitContentReview(request: Request, id: string) {
         status: "MENUNGGU_REVIEW",
         review_note: null,
       },
-      select: contentSelect,
+      select: contentDetailSelect,
     });
 
     await audit(tx, actor.id, "CONTENT_SUBMIT_REVIEW", "contents", content.id, {
@@ -387,12 +412,17 @@ export async function publishContent(request: Request, id: string) {
         reviewed_at: new Date(),
         review_note: null,
       },
-      select: contentSelect,
+      select: contentDetailSelect,
     });
 
     await audit(tx, actor.id, "CONTENT_PUBLISH", "contents", content.id, {
       title: content.title,
     });
+
+    // Invalidate public cache immediately after publish
+    revalidatePath("/");
+    revalidatePath("/berita");
+    revalidatePath(`/berita/${content.slug}`);
 
     return content;
   });
@@ -428,7 +458,7 @@ export async function reviseContent(request: Request, id: string, review_note: s
         reviewer_id: actor.id,
         reviewed_at: new Date(),
       },
-      select: contentSelect,
+      select: contentDetailSelect,
     });
 
     await audit(tx, actor.id, "CONTENT_REVISE", "contents", content.id, {
@@ -465,6 +495,12 @@ export async function deleteContent(request: Request, id: string) {
     await audit(tx, actor.id, "CONTENT_DELETE", "contents", id, {
       title: existing.title,
     });
+
+    // Invalidate public cache if content was published
+    if (existing.status === "TERBIT") {
+      revalidatePath("/");
+      revalidatePath("/berita");
+    }
 
     return { success: true };
   });

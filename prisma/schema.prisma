@@ -289,6 +289,10 @@ model contents {
   @@index([reviewer_id])
   @@index([department_id, period_id])
   @@index([period_id])
+  @@index([status, created_at])
+  @@index([category, status, created_at])
+  @@index([published_at])
+  @@index([slug])
 }
 
 model work_programs {
