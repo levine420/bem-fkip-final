@@ -45,16 +45,23 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const uploadsDir = join(process.cwd(), "public", "uploads");
-    await mkdir(uploadsDir, { recursive: true });
+    let publicUrl = "";
 
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const filename = `avatar-${Date.now()}-${randomBytes(4).toString("hex")}.${ext}`;
-    const filePath = join(uploadsDir, filename);
+    try {
+      const uploadsDir = join(process.cwd(), "public", "uploads");
+      await mkdir(uploadsDir, { recursive: true });
 
-    await writeFile(filePath, buffer);
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const filename = `avatar-${Date.now()}-${randomBytes(4).toString("hex")}.${ext}`;
+      const filePath = join(uploadsDir, filename);
 
-    const publicUrl = `/uploads/${filename}`;
+      await writeFile(filePath, buffer);
+      publicUrl = `/uploads/${filename}`;
+    } catch {
+      const mimeType = file.type || "image/jpeg";
+      const base64 = buffer.toString("base64");
+      publicUrl = `data:${mimeType};base64,${base64}`;
+    }
 
     return NextResponse.json({
       success: true,

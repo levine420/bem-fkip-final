@@ -51,13 +51,26 @@ export function ImageUploader({
       });
 
       const data = await res.json();
-      if (!res.ok || !data.success) {
+      if (!res.ok || !data.success || !data.url) {
         throw new Error(data.error?.message || "Gagal mengunggah gambar dari perangkat.");
       }
 
       onChange(data.url);
     } catch (err: any) {
-      setErrorMsg(err.message || "Gagal mengunggah berkas.");
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        if (result) {
+          onChange(result);
+          setErrorMsg("");
+        } else {
+          setErrorMsg(err?.message || "Gagal memproses berkas gambar.");
+        }
+      };
+      reader.onerror = () => {
+        setErrorMsg(err?.message || "Gagal memproses berkas gambar.");
+      };
+      reader.readAsDataURL(file);
     } finally {
       setUploading(false);
     }

@@ -45,23 +45,30 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Ensure public/uploads directory exists
-    const uploadsDir = join(process.cwd(), "public", "uploads");
-    await mkdir(uploadsDir, { recursive: true });
+    let publicUrl = "";
 
-    // Generate safe unique filename
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const filename = `banner-${Date.now()}-${randomBytes(4).toString("hex")}.${ext}`;
-    const filePath = join(uploadsDir, filename);
+    try {
+      // Try local filesystem first
+      const uploadsDir = join(process.cwd(), "public", "uploads");
+      await mkdir(uploadsDir, { recursive: true });
 
-    await writeFile(filePath, buffer);
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const filename = `banner-${Date.now()}-${randomBytes(4).toString("hex")}.${ext}`;
+      const filePath = join(uploadsDir, filename);
 
-    const publicUrl = `/uploads/${filename}`;
+      await writeFile(filePath, buffer);
+      publicUrl = `/uploads/${filename}`;
+    } catch {
+      // Fallback for Vercel Serverless read-only filesystem (/var/task/public)
+      const mimeType = file.type || "image/jpeg";
+      const base64 = buffer.toString("base64");
+      publicUrl = `data:${mimeType};base64,${base64}`;
+    }
 
     return NextResponse.json({
       success: true,
       url: publicUrl,
-      filename,
+      filename: file.name,
       size: file.size,
     });
   } catch (error: any) {
