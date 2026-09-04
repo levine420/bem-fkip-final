@@ -60,13 +60,20 @@ export function HomeDepartments() {
 }
 
 const prokerImages: Record<string, string> = {
-  "wp-1": "/images/news-platform.png",
-  "wp-2": "/images/news-advocacy.png",
-  "wp-3": "/images/hero-banner.png",
-  "wp-4": "/images/news-advocacy.png",
+  "wp-psdm-1": "/images/event-seminar.png",
+  "wp-psdm-2": "/images/news-advocacy.png",
+  "wp-psdm-3": "/images/news-platform.png",
+  "wp-minba-1": "/images/event-sports.png",
+  "wp-minba-2": "/images/hero-banner.png",
+  "wp-minba-3": "/images/event-sports.png",
+  "wp-kastrat-1": "/images/event-seminar.png",
+  "wp-sosgam-1": "/images/news-advocacy.png",
+  "wp-kominfo-1": "/images/news-platform.png",
 };
 
 export function HomePrograms() {
+  const featuredPrograms = workPrograms.slice(0, 6);
+
   return (
     <section id="program-kerja" className="relative px-4 py-24 sm:px-6">
       <div className="relative mx-auto max-w-7xl">
@@ -80,36 +87,41 @@ export function HomePrograms() {
             </Link>
           }
         />
-        <div className="mt-10 grid gap-6 sm:grid-cols-2">
-          {workPrograms.map((proker) => (
-            <div key={proker.id} className="glass rounded-3xl overflow-hidden transition duration-300 hover:border-accent/50">
-              {/* Image Banner */}
-              <div className="relative h-44 w-full overflow-hidden">
-                <Image
-                  src={prokerImages[proker.id] || "/images/hero-banner.png"}
-                  alt={proker.name}
-                  fill
-                  className="object-cover brightness-75"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                <span
-                  className={`absolute top-3 right-3 inline-block rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm ${
-                    proker.status === "SELESAI"
-                      ? "bg-green-500/40 text-green-200"
-                      : proker.status === "BERJALAN"
-                      ? "bg-yellow-500/40 text-yellow-200"
-                      : "bg-blue-500/40 text-blue-200"
-                  }`}
-                >
-                  {proker.status === "SELESAI" ? "Selesai" : proker.status === "BERJALAN" ? "Sedang Berjalan" : "Belum Mulai"}
-                </span>
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {featuredPrograms.map((proker) => (
+            <div key={proker.id} className="glass rounded-3xl overflow-hidden transition duration-300 hover:border-accent/50 flex flex-col justify-between">
+              <div>
+                {/* Image Banner */}
+                <div className="relative h-44 w-full overflow-hidden">
+                  <Image
+                    src={prokerImages[proker.id] || "/images/hero-banner.png"}
+                    alt={proker.name}
+                    fill
+                    className="object-cover brightness-75"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                  <span
+                    className={`absolute top-3 right-3 inline-block rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm ${
+                      proker.status === "SELESAI"
+                        ? "bg-green-500/40 text-green-200"
+                        : proker.status === "BERJALAN"
+                        ? "bg-yellow-500/40 text-yellow-200"
+                        : "bg-blue-500/40 text-blue-200"
+                    }`}
+                  >
+                    {proker.status === "SELESAI" ? "Selesai" : proker.status === "BERJALAN" ? "Sedang Berjalan" : "Belum Mulai"}
+                  </span>
+                </div>
+                <div className="p-6">
+                  <span className="text-xs font-semibold text-accent uppercase tracking-wider">
+                    {departments.find((d) => d.id === proker.department_id)?.name || "Unggulan BEM"}
+                  </span>
+                  <h3 className="mt-2 text-lg font-semibold text-white">{proker.name}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-3">{proker.description}</p>
+                </div>
               </div>
-              <div className="p-6">
-                <span className="text-xs font-semibold text-accent uppercase tracking-wider">
-                  {departments.find((d) => d.id === proker.department_id)?.name || "Unggulan BEM"}
-                </span>
-                <h3 className="mt-2 text-xl font-semibold text-white">{proker.name}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{proker.description}</p>
+              <div className="px-6 pb-6 pt-0 text-xs text-muted-foreground">
+                <span className="text-white font-medium">Target:</span> {proker.target_waktu}
               </div>
             </div>
           ))}

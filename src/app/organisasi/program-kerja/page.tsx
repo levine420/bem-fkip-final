@@ -53,11 +53,11 @@ export default function ProgramsPage() {
               <div className="mt-6 pt-4 border-t border-glass-border space-y-2 text-xs">
                 <p>
                   <span className="text-muted-foreground">Target Waktu:</span>{" "}
-                  <strong className="text-white font-medium">Triwulan III 2026</strong>
+                  <strong className="text-white font-medium">{proker.target_waktu || "Periode Aktif (2026–2027)"}</strong>
                 </p>
                 <p>
-                  <span className="text-muted-foreground">Indikator Keberhasilan:</span>{" "}
-                  <span className="text-soft font-medium">Terlaksana dengan partisipasi aktif mahasiswa</span>
+                  <span className="text-muted-foreground">Sasaran / Target:</span>{" "}
+                  <span className="text-soft font-medium">{proker.sasaran || "Mahasiswa FKIP UIKA"}</span>
                 </p>
               </div>
             </div>

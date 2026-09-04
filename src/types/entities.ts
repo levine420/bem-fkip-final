@@ -102,6 +102,8 @@ export interface WorkProgram {
   display_order: number;
   department_id: string;
   period_id: string;
+  target_waktu?: string;
+  sasaran?: string;
   created_at: string;
   updated_at: string;
 }
