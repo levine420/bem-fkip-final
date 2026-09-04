@@ -12,7 +12,7 @@ const pillars = [
 
 export function HomeAbout() {
   return (
-    <section id="tentang" className="relative px-4 py-24 sm:px-6">
+    <section id="tentang" className="relative px-4 py-12 sm:px-6 sm:py-16 md:py-24">
       <div className="relative mx-auto max-w-7xl">
         <SectionHeading eyebrow="Tentang Platform" title="Bukan company profile statis, tetapi ekosistem digital mahasiswa" description="Arah produk mengikuti empat pilar: pusat informasi, pelayanan mahasiswa, transparansi organisasi, dan keberlanjutan lintas periode." action={<Link href="/tentang" className="focus-ring inline-flex min-h-11 items-center rounded-full border border-glass-border px-5 text-sm font-semibold hover:border-accent/60 hover:text-accent">Profil lengkap</Link>} />
         <div className="mt-12 grid items-stretch gap-8 lg:grid-cols-[0.9fr_1.1fr]">
