@@ -12,6 +12,60 @@ interface ImageUploaderProps {
   placeholder?: string;
 }
 
+function compressImage(file: File, maxWidth = 1600, maxHeight = 1200, quality = 0.82): Promise<File> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined" || !file.type.startsWith("image/") || file.type === "image/svg+xml") {
+      resolve(file);
+      return;
+    }
+    const img = new window.Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let width = img.width;
+      let height = img.height;
+      if (width > maxWidth || height > maxHeight) {
+        if (width / height > maxWidth / maxHeight) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        } else {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve(file);
+            return;
+          }
+          const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+            type: "image/jpeg",
+            lastModified: Date.now(),
+          });
+          resolve(compressedFile);
+        },
+        "image/jpeg",
+        quality
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file);
+    };
+    img.src = url;
+  });
+}
+
 export function ImageUploader({
   label = "Banner / Foto Gambar",
   value,
@@ -25,16 +79,16 @@ export function ImageUploader({
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileUpload = async (file: File) => {
-    if (!file) return;
+  const handleFileUpload = async (rawFile: File) => {
+    if (!rawFile) return;
 
-    if (!file.type.startsWith("image/")) {
+    if (!rawFile.type.startsWith("image/")) {
       setErrorMsg("Pilih file gambar (JPG, PNG, WEBP, GIF).");
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setErrorMsg("Ukuran gambar terlalu besar. Maksimal 5 MB.");
+    if (rawFile.size > 10 * 1024 * 1024) {
+      setErrorMsg("Ukuran gambar terlalu besar. Maksimal 10 MB.");
       return;
     }
 
@@ -42,6 +96,7 @@ export function ImageUploader({
     setErrorMsg("");
 
     try {
+      const file = await compressImage(rawFile);
       const formData = new FormData();
       formData.append("file", file);
 
@@ -50,13 +105,20 @@ export function ImageUploader({
         body: formData,
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success || !data.url) {
-        throw new Error(data.error?.message || "Gagal mengunggah gambar dari perangkat.");
+      let data: any = {};
+      try {
+        const text = await res.text();
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = {};
       }
 
-      onChange(data.url);
-    } catch (err: any) {
+      if (res.ok && data.success && data.url) {
+        onChange(data.url);
+        return;
+      }
+
+      // Fallback: convert compressed file to base64 if server upload endpoint fails or returns data URL
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
@@ -64,13 +126,15 @@ export function ImageUploader({
           onChange(result);
           setErrorMsg("");
         } else {
-          setErrorMsg(err?.message || "Gagal memproses berkas gambar.");
+          setErrorMsg(data.error?.message || "Gagal mengunggah gambar dari perangkat.");
         }
       };
       reader.onerror = () => {
-        setErrorMsg(err?.message || "Gagal memproses berkas gambar.");
+        setErrorMsg("Gagal memproses berkas gambar.");
       };
       reader.readAsDataURL(file);
+    } catch (err: any) {
+      setErrorMsg(err?.message || "Gagal memproses berkas gambar.");
     } finally {
       setUploading(false);
     }

@@ -8,19 +8,55 @@ export class ApiError extends Error {
 export async function adminApi<T>(path: string, method = "GET", body?: unknown): Promise<T> {
   let csrf: string | undefined;
   if (method !== "GET") {
-    const response = await fetch("/api/admin/auth/csrf", { cache: "no-store", credentials: "same-origin" });
-    const token = await response.json();
-    if (!response.ok || !token.data?.csrf) throw new Error("Sesi formulir gagal dimuat. Coba lagi.");
-    csrf = token.data.csrf;
+    const csrfRes = await fetch("/api/admin/auth/csrf", { cache: "no-store", credentials: "same-origin" });
+    let tokenData: any = {};
+    try {
+      tokenData = await csrfRes.json();
+    } catch {
+      throw new Error("Sesi formulir gagal dimuat. Silakan muat ulang halaman.");
+    }
+    if (!csrfRes.ok || !tokenData.data?.csrf) throw new Error("Sesi formulir gagal dimuat. Silakan muat ulang.");
+    csrf = tokenData.data.csrf;
   }
-  const response = await fetch(path, { method, cache: "no-store", credentials: "same-origin",
-    headers: { ...(body !== undefined ? { "Content-Type": "application/json" } : {}), ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}) });
-  const result = await response.json();
+
+  const response = await fetch(path, {
+    method,
+    cache: "no-store",
+    credentials: "same-origin",
+    headers: {
+      ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+      ...(csrf ? { "X-CSRF-Token": csrf } : {}),
+    },
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+  });
+
+  let result: any = {};
+  const responseText = await response.text();
+  try {
+    result = responseText ? JSON.parse(responseText) : {};
+  } catch {
+    if (!response.ok) {
+      if (response.status === 413) {
+        throw new ApiError(413, "PAYLOAD_TOO_LARGE", "Ukuran file/gambar terlalu besar untuk disimpan.");
+      }
+      throw new ApiError(response.status, "SERVER_ERROR", `Terjadi kesalahan pada server (${response.status}).`);
+    }
+    result = {};
+  }
+
   if (!response.ok) {
-    if (result.error?.code === "SESSION_INVALID" || result.error?.code === "ASSIGNMENT_INACTIVE") window.location.assign("/admin/login");
-    if (result.error?.code === "PASSWORD_CHANGE_REQUIRED") window.location.assign("/admin/ganti-password");
-    throw new ApiError(response.status, result.error?.code ?? "ERROR", result.error?.message ?? "Permintaan gagal.", result.error?.fields);
+    if (result.error?.code === "SESSION_INVALID" || result.error?.code === "ASSIGNMENT_INACTIVE") {
+      window.location.assign("/admin/login");
+    }
+    if (result.error?.code === "PASSWORD_CHANGE_REQUIRED") {
+      window.location.assign("/admin/ganti-password");
+    }
+    throw new ApiError(
+      response.status,
+      result.error?.code ?? "ERROR",
+      result.error?.message ?? "Permintaan gagal.",
+      result.error?.fields
+    );
   }
   return result.data as T;
 }

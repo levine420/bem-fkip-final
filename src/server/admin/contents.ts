@@ -66,10 +66,10 @@ function canAccessContent(actor: AdminActor, content: { author_id: string; depar
  * Only DRAF or REVISI can be edited, and only by author or SA.
  */
 function canEditContent(actor: AdminActor, content: { status: string; author_id: string }) {
+  if (actor.role === "SUPER_ADMIN") return true;
   if (!["DRAF", "REVISI"].includes(content.status)) {
     return false;
   }
-  if (actor.role === "SUPER_ADMIN") return true;
   return content.author_id === actor.id;
 }
 
