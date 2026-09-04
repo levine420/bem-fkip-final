@@ -2,7 +2,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { AdminError } from "@/lib/admin/errors";
-export async function jsonInput(request: Request): Promise<unknown> {
+export async function jsonInput(request: Request, maxBytes = 4 * 1024 * 1024): Promise<unknown> {
   if (!request.headers.get("content-type")?.startsWith("application/json")) throw new AdminError(415, "CONTENT_TYPE", "Gunakan data JSON.");
   // Bound the stream, not just an untrusted Content-Length header.
   const reader = request.body?.getReader();
@@ -11,7 +11,7 @@ export async function jsonInput(request: Request): Promise<unknown> {
   for (;;) {
     const { done, value } = await reader.read(); if (done) break;
     bytes += value.byteLength;
-    if (bytes > 32768) { await reader.cancel(); throw new AdminError(413, "BODY_TOO_LARGE", "Data terlalu besar."); }
+    if (bytes > maxBytes) { await reader.cancel(); throw new AdminError(413, "BODY_TOO_LARGE", "Ukuran data formulir terlalu besar."); }
     chunks.push(value);
   }
   try { return JSON.parse(Buffer.concat(chunks).toString("utf8")) as unknown; }
