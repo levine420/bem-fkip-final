@@ -94,6 +94,23 @@ export function ContentReview() {
     }
   }
 
+  async function deleteContent(item: Content) {
+    if (busy || !window.confirm(`Hapus "${item.title}"?\n\nData akan dihapus secara permanen.`)) return;
+    setBusy(true);
+    setError("");
+    setNotice("");
+    
+    try {
+      await adminApi(`/api/admin/contents/${item.id}`, "DELETE");
+      setNotice(`"${item.title}" telah dihapus.`);
+      setRefresh((r) => r + 1);
+    } catch (cause) {
+      setError(errorMessage(cause));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function formatDate(date: string) {
     return new Date(date).toLocaleDateString("id-ID", {
       day: "numeric",
@@ -213,6 +230,13 @@ export function ContentReview() {
                   disabled={busy}
                 >
                   Minta Revisi
+                </button>
+                <button
+                  className={`${actionClass} bg-red-600 hover:bg-red-700`}
+                  onClick={() => deleteContent(item)}
+                  disabled={busy}
+                >
+                  Hapus
                 </button>
               </div>
 

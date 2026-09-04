@@ -273,7 +273,7 @@ export function ContentManager() {
                     </td>
                     <td className="py-3 text-muted-foreground">{formatDate(item.created_at)}</td>
                     <td className="py-3 text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end items-center gap-3">
                         {(item.status === "DRAF" || item.status === "REVISI") && (
                           <Link
                             href={`/admin/konten/${item.id}`}
@@ -291,15 +291,6 @@ export function ContentManager() {
                             Submit Review
                           </button>
                         )}
-                        {item.status === "DRAF" && (
-                          <button
-                            className="text-soft hover:underline"
-                            onClick={() => deleteContent(item)}
-                            disabled={busy}
-                          >
-                            Hapus
-                          </button>
-                        )}
                         {item.status !== "DRAF" && item.status !== "REVISI" && (
                           <Link
                             href={`/admin/konten/${item.id}`}
@@ -308,6 +299,13 @@ export function ContentManager() {
                             Lihat
                           </Link>
                         )}
+                        <button
+                          className="text-red-400 hover:underline hover:text-red-300"
+                          onClick={() => deleteContent(item)}
+                          disabled={busy}
+                        >
+                          Hapus
+                        </button>
                       </div>
                     </td>
                   </tr>
