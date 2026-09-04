@@ -180,7 +180,7 @@ export async function createContent(request: Request, input: {
     const excerpt = input.excerpt ? textField(input.excerpt, "excerpt", 0, 1000) : stripHtml(body).slice(0, 200);
     const category = (input.category || "BERITA") as "BERITA" | "PENGUMUMAN" | "KAJIAN" | "RILIS_PERS" | "LAINNYA";
     const tags = Array.isArray(input.tags) ? input.tags.filter(t => t.trim()).slice(0, 10) : [];
-    const thumbnail_url = input.thumbnail_url ? textField(input.thumbnail_url, "thumbnail_url", 0, 1024) : null;
+    const thumbnail_url = input.thumbnail_url ? textField(input.thumbnail_url, "thumbnail_url", 0, 2000000) : null;
     const meta_title = input.meta_title ? textField(input.meta_title, "meta_title", 0, 255) : null;
     const meta_description = input.meta_description ? textField(input.meta_description, "meta_description", 0, 1000) : null;
     
@@ -294,7 +294,7 @@ export async function updateContent(request: Request, id: string, input: {
     }
     
     if (input.thumbnail_url !== undefined) {
-      updates.thumbnail_url = input.thumbnail_url ? textField(input.thumbnail_url, "thumbnail_url", 0, 1024) : null;
+      updates.thumbnail_url = input.thumbnail_url ? textField(input.thumbnail_url, "thumbnail_url", 0, 2000000) : null;
     }
     
     if (input.meta_title !== undefined) {

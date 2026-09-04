@@ -92,7 +92,7 @@ export async function createEvent(request: Request, input: {
     const end_time = input.end_time ? new Date(input.end_time) : null;
     const registration_deadline = input.registration_deadline ? new Date(input.registration_deadline) : null;
     const max_participants = input.max_participants !== undefined ? integer(input.max_participants, "max_participants", 1, 10000) : null;
-    const poster_url = input.poster_url ? textField(input.poster_url, "poster_url", 0, 1024) : null;
+    const poster_url = input.poster_url ? textField(input.poster_url, "poster_url", 0, 2000000) : null;
     const status = (input.status || "DRAF") as any;
     const registration_status = (input.registration_status || "TUTUP") as any;
 
@@ -173,7 +173,7 @@ export async function updateEvent(request: Request, id: string, input: {
     if (input.end_time !== undefined) updates.end_time = input.end_time ? new Date(input.end_time) : null;
     if (input.registration_deadline !== undefined) updates.registration_deadline = input.registration_deadline ? new Date(input.registration_deadline) : null;
     if (input.max_participants !== undefined) updates.max_participants = input.max_participants ? integer(input.max_participants, "max_participants", 1, 10000) : null;
-    if (input.poster_url !== undefined) updates.poster_url = input.poster_url ? textField(input.poster_url, "poster_url", 0, 1024) : null;
+    if (input.poster_url !== undefined) updates.poster_url = input.poster_url ? textField(input.poster_url, "poster_url", 0, 2000000) : null;
     if (input.status !== undefined) updates.status = input.status as any;
     if (input.registration_status !== undefined) updates.registration_status = input.registration_status as any;
 

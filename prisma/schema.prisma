@@ -266,7 +266,7 @@ model contents {
   excerpt String? @db.Text
   reading_time Int?
   body String @db.Text
-  thumbnail_url String? @db.VarChar(1024)
+  thumbnail_url String? @db.Text
   view_count Int @default(0)
   category content_category @default(BERITA)
   status content_status @default(DRAF)
@@ -320,7 +320,7 @@ model events {
   slug String @unique @db.VarChar(150)
   description String @db.Text
   location String @db.VarChar(200)
-  poster_url String? @db.VarChar(1024)
+  poster_url String? @db.Text
   start_time DateTime @db.Timestamptz(6)
   end_time DateTime? @db.Timestamptz(6)
   registration_deadline DateTime? @db.Timestamptz(6)
