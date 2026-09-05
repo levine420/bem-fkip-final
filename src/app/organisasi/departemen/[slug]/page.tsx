@@ -3,7 +3,17 @@ import Link from "next/link";
 import { ChevronRight, Users } from "lucide-react";
 import { PublicPageFrame } from "@/components/PublicPageFrame";
 import { PublicPageHero } from "@/components/PublicPageHero";
-import { getDepartmentBySlug } from "@/server/public/data";
+import { getDepartmentBySlug, getActiveDepartments } from "@/server/public/data";
+
+export const revalidate = 60;
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const departments = await getActiveDepartments();
+  return departments
+    .filter((d) => d.slug)
+    .map((d) => ({ slug: d.slug! }));
+}
 
 export default async function DepartmentDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

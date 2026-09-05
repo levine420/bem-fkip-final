@@ -85,7 +85,7 @@ export async function createDepartment(request: Request, value: unknown) {
     await audit(tx, actor.id, "department.created", "department", item.id, { period_id, name: item.name, slug: item.slug });
     revalidatePath("/");
     revalidatePath("/organisasi");
-    revalidatePath("/organisasi/departemen");
+    revalidatePath("/organisasi/departemen", "layout");
     return item;
   });
 }
@@ -102,7 +102,7 @@ export async function editDepartment(request: Request, id: string, value: unknow
     await audit(tx, actor.id, "department.updated", "department", id, { period_id: item.period_id, changed_fields: Object.keys(data) });
     revalidatePath("/");
     revalidatePath("/organisasi");
-    revalidatePath("/organisasi/departemen");
+    revalidatePath("/organisasi/departemen", "layout");
     return { id };
   });
 }
@@ -130,7 +130,7 @@ export async function deleteDepartment(request: Request, id: string, value: unkn
     await audit(tx, actor.id, "department.deleted", "department", id, { period_id: item.period_id, name: item.name, soft_delete: true });
     revalidatePath("/");
     revalidatePath("/organisasi");
-    revalidatePath("/organisasi/departemen");
+    revalidatePath("/organisasi/departemen", "layout");
     return { id };
   });
 }
@@ -151,7 +151,7 @@ export async function createMember(request: Request, kind: MemberKind, value: un
     revalidatePath("/");
     revalidatePath("/organisasi");
     revalidatePath("/organisasi/struktur-kepengurusan");
-    revalidatePath("/organisasi/departemen");
+    revalidatePath("/organisasi/departemen", "layout");
     revalidatePath("/tentang");
     return item;
   });
@@ -179,7 +179,7 @@ export async function editMember(request: Request, kind: MemberKind, id: string,
     revalidatePath("/");
     revalidatePath("/organisasi");
     revalidatePath("/organisasi/struktur-kepengurusan");
-    revalidatePath("/organisasi/departemen");
+    revalidatePath("/organisasi/departemen", "layout");
     revalidatePath("/tentang");
     return { id };
   });
@@ -200,7 +200,7 @@ export async function deleteMember(request: Request, kind: MemberKind, id: strin
     revalidatePath("/");
     revalidatePath("/organisasi");
     revalidatePath("/organisasi/struktur-kepengurusan");
-    revalidatePath("/organisasi/departemen");
+    revalidatePath("/organisasi/departemen", "layout");
     revalidatePath("/tentang");
     return { id };
   });

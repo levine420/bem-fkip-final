@@ -83,6 +83,8 @@ export async function activatePeriod(request: Request, id: string, value: unknow
     revalidatePath("/tentang");
     revalidatePath("/tentang/visi-misi");
     revalidatePath("/organisasi");
+    revalidatePath("/organisasi/departemen", "layout");
+    revalidatePath("/organisasi/struktur-kepengurusan");
     return updated;
   });
 }
