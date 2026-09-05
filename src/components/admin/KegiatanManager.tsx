@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { actionClass, adminApi, errorMessage } from "./api";
 import { ImageUploader } from "@/components/ImageUploader";
 
@@ -99,6 +99,9 @@ export function KegiatanManager() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loadingRegs, setLoadingRegs] = useState(false);
 
+  // Ref for focus management
+  const createButtonRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     let live = true;
     setLoading(true);
@@ -118,6 +121,16 @@ export function KegiatanManager() {
 
     return () => { live = false; };
   }, [search, status, regStatus, page, refresh]);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isEventModalOpen || selectedEvent) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [isEventModalOpen, selectedEvent]);
 
   function openCreateModal() {
     setEditingEvent(null);
@@ -180,10 +193,20 @@ export function KegiatanManager() {
       }
       setIsEventModalOpen(false);
       setRefresh((r) => r + 1);
+      // Return focus to create button
+      setTimeout(() => createButtonRef.current?.focus(), 100);
     } catch (cause) {
       setError(errorMessage(cause));
     } finally {
       setBusy(false);
+    }
+  }
+
+  function closeEventModal() {
+    if (!busy) {
+      setIsEventModalOpen(false);
+      // Return focus to create button
+      setTimeout(() => createButtonRef.current?.focus(), 100);
     }
   }
 
@@ -275,7 +298,11 @@ export function KegiatanManager() {
               Kelola acara BEM/Departemen, kuota peserta, status pendaftaran, dan data kehadiran.
             </p>
           </div>
-          <button onClick={openCreateModal} className={`${actionClass} bg-brand`}>
+          <button 
+            ref={createButtonRef}
+            onClick={openCreateModal} 
+            className={`${actionClass} bg-brand`}
+          >
             + Buat Kegiatan Baru
           </button>
         </div>
@@ -412,119 +439,206 @@ export function KegiatanManager() {
 
       {/* Event Create / Edit Modal */}
       {isEventModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="glass rounded-3xl p-6 w-full max-w-xl shadow-2xl my-8">
-            <h3 className="text-lg font-semibold">{editingEvent ? "Edit Kegiatan" : "Buat Kegiatan Baru"}</h3>
-            <form onSubmit={handleSaveEvent} className="mt-4 grid gap-3">
-              <label className="text-sm">
-                Nama Kegiatan *
-                <input
-                  className="form-control mt-1"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Misal: Seminar Nasional Education 4.0"
-                />
-              </label>
-              <label className="text-sm">
-                Lokasi / Venue *
-                <input
-                  className="form-control mt-1"
-                  required
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Misal: Aula KH. Sholeh Iskandar UIKA"
-                />
-              </label>
-              <label className="text-sm">
-                Deskripsi Kegiatan *
-                <textarea
-                  className="form-control mt-1 h-24"
-                  required
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Deskripsi acara, pembicara, fasilitas, dll..."
-                />
-              </label>
-              <div className="grid sm:grid-cols-2 gap-3">
-                <label className="text-sm">
-                  Waktu Mulai *
-                  <input
-                    type="datetime-local"
-                    className="form-control mt-1"
-                    required
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                  />
-                </label>
-                <label className="text-sm">
-                  Waktu Selesai
-                  <input
-                    type="datetime-local"
-                    className="form-control mt-1"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                  />
-                </label>
-              </div>
-              <div className="grid sm:grid-cols-2 gap-3">
-                <label className="text-sm">
-                  Batas Pendaftaran
-                  <input
-                    type="datetime-local"
-                    className="form-control mt-1"
-                    value={regDeadline}
-                    onChange={(e) => setRegDeadline(e.target.value)}
-                  />
-                </label>
-                <label className="text-sm">
-                  Maksimal Peserta (Kuota)
-                  <input
-                    type="number"
-                    min={1}
-                    className="form-control mt-1"
-                    value={maxParticipants}
-                    onChange={(e) => setMaxParticipants(e.target.value)}
-                    placeholder="Kosongkan jika tidak terbatas"
-                  />
-                </label>
-              </div>
-              <div className="grid sm:grid-cols-2 gap-3">
-                <label className="text-sm">
-                  Status Acara
-                  <select className="form-control mt-1" value={eventStatusVal} onChange={(e) => setEventStatusVal(e.target.value as any)}>
-                    <option value="DRAF">Draf</option>
-                    <option value="TERBIT">Terbit</option>
-                    <option value="BERJALAN">Sedang Berlangsung</option>
-                    <option value="SELESAI">Selesai</option>
-                    <option value="DIBATALKAN">Dibatalkan</option>
-                  </select>
-                </label>
-                <label className="text-sm">
-                  Status Pendaftaran
-                  <select className="form-control mt-1" value={regStatusVal} onChange={(e) => setRegStatusVal(e.target.value as any)}>
-                    <option value="SEGERA_DIBUKA">Segera Dibuka</option>
-                    <option value="TERBUKA">Pendaftaran Terbuka</option>
-                    <option value="PENUH">Kuota Penuh</option>
-                    <option value="TUTUP">Tutup</option>
-                  </select>
-                </label>
-              </div>
-              <ImageUploader
-                label="Poster / Banner Kegiatan"
-                value={posterUrl}
-                onChange={(url) => setPosterUrl(url)}
-              />
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          onKeyDown={(e) => {
+            if (e.key === "Escape" && !busy) {
+              closeEventModal();
+            }
+          }}
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={closeEventModal}
+          />
 
-              <div className="mt-4 flex justify-end gap-2">
-                <button type="button" onClick={() => setIsEventModalOpen(false)} className={actionClass} disabled={busy}>
-                  Batal
-                </button>
-                <button type="submit" className={`${actionClass} bg-brand`} disabled={busy}>
-                  {busy ? "Menyimpan…" : "Simpan Kegiatan"}
-                </button>
+          {/* Modal Dialog */}
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-event-title"
+            className="
+              relative z-10 flex w-full max-w-3xl flex-col
+              overflow-hidden rounded-2xl
+              border border-white/10 bg-[#100a12]
+              shadow-2xl
+              max-h-[calc(100dvh-2rem)]
+            "
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Sticky Header */}
+            <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-[#100a12] px-6 py-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-pink-400">
+                  Manajemen Kegiatan
+                </p>
+                <h2 id="create-event-title" className="mt-1 text-xl font-bold text-white">
+                  {editingEvent ? "Edit Kegiatan" : "Buat Kegiatan Baru"}
+                </h2>
               </div>
-            </form>
+              <button
+                type="button"
+                onClick={closeEventModal}
+                aria-label="Tutup modal"
+                disabled={busy}
+                className="flex size-10 items-center justify-center rounded-xl border border-white/10 text-white/70 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+              >
+                <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Scrollable Body */}
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5">
+              <form id="create-event-form" onSubmit={handleSaveEvent} className="space-y-5">
+                <label className="block text-sm">
+                  <span className="font-semibold text-white">Nama Kegiatan *</span>
+                  <input
+                    className="form-control mt-2"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Misal: Seminar Nasional Education 4.0"
+                    autoFocus
+                  />
+                </label>
+
+                <label className="block text-sm">
+                  <span className="font-semibold text-white">Lokasi / Venue *</span>
+                  <input
+                    className="form-control mt-2"
+                    required
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="Misal: Aula KH. Sholeh Iskandar UIKA"
+                  />
+                </label>
+
+                <label className="block text-sm">
+                  <span className="font-semibold text-white">Deskripsi Kegiatan *</span>
+                  <textarea
+                    className="form-control mt-2 h-24 resize-none"
+                    required
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Deskripsi acara, pembicara, fasilitas, dll..."
+                  />
+                </label>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <label className="block text-sm">
+                    <span className="font-semibold text-white">Waktu Mulai *</span>
+                    <input
+                      type="datetime-local"
+                      className="form-control mt-2"
+                      required
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                    />
+                  </label>
+                  <label className="block text-sm">
+                    <span className="font-semibold text-white">Waktu Selesai</span>
+                    <input
+                      type="datetime-local"
+                      className="form-control mt-2"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                    />
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <label className="block text-sm">
+                    <span className="font-semibold text-white">Batas Pendaftaran</span>
+                    <input
+                      type="datetime-local"
+                      className="form-control mt-2"
+                      value={regDeadline}
+                      onChange={(e) => setRegDeadline(e.target.value)}
+                    />
+                  </label>
+                  <label className="block text-sm">
+                    <span className="font-semibold text-white">Maksimal Peserta (Kuota)</span>
+                    <input
+                      type="number"
+                      min={1}
+                      className="form-control mt-2"
+                      value={maxParticipants}
+                      onChange={(e) => setMaxParticipants(e.target.value)}
+                      placeholder="Kosongkan jika tidak terbatas"
+                    />
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <label className="block text-sm">
+                    <span className="font-semibold text-white">Status Acara</span>
+                    <select 
+                      className="form-control mt-2" 
+                      value={eventStatusVal} 
+                      onChange={(e) => setEventStatusVal(e.target.value as any)}
+                    >
+                      <option value="DRAF">Draf</option>
+                      <option value="TERBIT">Terbit</option>
+                      <option value="BERJALAN">Sedang Berlangsung</option>
+                      <option value="SELESAI">Selesai</option>
+                      <option value="DIBATALKAN">Dibatalkan</option>
+                    </select>
+                  </label>
+                  <label className="block text-sm">
+                    <span className="font-semibold text-white">Status Pendaftaran</span>
+                    <select 
+                      className="form-control mt-2" 
+                      value={regStatusVal} 
+                      onChange={(e) => setRegStatusVal(e.target.value as any)}
+                    >
+                      <option value="SEGERA_DIBUKA">Segera Dibuka</option>
+                      <option value="TERBUKA">Pendaftaran Terbuka</option>
+                      <option value="PENUH">Kuota Penuh</option>
+                      <option value="TUTUP">Tutup</option>
+                    </select>
+                  </label>
+                </div>
+
+                <ImageUploader
+                  label="Poster / Banner Kegiatan"
+                  value={posterUrl}
+                  onChange={(url) => setPosterUrl(url)}
+                />
+              </form>
+            </div>
+
+            {/* Sticky Footer */}
+            <div className="flex shrink-0 justify-end gap-3 border-t border-white/10 bg-[#100a12] px-6 py-4">
+              <button 
+                type="button" 
+                onClick={closeEventModal} 
+                className={`${actionClass} border border-white/20 hover:bg-white/5`}
+                disabled={busy}
+              >
+                Batal
+              </button>
+              <button 
+                type="submit" 
+                form="create-event-form"
+                className={`${actionClass} bg-brand hover:shadow-[var(--glow-pink)]`}
+                disabled={busy}
+              >
+                {busy ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="size-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Menyimpan…
+                  </span>
+                ) : (
+                  "Simpan Kegiatan"
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

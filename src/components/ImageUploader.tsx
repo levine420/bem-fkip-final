@@ -174,7 +174,12 @@ export function ImageUploader({
                 <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-500">
                   <CheckCircle className="h-3.5 w-3.5" /> Gambar Terpasang
                 </span>
-                <p className="truncate text-xs text-muted-foreground max-w-xs">{value}</p>
+                <p className="mt-1 truncate text-xs text-muted-foreground max-w-xs">
+                  {value.startsWith('data:image/') 
+                    ? `Poster kegiatan · ${(value.length / 1024).toFixed(1)} KB`
+                    : value.split('/').pop() || 'Gambar poster'
+                  }
+                </p>
               </div>
             </div>
 
@@ -185,14 +190,14 @@ export function ImageUploader({
                 rel="noreferrer"
                 className="rounded-xl border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted transition"
               >
-                Lihat Foto
+                Lihat
               </a>
               <button
                 type="button"
                 onClick={() => onChange("")}
                 className="flex items-center gap-1 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-500 hover:bg-red-500/20 transition"
               >
-                <X className="h-3.5 w-3.5" /> Hapus / Ganti
+                <X className="h-3.5 w-3.5" /> Hapus
               </button>
             </div>
           </div>
