@@ -11,30 +11,36 @@ export function HomeHero() {
   return (
     <section
       id="home"
-      className="relative isolate overflow-x-clip bg-transparent lg:min-h-[88svh] lg:flex lg:items-center"
+      className="relative isolate overflow-x-clip bg-[#0b0710] lg:min-h-[88svh] lg:flex lg:items-center"
     >
-      {/* Foto kepengurusan — hanya tampil di lg (1024px+) */}
-      <div className="absolute inset-y-0 right-0 -z-20 hidden w-[68%] lg:block">
+      {/* Foto hanya desktop */}
+      <div className="absolute inset-0 -z-20 hidden lg:block">
         <Image
           src="/images/kepengurusan-altiora.jpg"
           alt=""
           fill
           priority
-          sizes="68vw"
-          className="object-cover object-center brightness-[0.55] saturate-[0.85]"
+          sizes="100vw"
+          className="object-contain object-right brightness-[0.62] saturate-[0.85]"
         />
       </div>
 
-      {/* Overlay kiri gelap — hanya desktop, lebih tipis */}
+      {/* Gradient kiri untuk keterbacaan teks */}
       <div
         className="
           pointer-events-none absolute inset-0 -z-10 hidden lg:block
-          bg-[linear-gradient(90deg,rgba(11,7,16,0.92)_0%,rgba(11,7,16,0.82)_24%,rgba(11,7,16,0.55)_48%,rgba(11,7,16,0.20)_72%,transparent_100%)]
+          bg-[linear-gradient(90deg,#0b0710_0%,rgba(11,7,16,0.97)_18%,rgba(11,7,16,0.82)_36%,rgba(11,7,16,0.52)_57%,rgba(11,7,16,0.18)_78%,transparent_100%)]
         "
       />
 
-      {/* Fade bawah — hanya desktop */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 hidden h-[40%] bg-gradient-to-b from-transparent to-[#0b0710] lg:block" />
+      {/* Fade bagian bawah */}
+      <div
+        className="
+          pointer-events-none absolute inset-x-0 bottom-0 -z-10 hidden h-[38%]
+          bg-gradient-to-b from-transparent via-[#0b0710]/55 to-[#0b0710]
+          lg:block
+        "
+      />
 
       {/* Konten */}
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-14 pt-28 sm:px-6 sm:pb-16 lg:py-24">
