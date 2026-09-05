@@ -123,7 +123,7 @@ export async function createEvent(request: Request, input: {
         status,
         registration_status,
         created_by_user_id: actor.id,
-        department_id: deptId ?? undefined,
+        ...(deptId ? { department_id: deptId } : {}),
         period_id,
       },
       select: eventSelect,
