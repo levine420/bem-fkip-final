@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, useRef, type ChangeEvent, type FormEvent } from "react";
 import type { DepartmentSummary, OrganizationItem, OrganizationKind, OrganizationResult, PeriodOptions, PeriodSummary } from "@/lib/admin/organization";
 import { actionClass, adminApi, ApiError, errorMessage } from "./api";
 import { OrganizationPicker } from "./OrganizationPicker";
@@ -11,6 +11,7 @@ const blank: Editor = { name: "", slug: "", description: "", logo_url: "", posit
 const title: Record<OrganizationKind, string> = { departments: "Departemen", "department-members": "Anggota Departemen", "board-members": "Struktur Pengurus" };
 export function OrganizationManager({ kind }: { kind: OrganizationKind }) {
   const isDepartment = kind === "departments", isBoard = kind === "board-members";
+  const editorRef = useRef<HTMLFormElement>(null);
   const [period, setPeriod] = useState<PeriodSummary | null>(null), [superAdmin, setSuperAdmin] = useState(false);
   const [initializing, setInitializing] = useState(true), [initRetry, setInitRetry] = useState(0);
   const [data, setData] = useState<OrganizationResult | null>(null), [loading, setLoading] = useState(false);
@@ -40,10 +41,16 @@ export function OrganizationManager({ kind }: { kind: OrganizationKind }) {
   const readOnly = currentPeriod?.status === "ARSIP";
   const departmentPath = period ? `/api/admin/departments?period_id=${encodeURIComponent(period.id)}` : "";
   function edit(item: OrganizationItem) {
+    console.log("Edit clicked for item:", item);
     const next: Editor = { ...blank, id: item.id, version: item.version, name: item.name };
     if ("slug" in item) { next.slug = item.slug; next.description = item.description ?? ""; next.logo_url = item.logo_url ?? ""; }
     else { next.position = item.position; next.photo_url = item.photo_url ?? ""; next.display_order = String(item.display_order); next.department = item.department; }
+    console.log("Setting editor to:", next);
     setEditor(next); setFields({}); setError(""); setNotice("");
+    // Scroll to form after state update
+    setTimeout(() => {
+      editorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
   }
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (!editor || !period || busy || readOnly) return;
@@ -96,7 +103,7 @@ export function OrganizationManager({ kind }: { kind: OrganizationKind }) {
     {notice && <p role="status" className="glass rounded-2xl p-4 text-sm text-soft">{notice}</p>}
     {error && <div role="alert" className="glass rounded-2xl p-4 text-sm text-soft"><p>{error}</p><button type="button" className={`${actionClass} mt-3`} disabled={busy} onClick={() => period ? setRefresh((r) => r + 1) : setInitRetry((r) => r + 1)}>Muat ulang daftar</button>
       {editor && <p className="mt-2 text-xs">Input belum dibuang. Jika terjadi konflik versi, batalkan edit lalu buka data terbaru.</p>}</div>}
-    {editor && <form onSubmit={save} className="glass grid gap-4 rounded-3xl p-5 sm:p-7" aria-busy={busy}>
+    {editor && <form ref={editorRef} onSubmit={save} className="glass grid gap-4 rounded-3xl p-5 sm:p-7" aria-busy={busy}>
       <h3 className="font-semibold">{editor.id ? "Edit" : "Tambah"} · {title[kind]} · {currentPeriod?.name}</h3>
       {(!isDepartment || superAdmin) && field("name", "Nama")}
       {isDepartment ? <>{superAdmin && field("slug", "Slug — huruf kecil, angka, tanda hubung")}{field("description", "Deskripsi (opsional)", false)}
