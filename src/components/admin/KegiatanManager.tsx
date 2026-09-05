@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { actionClass, adminApi, errorMessage } from "./api";
 import { ImageUploader } from "@/components/ImageUploader";
+import { OrganizationPicker } from "./OrganizationPicker";
 
 type EventItem = {
   id: string;
@@ -93,6 +94,7 @@ export function KegiatanManager() {
   const [posterUrl, setPosterUrl] = useState("");
   const [eventStatusVal, setEventStatusVal] = useState<EventItem["status"]>("TERBIT");
   const [regStatusVal, setRegStatusVal] = useState<EventItem["registration_status"]>("TERBUKA");
+  const [department, setDepartment] = useState<{ id: string; name: string } | null>(null);
 
   // Participant Management Modal
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
@@ -145,6 +147,7 @@ export function KegiatanManager() {
     setPosterUrl("");
     setEventStatusVal("TERBIT");
     setRegStatusVal("TERBUKA");
+    setDepartment(null);
     setIsEventModalOpen(true);
   }
 
@@ -160,6 +163,7 @@ export function KegiatanManager() {
     setPosterUrl(event.poster_url || "");
     setEventStatusVal(event.status);
     setRegStatusVal(event.registration_status);
+    setDepartment(event.department);
     setIsEventModalOpen(true);
   }
 
@@ -181,6 +185,7 @@ export function KegiatanManager() {
       poster_url: posterUrl || undefined,
       status: eventStatusVal,
       registration_status: regStatusVal,
+      department_id: department?.id || undefined,
     };
 
     console.log("Saving event with payload:", payload);
@@ -602,6 +607,24 @@ export function KegiatanManager() {
                       <option value="TUTUP">Tutup</option>
                     </select>
                   </label>
+                </div>
+
+                <div>
+                  <label className="block text-sm">
+                    <span className="font-semibold text-white">Departemen Penyelenggara</span>
+                  </label>
+                  <div className="mt-2">
+                    <OrganizationPicker
+                      label=""
+                      path="/api/admin/departments"
+                      value={department}
+                      clearLabel="BEM (Tanpa Departemen Khusus)"
+                      onChange={(item) => setDepartment(item as any)}
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Pilih departemen yang menyelenggarakan kegiatan ini, atau kosongkan jika kegiatan diselenggarakan oleh BEM secara umum.
+                  </p>
                 </div>
 
                 <ImageUploader
