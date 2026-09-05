@@ -124,6 +124,7 @@ async function main() {
   console.log(`   - KASTRAT: ${kastratCount} staff`);
   console.log(`   - Total: ${staffMembers.length} staff`);
   console.log('\n🌐 Check frontend: /organisasi/departemen/[slug]');
+  console.log('💡 Note: Hard refresh browser (Ctrl+Shift+R) to see changes immediately');
 }
 
 main()
