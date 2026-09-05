@@ -58,7 +58,6 @@ async function main() {
           slug: dept.slug,
           description: dept.description,
           period_id: activePeriod.id,
-          status: 'AKTIF',
           version: 1
         }
       });
