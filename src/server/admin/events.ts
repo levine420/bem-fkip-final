@@ -104,8 +104,10 @@ export async function createEvent(request: Request, input: {
       throw new AdminError(400, "NO_ACTIVE_PERIOD", "Tidak ada periode aktif.");
     }
 
-    // Department is optional — events can be organized by BEM without a specific department
-    const deptId = actor.role === "ADMIN" ? scope.department_id : (input.department_id ? uuid(input.department_id) : (actor.assignment?.department_id ?? null));
+    // Normalize department_id: empty input becomes null
+    const departmentId = actor.role === "ADMIN" 
+      ? scope.department_id 
+      : (input.department_id?.trim() ? uuid(input.department_id.trim()) : (actor.assignment?.department_id ?? null));
 
     const slug = generateSlug(name) + "-" + Date.now().toString(36);
 
@@ -123,7 +125,7 @@ export async function createEvent(request: Request, input: {
         status,
         registration_status,
         created_by_user_id: actor.id,
-        ...(deptId ? { department_id: deptId } : {}),
+        department_id: departmentId,
         period_id,
       },
       select: eventSelect,
