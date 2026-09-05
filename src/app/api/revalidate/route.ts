@@ -32,7 +32,7 @@ async function handleRevalidate(request: NextRequest) {
       { 
         success: true,
         message: 'Cache revalidated successfully',
-        ]
+        timestamp: new Date().toISOString()
       },
       { status: 200 }
     );
