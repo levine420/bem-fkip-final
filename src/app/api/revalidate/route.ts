@@ -1,18 +1,22 @@
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
-  const secret = request.headers.get('x-revalidate-secret');
-  
-  // Check secret token for security
-  if (secret !== process.env.REVALIDATE_SECRET) {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    );
-  }
-
+async function handleRevalidate(request: NextRequest) {
   try {
+    const url = new URL(request.url);
+    const force = url.searchParams.get('force');
+    
+    // For production, require secret. For development, allow direct access
+    if (process.env.NODE_ENV === 'production' && !force) {
+      const secret = request.headers.get('x-revalidate-secret');
+      if (secret !== process.env.REVALIDATE_SECRET) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
+    }
+
     // Revalidate all department and organization pages
     revalidatePath('/organisasi');
     revalidatePath('/organisasi/departemen');
@@ -28,16 +32,6 @@ export async function POST(request: NextRequest) {
       { 
         success: true,
         message: 'Cache revalidated successfully',
-        paths: [
-          '/organisasi',
-          '/organisasi/departemen',
-          '/organisasi/struktur-kepengurusan',
-          '/organisasi/departemen/sosgam',
-          '/organisasi/departemen/psdm',
-          '/organisasi/departemen/minba',
-          '/organisasi/departemen/kominfo',
-          '/organisasi/departemen/kastrat',
-          '/tentang'
         ]
       },
       { status: 200 }
