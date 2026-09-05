@@ -172,14 +172,18 @@ export async function getActiveDepartments() {
   }
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function getDepartmentBySlug(slug: string) {
   try {
     const period = await getActivePeriod();
     if (!period) return null;
 
+    const isUuid = UUID_REGEX.test(slug);
+
     const department = await db.departments.findFirst({
       where: {
-        OR: [{ slug }, { id: slug }],
+        ...(isUuid ? { OR: [{ slug }, { id: slug }] } : { slug }),
         period_id: period.id,
         deleted_at: null,
       },
