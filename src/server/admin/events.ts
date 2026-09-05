@@ -104,11 +104,8 @@ export async function createEvent(request: Request, input: {
       throw new AdminError(400, "NO_ACTIVE_PERIOD", "Tidak ada periode aktif.");
     }
 
+    // Department is optional — events can be organized by BEM without a specific department
     const deptId = actor.role === "ADMIN" ? scope.department_id : (input.department_id ? uuid(input.department_id) : (actor.assignment?.department_id ?? null));
-
-    if (!deptId) {
-      throw new AdminError(400, "DEPARTMENT_REQUIRED", "Pilih departemen penyelenggara.");
-    }
 
     const slug = generateSlug(name) + "-" + Date.now().toString(36);
 

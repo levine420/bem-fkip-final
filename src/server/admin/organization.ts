@@ -51,7 +51,20 @@ export async function listOrganization(kind: OrganizationKind, params: URLSearch
   const { q, take, skip, page } = pagination(params);
   return adminRead(async (tx, actor) => {
     requireOrganizationAccess(actor, kind, "read");
-    const scope = organizationScope(actor, params.get("period_id"), params.get("department_id"));
+    
+    // Auto-detect active period if period_id not provided
+    let periodIdParam = params.get("period_id");
+    if (!periodIdParam) {
+      const scope = departmentScope(actor);
+      if (scope.period_id) {
+        periodIdParam = scope.period_id;
+      } else {
+        const activePeriod = await tx.periods.findFirst({ where: { status: "AKTIF" }, select: { id: true } });
+        periodIdParam = activePeriod?.id ?? null;
+      }
+    }
+    
+    const scope = organizationScope(actor, periodIdParam, params.get("department_id"));
     const period = await periodFor(tx, scope.period_id);
     const common = { deleted_at: null, ...(q ? { name: { contains: q, mode: "insensitive" as const } } : {}) };
     let items; let total: number;
