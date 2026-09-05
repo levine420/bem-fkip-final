@@ -10,7 +10,7 @@ export function PublicPageHero({
 }: {
   eyebrow: string;
   title: string;
-  description: string;
+  description?: string | null;
   breadcrumbs?: Array<{ label: string; href?: string }>;
   hideBackdrop?: boolean;
 }) {
@@ -28,7 +28,7 @@ export function PublicPageHero({
         </nav>
         <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">{eyebrow}</span>
         <h1 className="mt-1 max-w-4xl font-display text-2xl font-extrabold leading-tight sm:text-4xl lg:text-5xl">{title}</h1>
-        <p className="mt-2 max-w-3xl text-xs leading-relaxed text-muted-foreground sm:text-base">{description}</p>
+        {description ? <p className="mt-2 max-w-3xl text-xs leading-relaxed text-muted-foreground sm:text-base">{description}</p> : null}
       </div>
     </section>
   );
