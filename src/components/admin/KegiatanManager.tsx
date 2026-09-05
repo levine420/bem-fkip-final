@@ -183,12 +183,16 @@ export function KegiatanManager() {
       registration_status: regStatusVal,
     };
 
+    console.log("Saving event with payload:", payload);
+
     try {
       if (editingEvent) {
-        await adminApi(`/api/admin/events/${editingEvent.id}`, "PATCH", payload);
+        const result = await adminApi(`/api/admin/events/${editingEvent.id}`, "PATCH", payload);
+        console.log("Event updated successfully:", result);
         setNotice(`Kegiatan "${name}" berhasil diperbarui.`);
       } else {
-        await adminApi(`/api/admin/events`, "POST", payload);
+        const result = await adminApi(`/api/admin/events`, "POST", payload);
+        console.log("Event created successfully:", result);
         setNotice(`Kegiatan "${name}" berhasil dibuat.`);
       }
       setIsEventModalOpen(false);
@@ -196,7 +200,9 @@ export function KegiatanManager() {
       // Return focus to create button
       setTimeout(() => createButtonRef.current?.focus(), 100);
     } catch (cause) {
-      setError(errorMessage(cause));
+      const errMsg = errorMessage(cause);
+      console.error("Error saving event:", cause, errMsg);
+      setError(errMsg);
     } finally {
       setBusy(false);
     }
@@ -482,6 +488,12 @@ export function KegiatanManager() {
 
             {/* Scrollable Body */}
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5">
+              {error && (
+                <div role="alert" className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 p-4">
+                  <p className="text-sm text-red-500">{error}</p>
+                </div>
+              )}
+              
               <form id="create-event-form" onSubmit={handleSaveEvent} className="space-y-5">
                 <label className="block text-sm">
                   <span className="font-semibold text-white">Nama Kegiatan *</span>
