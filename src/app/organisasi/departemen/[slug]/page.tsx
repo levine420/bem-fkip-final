@@ -3,84 +3,46 @@ import Link from "next/link";
 import { Mail, Instagram, FileText, Calendar, ChevronRight, Users, Target } from "lucide-react";
 import { PublicPageFrame } from "@/components/PublicPageFrame";
 import { PublicPageHero } from "@/components/PublicPageHero";
-
-// Dummy data - will be replaced with real data from database
-const dummyDepartment = {
-  id: "d-kominfo",
-  name: "Komunikasi dan Informasi (KOMINFO)",
-  abbreviation: "KOMINFO",
-  color: "from-pink-500 to-rose-400",
-  description: "Bertanggung jawab atas pengelolaan informasi dan publikasi seluruh kegiatan BEM FKIP UIKA. Mengelola media sosial resmi, membuat konten kreatif, mendokumentasikan kegiatan, dan membangun citra positif organisasi di ruang digital.",
-  vision: "Menjadi pusat informasi dan komunikasi yang kredibel, inovatif, dan responsif bagi seluruh Keluarga Besar Mahasiswa FKIP UIKA.",
-  mission: [
-    "Mengelola platform digital dan media sosial BEM FKIP UIKA secara profesional",
-    "Memproduksi konten berkualitas yang informatif, edukatif, dan engaging",
-    "Mendokumentasikan seluruh kegiatan organisasi dengan baik",
-    "Membangun branding dan citra positif BEM FKIP UIKA di mata publik"
-  ]
-};
-
-const dummyHead = {
-  name: "Rizki Pratama",
-  position: "Kepala Departemen KOMINFO",
-  photo: "/images/placeholder-profile.jpg", // Will use initials if no photo
-  email: "kominfo@bemfkip-uika.ac.id",
-  instagram: "@kominfo.bemfkip",
-  bio: "Mahasiswa Pendidikan Bahasa Inggris semester 6 yang passionate di bidang desain grafis, konten kreator, dan manajemen media sosial. Berpengalaman dalam mengelola berbagai project publikasi kampus."
-};
-
-const dummyStaff = [
-  { name: "Siti Nurhaliza", role: "Koordinator Konten", photo: null },
-  { name: "Ahmad Fauzi", role: "Desainer Grafis", photo: null },
-  { name: "Dea Ananda", role: "Videographer", photo: null },
-  { name: "Budi Santoso", role: "Social Media Specialist", photo: null },
-  { name: "Rina Safitri", role: "Photographer", photo: null },
-  { name: "Eko Prasetyo", role: "Content Writer", photo: null }
-];
-
-const dummyPrograms = [
-  {
-    title: "Rebranding Media Sosial BEM",
-    description: "Pembaruan visual identity dan content strategy untuk semua platform media sosial resmi BEM FKIP UIKA",
-    status: "Sedang Berjalan",
-    progress: 65
-  },
-  {
-    title: "Podcast BEM FKIP",
-    description: "Produksi podcast mingguan yang membahas isu kampus, tips mahasiswa, dan wawancara tokoh inspiratif",
-    status: "Perencanaan",
-    progress: 25
-  },
-  {
-    title: "Workshop Konten Kreator",
-    description: "Pelatihan pembuatan konten digital untuk anggota BEM dan mahasiswa umum",
-    status: "Terlaksana",
-    progress: 100
-  }
-];
-
-const dummyPublications = [
-  { title: "Pelantikan Kabinet Altiora 2026-2027", category: "BERITA", date: "2026-08-15" },
-  { title: "Tips Produktif di Masa Perkuliahan", category: "ARTIKEL", date: "2026-08-10" },
-  { title: "Dokumentasi LKMM BEM FKIP", category: "GALERI", date: "2026-08-05" }
-];
+import { getDepartmentBySlug } from "@/server/public/data";
 
 export default async function DepartmentDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const department = await getDepartmentBySlug(slug);
   
-  // In real implementation, fetch data based on slug
-  // const department = await getDepartmentBySlug(slug);
-  
+  if (!department) {
+    return (
+      <PublicPageFrame>
+        <PublicPageHero 
+          eyebrow="Departemen"
+          title="Departemen Tidak Ditemukan"
+          description="Departemen yang Anda cari tidak tersedia."
+          breadcrumbs={[
+            { label: "Organisasi", href: "/organisasi" }, 
+            { label: "Departemen", href: "/organisasi/departemen" }
+          ]}
+        />
+        <section className="px-4 pb-24 sm:px-6">
+          <div className="mx-auto max-w-7xl">
+            <p className="text-muted-foreground">Departemen tidak ditemukan.</p>
+          </div>
+        </section>
+      </PublicPageFrame>
+    );
+  }
+
+  const head = department.department_members_department.find(m => m.position.includes("Kepala"));
+  const staff = department.department_members_department.filter(m => !m.position.includes("Kepala"));
+
   return (
     <PublicPageFrame>
       <PublicPageHero 
         eyebrow="Departemen · Kabinet Altiora 2026-2027"
-        title={dummyDepartment.name}
-        description={dummyDepartment.description}
+        title={department.name}
+        description={department.description}
         breadcrumbs={[
           { label: "Organisasi", href: "/organisasi" }, 
           { label: "Departemen", href: "/organisasi/departemen" }, 
-          { label: dummyDepartment.abbreviation }
+          { label: department.slug.toUpperCase() }
         ]}
       />
 
@@ -91,12 +53,12 @@ export default async function DepartmentDetailPage({ params }: { params: Promise
           <div className="glass rounded-3xl p-8 space-y-6">
             <div>
               <h2 className="text-xs font-bold uppercase tracking-wider text-accent mb-3">Visi Departemen</h2>
-              <p className="text-base text-foreground leading-relaxed">{dummyDepartment.vision}</p>
+              <p className="text-base text-foreground leading-relaxed">{department.vision}</p>
             </div>
             <div>
               <h2 className="text-xs font-bold uppercase tracking-wider text-accent mb-3">Misi Departemen</h2>
               <ul className="space-y-2">
-                {dummyDepartment.mission.map((item, i) => (
+                {department.mission.map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
                     <span className="text-accent mt-0.5">•</span>
                     <span>{item}</span>
