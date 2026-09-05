@@ -104,14 +104,14 @@ export async function createEvent(request: Request, input: {
       throw new AdminError(400, "NO_ACTIVE_PERIOD", "Tidak ada periode aktif.");
     }
 
-    // Normalize department_id: empty/falsy → null
+    // Normalize department_id: empty/falsy → undefined
     const departmentId = actor.role === "ADMIN" 
       ? scope.department_id 
       : (input.department_id?.trim() ? uuid(input.department_id.trim()) : null);
     
-    const normalizedDepartmentId = typeof departmentId === "string" && departmentId.trim().length > 0
+    const normalizedDepartmentId: string | undefined = typeof departmentId === "string" && departmentId.trim().length > 0
       ? departmentId.trim()
-      : null;
+      : undefined;
 
     const slug = generateSlug(name) + "-" + Date.now().toString(36);
 
