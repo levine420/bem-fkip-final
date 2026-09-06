@@ -10,21 +10,21 @@ export async function GET() {
         code: true,
         name: true,
       },
-      orderBy: { name: "asc" },
+      orderBy: { code: "asc" },
     });
     if (programs.length > 0) return NextResponse.json({ data: programs });
   } catch (err) {
     console.warn("DB study programs fallback:", err);
   }
 
-  // Fallback study programs for FKIP UIKA
+  // Official 5 S1 Study Programs for FKIP UIKA Bogor
   return NextResponse.json({
     data: [
-      { id: "sp-1", code: "PBI", name: "Pendidikan Bahasa Inggris" },
-      { id: "sp-2", code: "PBSI", name: "Pendidikan Bahasa dan Sastra Indonesia" },
-      { id: "sp-3", code: "PJKR", name: "Pendidikan Jasmani Kesehatan dan Rekreasi" },
-      { id: "sp-4", code: "PMAT", name: "Pendidikan Matematika" },
-      { id: "sp-5", code: "PGPAUD", name: "Pendidikan Guru Pendidikan Anak Usia Dini" },
+      { id: "sp-pbi", code: "PBI", name: "Pendidikan Bahasa Inggris" },
+      { id: "sp-pmat", code: "PMAT", name: "Pendidikan Matematika" },
+      { id: "sp-pls", code: "PLS", name: "Pendidikan Masyarakat / Pendidikan Luar Sekolah" },
+      { id: "sp-tp", code: "TP", name: "Teknologi Pendidikan" },
+      { id: "sp-pvdf", code: "PVDF", name: "Pendidikan Vokasional Desain Fashion" },
     ],
   });
 }

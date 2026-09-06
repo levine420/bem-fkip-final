@@ -184,10 +184,10 @@ export default function EventRegisterPage({ params }: { params: Promise<{ slug: 
                     ) : (
                       <>
                         <option value="Pendidikan Bahasa Inggris">Pendidikan Bahasa Inggris (PBI)</option>
-                        <option value="Pendidikan Bahasa dan Sastra Indonesia">Pendidikan Bahasa dan Sastra Indonesia (PBSI)</option>
-                        <option value="Pendidikan Jasmani Kesehatan dan Rekreasi">Pendidikan Jasmani Kesehatan dan Rekreasi (PJKR)</option>
                         <option value="Pendidikan Matematika">Pendidikan Matematika (PMAT)</option>
-                        <option value="Pendidikan Guru Pendidikan Anak Usia Dini">Pendidikan Guru Pendidikan Anak Usia Dini (PGPAUD)</option>
+                        <option value="Pendidikan Masyarakat / Pendidikan Luar Sekolah">Pendidikan Masyarakat / Pendidikan Luar Sekolah (PLS)</option>
+                        <option value="Teknologi Pendidikan">Teknologi Pendidikan (TP)</option>
+                        <option value="Pendidikan Vokasional Desain Fashion">Pendidikan Vokasional Desain Fashion (PVDF)</option>
                       </>
                     )}
                   </select>
