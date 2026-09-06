@@ -11,14 +11,15 @@ export async function registerForEvent(input: {
 }) {
   const { slug, name, nim, email, prodi = "Pendidikan Bahasa Inggris", notes } = input;
 
+  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const isUuid = UUID_REGEX.test(slug);
+
   // 1. Find event by slug or fallback to first active event in DB
-  // Note: don't try to match id directly since slug may be a non-UUID string
   let event = await db.events.findFirst({
     where: {
-      OR: [
-        { slug: slug },
-        { name: { contains: slug, mode: "insensitive" } },
-      ],
+      OR: isUuid
+        ? [{ id: slug }, { slug: slug }, { name: { contains: slug, mode: "insensitive" } }]
+        : [{ slug: slug }, { name: { contains: slug, mode: "insensitive" } }],
       deleted_at: null,
     },
     select: { id: true, name: true, max_participants: true },

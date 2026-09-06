@@ -310,9 +310,10 @@ export async function getPublicEvents(params?: { limit?: number }) {
 
 export async function getPublicEventByIdOrSlug(idOrSlug: string) {
   try {
+    const isUuid = UUID_REGEX.test(idOrSlug);
     const event = await db.events.findFirst({
       where: {
-        OR: [{ id: idOrSlug }, { slug: idOrSlug }],
+        OR: isUuid ? [{ id: idOrSlug }, { slug: idOrSlug }] : [{ slug: idOrSlug }],
         status: { in: ["TERBIT", "BERJALAN", "SELESAI"] },
         deleted_at: null,
       },
