@@ -1,8 +1,8 @@
-import Image from "next/image";
-import Link from "next/link";
-import { ChevronRight, Users } from "lucide-react";
+import { notFound } from "next/navigation";
+import { Clock, Target, CheckCircle2, AlertCircle, Briefcase } from "lucide-react";
 import { PublicPageFrame } from "@/components/PublicPageFrame";
 import { PublicPageHero } from "@/components/PublicPageHero";
+import { DepartmentTeamCarousel } from "@/components/DepartmentTeamCarousel";
 import { getDepartmentBySlug, getActiveDepartments } from "@/server/public/data";
 
 export const revalidate = 60;
@@ -15,122 +15,127 @@ export async function generateStaticParams() {
     .map((d) => ({ slug: d.slug! }));
 }
 
-export default async function DepartmentDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+const statusMapping: Record<string, { label: string; className: string }> = {
+  BELUM_MULAI: {
+    label: "Akan Datang",
+    className: "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
+  },
+  BERJALAN: {
+    label: "Berlangsung",
+    className: "bg-blue-500/20 text-blue-300 border border-blue-500/30",
+  },
+  SELESAI: {
+    label: "Selesai",
+    className: "bg-green-500/20 text-green-300 border border-green-500/30",
+  },
+};
+
+export default async function DepartmentDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const department = await getDepartmentBySlug(slug);
-  
+
   if (!department) {
-    return (
-      <PublicPageFrame>
-        <PublicPageHero 
-          eyebrow="Departemen"
-          title="Departemen Tidak Ditemukan"
-          description="Departemen yang Anda cari tidak tersedia."
-          breadcrumbs={[
-            { label: "Organisasi", href: "/organisasi" }, 
-            { label: "Departemen", href: "/organisasi/departemen" }
-          ]}
-        />
-        <section className="px-4 pb-24 sm:px-6">
-          <div className="mx-auto max-w-7xl">
-            <p className="text-muted-foreground">Departemen tidak ditemukan.</p>
-          </div>
-        </section>
-      </PublicPageFrame>
-    );
+    notFound();
   }
 
-  const head = department.department_members_department.find(m => m.position.includes("Kepala"));
-  const staff = department.department_members_department.filter(m => !m.position.includes("Kepala"));
+  const periodName = department.period
+    ? `Kabinet ${department.period.name} (${department.period.year_start}–${department.period.year_end})`
+    : "BEM FKIP UIKA";
+
+  const workPrograms = department.work_programs_department || [];
+  const members = department.department_members_department || [];
 
   return (
     <PublicPageFrame>
-      <PublicPageHero 
-        eyebrow="Departemen · Kabinet Altiora 2026-2027"
+      <PublicPageHero
+        eyebrow={`Departemen · ${periodName}`}
         title={department.name}
         description={department.description}
         breadcrumbs={[
-          { label: "Organisasi", href: "/organisasi" }, 
-          { label: "Departemen", href: "/organisasi/departemen" }, 
-          { label: department.slug.toUpperCase() }
+          { label: "Organisasi", href: "/organisasi" },
+          { label: "Departemen", href: "/organisasi/departemen" },
+          { label: department.name },
         ]}
       />
 
       <section className="px-4 pb-24 sm:px-6">
-        <div className="mx-auto max-w-7xl space-y-12">
-
-          {/* Department Head Spotlight */}
-          {head && (
-            <div>
-              <h2 className="mb-6 flex items-center gap-2 text-xl font-bold">
-                <Users className="size-5 text-accent" />
-                Kepala Departemen
-              </h2>
-              <div className="glass rounded-3xl p-8">
-                <div className="flex flex-col gap-8 md:flex-row md:items-start">
-                  {/* Photo */}
-                  <div className="shrink-0">
-                    {head.photo_url ? (
-                      <div className="relative size-32 overflow-hidden rounded-2xl border-4 border-accent/30">
-                        <Image src={head.photo_url} alt={head.name} fill className="object-cover" />
-                      </div>
-                    ) : (
-                      <div className="flex size-32 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent/60 text-4xl font-black text-black shadow-lg">
-                        {head.name.split(' ').map((n: string) => n[0]).join('')}
-                      </div>
-                    )}
-                  </div>
-                  {/* Info */}
-                  <div className="flex-1 space-y-4">
-                    <div>
-                      <h3 className="text-2xl font-bold text-foreground">{head.name}</h3>
-                      <p className="text-sm text-accent">{head.position}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Staff Grid */}
-          {staff.length > 0 && (
-            <div>
-              <h2 className="mb-6 flex items-center gap-2 text-xl font-bold">
-                <Users className="size-5 text-accent" />
-                Anggota Staff
-              </h2>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {staff.map((member) => (
-                  <div key={member.id} className="glass rounded-2xl p-6 flex items-center gap-4">
-                    {member.photo_url ? (
-                      <div className="relative size-16 shrink-0 overflow-hidden rounded-full border-2 border-glass-border">
-                        <Image src={member.photo_url} alt={member.name} fill className="object-cover" />
-                      </div>
-                    ) : (
-                      <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent/60 text-lg font-bold text-black">
-                        {member.name.split(' ').map((n: string) => n[0]).join('')}
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="font-semibold text-foreground truncate">{member.name}</p>
-                      <p className="text-xs text-muted-foreground">{member.position}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-6 text-center text-xs text-muted-foreground">
-                Foto dan data staff dapat diperbarui melalui Admin Panel oleh Super Admin atau Kepala Departemen.
-              </p>
-            </div>
-          )}
-
-          {/* Link to Program Kerja */}
-          <div className="text-center">
-            <Link href="/organisasi/program-kerja" className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline">
-              Lihat Program Kerja <ChevronRight className="size-4" />
-            </Link>
+        <div className="mx-auto max-w-7xl space-y-16">
+          {/* SECTION 1: Carousel Tim Departemen */}
+          <div>
+            <DepartmentTeamCarousel members={members} departmentName={department.name} />
           </div>
 
+          {/* SECTION 2: Program Kerja Departemen */}
+          <div className="space-y-6 pt-4 border-t border-glass-border">
+            <div>
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Briefcase className="size-5 text-accent" /> Program Kerja Departemen
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Daftar program kerja dan agenda strategis yang dilaksanakan oleh {department.name}
+              </p>
+            </div>
+
+            {workPrograms.length === 0 ? (
+              <div className="glass rounded-3xl p-8 sm:p-10 text-center border border-glass-border">
+                <p className="text-sm text-muted-foreground">
+                  Belum ada program kerja yang dipublikasikan untuk departemen ini.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {workPrograms.map((program) => {
+                  const statusInfo = statusMapping[program.status] || {
+                    label: program.status,
+                    className: "bg-gray-500/20 text-gray-300 border border-gray-500/30",
+                  };
+
+                  return (
+                    <div
+                      key={program.id}
+                      className="glass rounded-3xl p-6 border border-glass-border hover:border-accent/40 transition shadow-xl flex flex-col justify-between space-y-4"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${statusInfo.className}`}>
+                            {statusInfo.label}
+                          </span>
+                        </div>
+
+                        <h3 className="text-lg font-bold text-white leading-snug">
+                          {program.name}
+                        </h3>
+
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">
+                          {program.description}
+                        </p>
+                      </div>
+
+                      <div className="pt-4 border-t border-glass-border space-y-2 text-xs text-muted-foreground">
+                        {program.target_time && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="size-3.5 text-accent shrink-0" />
+                            <span>Waktu: <strong className="text-white">{program.target_time}</strong></span>
+                          </div>
+                        )}
+
+                        {program.success_indicator && (
+                          <div className="flex items-start gap-2">
+                            <Target className="size-3.5 text-accent shrink-0 mt-0.5" />
+                            <span>Indikator: <strong className="text-white">{program.success_indicator}</strong></span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </PublicPageFrame>

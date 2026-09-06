@@ -202,12 +202,36 @@ export async function getDepartmentBySlug(slug: string) {
             photo_url: true,
             display_order: true,
           },
-          orderBy: { display_order: "asc" },
+          orderBy: [{ display_order: "asc" }, { id: "asc" }],
+        },
+        work_programs_department: {
+          where: { deleted_at: null, period_id: period.id },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            target_time: true,
+            success_indicator: true,
+            status: true,
+            display_order: true,
+          },
+          orderBy: [{ display_order: "asc" }, { id: "asc" }],
         },
       },
     });
 
-    return department ?? null;
+    if (!department) return null;
+
+    return {
+      ...department,
+      period: {
+        id: period.id,
+        name: period.name,
+        year_start: period.year_start,
+        year_end: period.year_end,
+      },
+    };
   } catch (err) {
     console.error("DB getDepartmentBySlug error:", err);
     return null;
