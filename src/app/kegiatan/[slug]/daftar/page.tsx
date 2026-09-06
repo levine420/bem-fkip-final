@@ -19,6 +19,8 @@ export default function EventRegisterPage({ params }: { params: Promise<{ slug: 
   const [errorMsg, setErrorMsg] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
+  const [studyPrograms, setStudyPrograms] = useState<{ id: string; name: string; code: string }[]>([]);
+
   useEffect(() => {
     fetch("/api/public/auth/me")
       .then((res) => res.json())
@@ -30,6 +32,15 @@ export default function EventRegisterPage({ params }: { params: Promise<{ slug: 
           if (data.student.program_studi_name) {
             setProdi(data.student.program_studi_name);
           }
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/public/study-programs")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+          setStudyPrograms(data.data);
         }
       })
       .catch(() => {});
@@ -164,11 +175,21 @@ export default function EventRegisterPage({ params }: { params: Promise<{ slug: 
                     value={prodi}
                     onChange={(e) => setProdi(e.target.value)}
                   >
-                    <option value="Pendidikan Bahasa Inggris">Pendidikan Bahasa Inggris</option>
-                    <option value="Pendidikan Agama Islam">Pendidikan Agama Islam</option>
-                    <option value="Pendidikan Matematika">Pendidikan Matematika</option>
-                    <option value="Pendidikan Luar Sekolah">Pendidikan Luar Sekolah</option>
-                    <option value="Teknologi Pendidikan">Teknologi Pendidikan</option>
+                    {studyPrograms.length > 0 ? (
+                      studyPrograms.map((sp) => (
+                        <option key={sp.id} value={sp.name}>
+                          {sp.name} ({sp.code})
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="Pendidikan Bahasa Inggris">Pendidikan Bahasa Inggris (PBI)</option>
+                        <option value="Pendidikan Bahasa dan Sastra Indonesia">Pendidikan Bahasa dan Sastra Indonesia (PBSI)</option>
+                        <option value="Pendidikan Jasmani Kesehatan dan Rekreasi">Pendidikan Jasmani Kesehatan dan Rekreasi (PJKR)</option>
+                        <option value="Pendidikan Matematika">Pendidikan Matematika (PMAT)</option>
+                        <option value="Pendidikan Guru Pendidikan Anak Usia Dini">Pendidikan Guru Pendidikan Anak Usia Dini (PGPAUD)</option>
+                      </>
+                    )}
                   </select>
                 </label>
               </div>
