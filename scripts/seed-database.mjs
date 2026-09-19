@@ -50,34 +50,29 @@ async function main() {
   console.log("Seeding Departments...");
   const deptData = [
     {
-      name: "Advokasi & Kesejahteraan Mahasiswa",
-      slug: "advokesma",
-      description: "Menampung aspirasi, mengawal isu beasiswa & UKT, dan mendampingi mahasiswa FKIP UIKA.",
+      name: "Sosial dan Agama",
+      slug: "sosgam",
+      description: "Bertanggung jawab atas program kepedulian sosial dan pengembangan spiritual keagamaan mahasiswa.",
     },
     {
-      name: "Komunikasi & Informasi",
-      slug: "kominfo",
-      description: "Pusat media publikasi digital, manajemen situs web terpadu, dan kehumasan BEM FKIP UIKA.",
-    },
-    {
-      name: "Pengembangan Sumber Daya Manusia",
+      name: "Peningkatan Sumber Daya Mahasiswa",
       slug: "psdm",
-      description: "Fokus pada kaderisasi, pelatihan kepemimpinan (LKMM), dan manajerial organisasi mahasiswa.",
+      description: "Bertanggung jawab atas peningkatan kualitas dan kapasitas sumber daya mahasiswa melalui pelatihan kepemimpinan.",
     },
     {
-      name: "Pemuda & Olahraga",
-      slug: "pemora",
-      description: "Mengembangkan potensi minat bakat olahraga dan kompetisi mahasiswa FKIP UIKA.",
+      name: "Minat dan Bakat",
+      slug: "minba",
+      description: "Mewadahi dan mengembangkan minat serta bakat mahasiswa FKIP di bidang olahraga, seni, dan kreativitas.",
     },
     {
-      name: "Sosial & Pengabdian Masyarakat",
-      slug: "sosmas",
-      description: "Penyelenggara Bina Desa Edukasi dan program pengabdian masyarakat berkelanjutan.",
+      name: "Komunikasi dan Informasi",
+      slug: "kominfo",
+      description: "Bertanggung jawab atas pengelolaan informasi dan publikasi seluruh kegiatan BEM.",
     },
     {
-      name: "Pendidikan & Riset Kebijakan",
-      slug: "pendidikan-riset",
-      description: "Mengkaji isu kurikulum pendidikan nasional, karya tulis ilmiah, dan debat mahasiswa.",
+      name: "Kajian Aksi dan Isu Strategis",
+      slug: "kastrat",
+      description: "Melakukan kajian dan aksi strategis terhadap isu-isu pendidikan, kebijakan kampus, dan sosial-politik.",
     },
   ];
 
@@ -99,10 +94,9 @@ async function main() {
     createdDepts.push(dept);
   }
 
-  const advoDept = createdDepts.find((d) => d.slug === "advokesma") || createdDepts[0];
-  const kominfoDept = createdDepts.find((d) => d.slug === "kominfo") || createdDepts[1];
-  const psdmDept = createdDepts.find((d) => d.slug === "psdm") || createdDepts[2];
-  const pendDept = createdDepts.find((d) => d.slug === "pendidikan-riset") || createdDepts[5];
+  const kominfoDept = createdDepts.find((d) => d.slug === "kominfo") || createdDepts[3];
+  const psdmDept = createdDepts.find((d) => d.slug === "psdm") || createdDepts[1];
+  const kastratDept = createdDepts.find((d) => d.slug === "kastrat") || createdDepts[4];
 
   // 4. Create Board Members (Struktur Pengurus)
   console.log("Seeding Board Members...");
@@ -111,8 +105,7 @@ async function main() {
     { name: "Siti Rahmawati", position: "Wakil Ketua Umum BEM FKIP", order: 2 },
     { name: "Ahmad Hidayat", position: "Sekretaris Jenderal", order: 3 },
     { name: "Dina Fitriani", position: "Bendahara Umum", order: 4 },
-    { name: "Rizky Pratama", position: "Kepala Departemen ADVOKESMA", order: 5, deptId: advoDept.id },
-    { name: "Nurul Aini", position: "Kepala Departemen KOMINFO", order: 6, deptId: kominfoDept.id },
+    { name: "Nurul Aini", position: "Kepala Departemen KOMINFO", order: 5, deptId: kominfoDept.id },
   ];
 
   for (const b of boardData) {
@@ -146,7 +139,7 @@ async function main() {
       body: "BEM FKIP UIKA melalui Departemen Advokasi dan Kesejahteraan Mahasiswa resmi membuka posko layanan bantuan pendaftaran Beasiswa Prestasi Gelombang II. Mahasiswa yang memenuhi kriteria IPK minimal 3.50 dapat mengajukan berkas secara langsung melalui Portal Mahasiswa.",
       category: "PENGUMUMAN",
       status: "TERBIT",
-      deptId: advoDept.id,
+      deptId: kominfoDept.id,
     },
     {
       title: "Peluncuran Platform Digital BEM FKIP UIKA Terpadu v0.4.0",
@@ -165,12 +158,12 @@ async function main() {
       slug: "kajian-kritis-transformasi-kurikulum-pendidikan-era-ai",
       seo_slug: "kajian-kurikulum-pendidikan-ai",
       meta_title: "Kajian Kurikulum Pendidikan Era AI",
-      meta_description: "Rilis hasil kajian akademis Departemen Pendidikan BEM FKIP UIKA Bogor.",
-      excerpt: "Departemen Pendidikan merilis naskah kajian kritis mengenai implikasi kecerdasan buatan terhadap profesionalisme calon pendidik.",
+      meta_description: "Rilis hasil kajian akademis Departemen KASTRAT BEM FKIP UIKA Bogor.",
+      excerpt: "Departemen KASTRAT merilis naskah kajian kritis mengenai implikasi kecerdasan buatan terhadap profesionalisme calon pendidik.",
       body: "Pesatnya perkembangan kecerdasan buatan menuntut calon pendidik di FKIP UIKA untuk memiliki adaptabilitas tinggi terhadap etika penggunaan AI dan integrasi teknologi pembelajaran.",
       category: "KAJIAN",
       status: "TERBIT",
-      deptId: pendDept.id,
+      deptId: kastratDept.id,
     },
   ];
 
@@ -221,7 +214,7 @@ async function main() {
       success_indicator: "100% permohonan advokasi terverifikasi",
       status: "SELESAI",
       order: 2,
-      deptId: advoDept.id,
+      deptId: psdmDept.id,
     },
     {
       name: "Latihan Keterampilan Manajemen Mahasiswa (LKMM-TD)",
@@ -269,7 +262,7 @@ async function main() {
       max_participants: 300,
       status: "TERBIT",
       registration_status: "TERBUKA",
-      deptId: pendDept.id,
+      deptId: kastratDept.id,
     },
     {
       name: "Pekan Olahraga & Seni FKIP (PORSE-FKIP 2026)",
