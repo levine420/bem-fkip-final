@@ -1,4 +1,7 @@
 "use client";
+import { toWibInput, fromWibInput } from "@/lib/ui/event-time";
+import { Pagination } from "@/components/Pagination";
+import { Modal } from "@/components/Modal";
 import { useEffect, useState, useRef } from "react";
 import { actionClass, adminApi, errorMessage } from "./api";
 import { ImageUploader } from "@/components/ImageUploader";
@@ -61,11 +64,11 @@ const regStatusLabels: Record<EventItem["registration_status"], string> = {
 };
 
 const regParticipantColors: Record<Registration["status"], string> = {
-  MENUNGGU: "bg-yellow-500/20 text-yellow-300",
-  DITERIMA: "bg-green-500/20 text-green-300",
-  DITOLAK: "bg-red-500/20 text-red-300",
-  HADIR: "bg-blue-500/20 text-blue-300",
-  TIDAK_HADIR: "bg-gray-500/20 text-gray-300",
+  MENUNGGU: "bg-yellow-500/20 text-warning",
+  DITERIMA: "bg-green-500/20 text-success",
+  DITOLAK: "bg-red-500/20 text-danger",
+  HADIR: "bg-blue-500/20 text-foreground",
+  TIDAK_HADIR: "bg-gray-500/20 text-muted-foreground",
 };
 
 export function KegiatanManager() {
@@ -124,22 +127,25 @@ export function KegiatanManager() {
     return () => { live = false; };
   }, [search, status, regStatus, page, refresh]);
 
-  // Lock body scroll when modal is open
   useEffect(() => {
-    if (isEventModalOpen || selectedEvent) {
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = "";
-      };
-    }
-  }, [isEventModalOpen, selectedEvent]);
+    if (!selectedEvent) return;
+    let live = true;
+    setRegistrations([]);
+    setLoadingRegs(true);
+    setError("");
+    adminApi<{ items: Registration[] }>(`/api/admin/events/${selectedEvent.id}/registrations`)
+      .then(result => { if (live) setRegistrations(result.items || []); })
+      .catch(cause => { if (live) setError(errorMessage(cause)); })
+      .finally(() => { if (live) setLoadingRegs(false); });
+    return () => { live = false; };
+  }, [selectedEvent]);
 
   function openCreateModal() {
     setEditingEvent(null);
     setName("");
     setDescription("");
     setLocation("");
-    const nowISO = new Date().toISOString().slice(0, 16);
+    const nowISO = toWibInput(new Date());
     setStartTime(nowISO);
     setEndTime("");
     setRegDeadline("");
@@ -156,9 +162,9 @@ export function KegiatanManager() {
     setName(event.name);
     setDescription(event.description);
     setLocation(event.location);
-    setStartTime(new Date(event.start_time).toISOString().slice(0, 16));
-    setEndTime(event.end_time ? new Date(event.end_time).toISOString().slice(0, 16) : "");
-    setRegDeadline(event.registration_deadline ? new Date(event.registration_deadline).toISOString().slice(0, 16) : "");
+    setStartTime(toWibInput(event.start_time));
+    setEndTime(event.end_time ? toWibInput(event.end_time) : "");
+    setRegDeadline(event.registration_deadline ? toWibInput(event.registration_deadline) : "");
     setMaxParticipants(event.max_participants ? String(event.max_participants) : "");
     setPosterUrl(event.poster_url || "");
     setEventStatusVal(event.status);
@@ -174,13 +180,14 @@ export function KegiatanManager() {
     setError("");
     setNotice("");
 
+    try {
     const payload = {
       name,
       description,
       location,
-      start_time: startTime,
-      end_time: endTime || undefined,
-      registration_deadline: regDeadline || undefined,
+      start_time: fromWibInput(startTime),
+      end_time: endTime ? fromWibInput(endTime) : undefined,
+      registration_deadline: regDeadline ? fromWibInput(regDeadline) : undefined,
       max_participants: maxParticipants ? Number(maxParticipants) : undefined,
       poster_url: posterUrl || undefined,
       status: eventStatusVal,
@@ -188,16 +195,14 @@ export function KegiatanManager() {
       department_id: department?.id || undefined,
     };
 
-    console.log("Saving event with payload:", payload);
 
-    try {
       if (editingEvent) {
         const result = await adminApi(`/api/admin/events/${editingEvent.id}`, "PATCH", payload);
-        console.log("Event updated successfully:", result);
+
         setNotice(`Kegiatan "${name}" berhasil diperbarui.`);
       } else {
         const result = await adminApi(`/api/admin/events`, "POST", payload);
-        console.log("Event created successfully:", result);
+
         setNotice(`Kegiatan "${name}" berhasil dibuat.`);
       }
       setIsEventModalOpen(false);
@@ -238,17 +243,8 @@ export function KegiatanManager() {
     }
   }
 
-  async function openParticipantsModal(event: EventItem) {
+  function openParticipantsModal(event: EventItem) {
     setSelectedEvent(event);
-    setLoadingRegs(true);
-    try {
-      const res = await adminApi<{ items: Registration[] }>(`/api/admin/events/${event.id}/registrations`);
-      setRegistrations(res.items || []);
-    } catch (cause) {
-      setError(errorMessage(cause));
-    } finally {
-      setLoadingRegs(false);
-    }
   }
 
   async function handleUpdateParticipantStatus(registrationId: string, newStatus: Registration["status"]) {
@@ -309,9 +305,9 @@ export function KegiatanManager() {
               Kelola acara BEM/Departemen, kuota peserta, status pendaftaran, dan data kehadiran.
             </p>
           </div>
-          <button 
+          <button type="button"
             ref={createButtonRef}
-            onClick={openCreateModal} 
+            onClick={openCreateModal}
             className={`${actionClass} bg-brand`}
           >
             + Buat Kegiatan Baru
@@ -378,7 +374,7 @@ export function KegiatanManager() {
               <option value="TUTUP">Tutup</option>
             </select>
           </label>
-          <button className={`${actionClass} bg-brand/50`} disabled={loading}>
+          <button type="submit" className={`${actionClass} bg-brand/50`} disabled={loading}>
             {loading ? "Memuat…" : "Terapkan"}
           </button>
         </form>
@@ -426,16 +422,16 @@ export function KegiatanManager() {
                     </td>
                     <td className="py-3 text-right">
                       <div className="flex justify-end gap-2 items-center">
-                        <button
+                        <button type="button"
                           onClick={() => openParticipantsModal(item)}
                           className={`${actionClass} py-1 text-xs bg-brand/30`}
                         >
                           Peserta ({item._count.event_registrations_event})
                         </button>
-                        <button onClick={() => openEditModal(item)} className="text-accent hover:underline text-xs" disabled={busy}>
+                        <button type="button" onClick={() => openEditModal(item)} className="text-accent hover:underline text-xs" disabled={busy}>
                           Edit
                         </button>
-                        <button onClick={() => handleDeleteEvent(item)} className="text-soft hover:underline text-xs" disabled={busy}>
+                        <button type="button" onClick={() => handleDeleteEvent(item)} className="text-soft hover:underline text-xs" disabled={busy}>
                           Hapus
                         </button>
                       </div>
@@ -448,33 +444,31 @@ export function KegiatanManager() {
         )}
       </section>
 
+      {data && <Pagination page={page} pageSize={data.page_size} total={data.total} busy={busy || loading} onPage={setPage} />}
+
       {/* Event Create / Edit Modal */}
       {isEventModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <Modal label="Form kegiatan" busy={busy} onClose={closeEventModal} className="max-w-3xl">
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
           {/* Modal Dialog */}
           <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="create-event-title"
             className="
               relative z-10 flex w-full max-w-3xl flex-col
               overflow-hidden rounded-2xl
-              border border-white/10 bg-[#100a12]
-              shadow-2xl
+              border border-border bg-surface
+              shadow-sm
               max-h-[calc(100dvh-2rem)]
             "
             onClick={(e) => e.stopPropagation()}
           >
             {/* Sticky Header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-[#100a12] px-6 py-4">
+            <div className="flex shrink-0 items-center justify-between border-b border-border bg-surface px-6 py-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-pink-400">
+                <p className="text-xs font-semibold uppercase tracking-widest text-accent">
                   Manajemen Kegiatan
                 </p>
-                <h2 id="create-event-title" className="mt-1 text-xl font-bold text-white">
+                <h2 id="create-event-title" className="mt-1 text-xl font-bold text-foreground">
                   {editingEvent ? "Edit Kegiatan" : "Buat Kegiatan Baru"}
                 </h2>
               </div>
@@ -483,7 +477,7 @@ export function KegiatanManager() {
                 onClick={closeEventModal}
                 aria-label="Tutup modal"
                 disabled={busy}
-                className="flex size-10 items-center justify-center rounded-xl border border-white/10 text-white/70 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                className="flex size-10 items-center justify-center rounded-xl border border-border text-foreground transition hover:bg-white/10 hover:text-foreground disabled:opacity-50"
               >
                 <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -498,10 +492,10 @@ export function KegiatanManager() {
                   <p className="text-sm text-red-500">{error}</p>
                 </div>
               )}
-              
+
               <form id="create-event-form" onSubmit={handleSaveEvent} className="space-y-5">
                 <label className="block text-sm">
-                  <span className="font-semibold text-white">Nama Kegiatan *</span>
+                  <span className="font-semibold text-foreground">Nama Kegiatan *</span>
                   <input
                     className="form-control mt-2"
                     required
@@ -513,7 +507,7 @@ export function KegiatanManager() {
                 </label>
 
                 <label className="block text-sm">
-                  <span className="font-semibold text-white">Lokasi / Venue *</span>
+                  <span className="font-semibold text-foreground">Lokasi / Venue *</span>
                   <input
                     className="form-control mt-2"
                     required
@@ -524,7 +518,7 @@ export function KegiatanManager() {
                 </label>
 
                 <label className="block text-sm">
-                  <span className="font-semibold text-white">Deskripsi Kegiatan *</span>
+                  <span className="font-semibold text-foreground">Deskripsi Kegiatan *</span>
                   <textarea
                     className="form-control mt-2 h-24 resize-none"
                     required
@@ -536,7 +530,7 @@ export function KegiatanManager() {
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <label className="block text-sm">
-                    <span className="font-semibold text-white">Waktu Mulai *</span>
+                    <span className="font-semibold text-foreground">Waktu Mulai (WIB) *</span>
                     <input
                       type="datetime-local"
                       className="form-control mt-2"
@@ -546,7 +540,7 @@ export function KegiatanManager() {
                     />
                   </label>
                   <label className="block text-sm">
-                    <span className="font-semibold text-white">Waktu Selesai</span>
+                    <span className="font-semibold text-foreground">Waktu Selesai (WIB)</span>
                     <input
                       type="datetime-local"
                       className="form-control mt-2"
@@ -558,7 +552,7 @@ export function KegiatanManager() {
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <label className="block text-sm">
-                    <span className="font-semibold text-white">Batas Pendaftaran</span>
+                    <span className="font-semibold text-foreground">Batas Pendaftaran (WIB)</span>
                     <input
                       type="datetime-local"
                       className="form-control mt-2"
@@ -567,7 +561,7 @@ export function KegiatanManager() {
                     />
                   </label>
                   <label className="block text-sm">
-                    <span className="font-semibold text-white">Maksimal Peserta (Kuota)</span>
+                    <span className="font-semibold text-foreground">Maksimal Peserta (Kuota)</span>
                     <input
                       type="number"
                       min={1}
@@ -581,10 +575,10 @@ export function KegiatanManager() {
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <label className="block text-sm">
-                    <span className="font-semibold text-white">Status Acara</span>
-                    <select 
-                      className="form-control mt-2" 
-                      value={eventStatusVal} 
+                    <span className="font-semibold text-foreground">Status Acara</span>
+                    <select
+                      className="form-control mt-2"
+                      value={eventStatusVal}
                       onChange={(e) => setEventStatusVal(e.target.value as any)}
                     >
                       <option value="DRAF">Draf</option>
@@ -595,10 +589,10 @@ export function KegiatanManager() {
                     </select>
                   </label>
                   <label className="block text-sm">
-                    <span className="font-semibold text-white">Status Pendaftaran</span>
-                    <select 
-                      className="form-control mt-2" 
-                      value={regStatusVal} 
+                    <span className="font-semibold text-foreground">Status Pendaftaran</span>
+                    <select
+                      className="form-control mt-2"
+                      value={regStatusVal}
                       onChange={(e) => setRegStatusVal(e.target.value as any)}
                     >
                       <option value="SEGERA_DIBUKA">Segera Dibuka</option>
@@ -611,7 +605,7 @@ export function KegiatanManager() {
 
                 <div>
                   <label className="block text-sm">
-                    <span className="font-semibold text-white">Departemen Penyelenggara</span>
+                    <span className="font-semibold text-foreground">Departemen Penyelenggara</span>
                   </label>
                   <div className="mt-2">
                     <OrganizationPicker
@@ -636,17 +630,17 @@ export function KegiatanManager() {
             </div>
 
             {/* Sticky Footer */}
-            <div className="flex shrink-0 justify-end gap-3 border-t border-white/10 bg-[#100a12] px-6 py-4">
-              <button 
-                type="button" 
-                onClick={closeEventModal} 
+            <div className="flex shrink-0 justify-end gap-3 border-t border-border bg-surface px-6 py-4">
+              <button
+                type="button"
+                onClick={closeEventModal}
                 className={`${actionClass} border border-white/20 hover:bg-white/5`}
                 disabled={busy}
               >
                 Batal
               </button>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 form="create-event-form"
                 className={`${actionClass} bg-brand hover:shadow-[var(--glow-pink)]`}
                 disabled={busy}
@@ -665,29 +659,31 @@ export function KegiatanManager() {
               </button>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Participants Management Modal */}
       {selectedEvent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="glass rounded-3xl p-6 w-full max-w-3xl shadow-2xl my-8">
+        <Modal label="Peserta kegiatan" busy={busy} onClose={() => setSelectedEvent(null)} className="max-w-3xl">
+          <div className="glass rounded-3xl p-6 w-full max-w-3xl shadow-sm my-8">
             <div className="flex justify-between items-center border-b border-glass-border pb-4">
               <div>
                 <h3 className="text-lg font-semibold">Peserta: {selectedEvent.name}</h3>
                 <p className="text-xs text-muted-foreground">Total Pendaftar: {registrations.length} mahasiswa</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={handleExportCSV} className={`${actionClass} py-1 text-xs bg-brand`}>
+                <button type="button" disabled={loadingRegs || !registrations.length} onClick={handleExportCSV} className={`${actionClass} py-1 text-xs bg-brand`}>
                   📥 Ekspor CSV
                 </button>
-                <button onClick={() => setSelectedEvent(null)} className="text-muted-foreground hover:text-white ml-2">✕</button>
+                <button type="button" disabled={busy} aria-label="Tutup daftar peserta" onClick={() => setSelectedEvent(null)} className="text-muted-foreground hover:text-foreground ml-2">✕</button>
               </div>
             </div>
 
-            {loadingRegs && <p className="mt-6 text-center text-sm text-muted-foreground">Memuat daftar peserta…</p>}
+            {error && <p role="alert" className="mt-4 rounded-lg border p-3">{error}</p>}
+            {notice && <p role="status" className="mt-4 text-success">{notice}</p>}
+            {loadingRegs && <p role="status" className="mt-6 text-center text-sm text-muted-foreground">Memuat daftar peserta…</p>}
 
-            {!loadingRegs && registrations.length === 0 && (
+            {!loadingRegs && !error && registrations.length === 0 && (
               <p className="mt-6 text-center text-sm text-muted-foreground">Belum ada peserta yang mendaftar kegiatan ini.</p>
             )}
 
@@ -741,7 +737,7 @@ export function KegiatanManager() {
               </div>
             )}
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

@@ -47,13 +47,13 @@ export default async function VisionMissionPage() {
       />
 
       <section className="px-4 pb-16 sm:px-6">
-        <div className="mx-auto max-w-5xl space-y-10 sm:space-y-12">
+        <div className="mx-auto max-w-7xl grid gap-8 lg:grid-cols-[.85fr_1.15fr]">
 
           {/* Logo + Nama Kabinet */}
-          <div className="flex flex-col items-center gap-6 text-center">
+          <div className="flex flex-col items-center gap-6 text-center lg:col-span-2">
             {period.photo_url && (
-              <div className="relative size-40 drop-shadow-2xl">
-                <Image
+              <div className="relative size-40 drop-shadow-sm">
+                <Image unoptimized
                   src={period.photo_url}
                   alt={`Logo Kabinet ${period.name}`}
                   fill
@@ -63,7 +63,7 @@ export default async function VisionMissionPage() {
               </div>
             )}
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">
                 Kabinet Aktif {period.year_start}–{period.year_end}
               </p>
               <h2 className="mt-2 font-display text-3xl font-extrabold text-foreground sm:text-4xl">
@@ -73,14 +73,14 @@ export default async function VisionMissionPage() {
           </div>
 
           {/* Visi */}
-          <div className="space-y-4">
+          <div className="dark-section rounded-2xl p-8 space-y-4">
             <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-xl bg-amber-500/20 text-amber-400">
+              <span className="grid size-10 place-items-center rounded-xl bg-amber-500/20 text-accent">
                 <Eye className="size-5" />
               </span>
               <h3 className="font-display text-2xl font-bold text-foreground">Visi</h3>
             </div>
-            <div className="glass rounded-3xl border-amber-500/20 p-8 shadow-xl">
+            <div className="py-4">
               <p className="text-lg font-semibold leading-relaxed text-foreground sm:text-xl">
                 &ldquo;{period.visi}&rdquo;
               </p>
@@ -90,7 +90,7 @@ export default async function VisionMissionPage() {
           {/* Misi */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-xl bg-amber-500/20 text-amber-400">
+              <span className="grid size-10 place-items-center rounded-xl bg-amber-500/20 text-accent">
                 <Target className="size-5" />
               </span>
               <h3 className="font-display text-2xl font-bold text-foreground">Misi</h3>
@@ -101,7 +101,7 @@ export default async function VisionMissionPage() {
               <div className="grid gap-3">
                 {misiList.map((misi, i) => (
                   <div key={i} className="glass flex items-start gap-5 rounded-2xl p-5 shadow-md transition hover:border-amber-500/30">
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-yellow-400 font-display text-sm font-black text-black shadow">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand font-display text-sm font-black text-white shadow">
                       {i + 1}
                     </span>
                     <p className="leading-relaxed text-foreground/90">{misi}</p>
@@ -112,7 +112,7 @@ export default async function VisionMissionPage() {
           </div>
 
           {/* CTA */}
-          <div className="flex flex-col items-center gap-4 text-center pt-4">
+          <div className="flex flex-col items-center gap-4 text-center pt-4 lg:col-span-2">
             <div className="flex flex-wrap justify-center gap-3">
               <Link href="/organisasi/struktur-kepengurusan" className="bg-brand focus-ring inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-xs hover:shadow-md transition">
                 Struktur Kepengurusan <ArrowRight className="size-4" />

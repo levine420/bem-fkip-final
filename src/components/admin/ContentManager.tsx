@@ -31,10 +31,10 @@ const statusLabels: Record<Content["status"], string> = {
 };
 
 const statusColors: Record<Content["status"], string> = {
-  DRAF: "bg-gray-500/20 text-gray-300",
-  MENUNGGU_REVIEW: "bg-yellow-500/20 text-yellow-300",
-  TERBIT: "bg-green-500/20 text-green-300",
-  REVISI: "bg-orange-500/20 text-orange-300",
+  DRAF: "bg-gray-500/20 text-muted-foreground",
+  MENUNGGU_REVIEW: "bg-yellow-500/20 text-warning",
+  TERBIT: "bg-green-500/20 text-success",
+  REVISI: "bg-orange-500/20 text-warning",
 };
 
 const categoryLabels: Record<string, string> = {
@@ -63,19 +63,19 @@ export function ContentManager() {
     setLoading(true);
     setError("");
     setData(null);
-    
+
     const params = new URLSearchParams({
       q: search,
       ...(status ? { status } : {}),
       ...(category ? { category } : {}),
       page: String(page),
     });
-    
+
     adminApi<Result>(`/api/admin/contents?${params}`)
       .then((result) => { if (live) setData(result); })
       .catch((cause) => { if (live) setError(errorMessage(cause)); })
       .finally(() => { if (live) setLoading(false); });
-    
+
     return () => { live = false; };
   }, [search, status, category, page, refresh]);
 
@@ -84,7 +84,7 @@ export function ContentManager() {
     setBusy(true);
     setError("");
     setNotice("");
-    
+
     try {
       await adminApi(`/api/admin/contents/${item.id}/submit`, "POST");
       setNotice(`"${item.title}" telah disubmit untuk review.`);
@@ -101,7 +101,7 @@ export function ContentManager() {
     setBusy(true);
     setError("");
     setNotice("");
-    
+
     try {
       await adminApi(`/api/admin/contents/${item.id}`, "DELETE");
       setNotice(`"${item.title}" telah dihapus.`);
@@ -132,7 +132,7 @@ export function ContentManager() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link href="/admin/konten/review" className={`${actionClass} bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30 border border-yellow-500/40`}>
+            <Link href="/admin/konten/review" className={`${actionClass} bg-yellow-500/20 text-warning hover:bg-yellow-500/30 border border-yellow-500/40`}>
               Review &amp; Terbitkan
             </Link>
             <Link href="/admin/konten/baru" className={`${actionClass} bg-brand`}>
@@ -151,7 +151,7 @@ export function ContentManager() {
       {error && (
         <div role="alert" className="glass rounded-2xl border-danger/50 p-4">
           <p className="text-sm text-soft">{error}</p>
-          <button
+          <button type="button"
             className={`${actionClass} mt-3`}
             disabled={busy}
             onClick={() => setRefresh((r) => r + 1)}
@@ -216,7 +216,7 @@ export function ContentManager() {
               <option value="LAINNYA">Lainnya</option>
             </select>
           </label>
-          <button className={`${actionClass} bg-brand/50`} disabled={loading}>
+          <button type="submit" className={`${actionClass} bg-brand/50`} disabled={loading}>
             {loading ? "Memuat…" : "Terapkan"}
           </button>
         </form>
@@ -264,7 +264,7 @@ export function ContentManager() {
                         {statusLabels[item.status]}
                       </span>
                       {item.status === "REVISI" && item.review_note && (
-                        <p className="mt-1 text-xs text-orange-400">Ada catatan revisi</p>
+                        <p className="mt-1 text-xs text-warning">Ada catatan revisi</p>
                       )}
                     </td>
                     <td className="py-3">{item.author.name}</td>
@@ -283,7 +283,7 @@ export function ContentManager() {
                           </Link>
                         )}
                         {item.status === "DRAF" && (
-                          <button
+                          <button type="button"
                             className="text-accent hover:underline"
                             onClick={() => submitReview(item)}
                             disabled={busy}
@@ -299,8 +299,8 @@ export function ContentManager() {
                             Lihat
                           </Link>
                         )}
-                        <button
-                          className="text-red-400 hover:underline hover:text-red-300"
+                        <button type="button"
+                          className="text-danger hover:underline hover:text-danger"
                           onClick={() => deleteContent(item)}
                           disabled={busy}
                         >
@@ -321,14 +321,14 @@ export function ContentManager() {
               Halaman {data.page} dari {Math.ceil(data.total / data.page_size)} · {data.total} konten
             </p>
             <div className="flex gap-2">
-              <button
+              <button type="button"
                 className={actionClass}
                 disabled={page === 1 || busy}
                 onClick={() => setPage(page - 1)}
               >
                 Sebelumnya
               </button>
-              <button
+              <button type="button"
                 className={actionClass}
                 disabled={page >= Math.ceil(data.total / data.page_size) || busy}
                 onClick={() => setPage(page + 1)}

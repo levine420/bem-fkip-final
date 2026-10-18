@@ -24,11 +24,11 @@ export function AuthShell({
 
       {/* Dead-Centered Container */}
       <div className="relative w-full max-w-lg mx-auto flex flex-col items-center justify-center my-auto">
-        
+
         {/* Centered Brand Logo & Title */}
         <div className="text-center mb-6 flex flex-col items-center">
           <Link href="/" className="focus-ring inline-flex flex-col items-center gap-3 group">
-            <div className="relative size-16 p-2.5 bg-amber-500/10 rounded-3xl border border-amber-500/30 group-hover:scale-105 transition shadow-2xl flex items-center justify-center">
+            <div className="relative size-16 p-2.5 bg-amber-500/10 rounded-3xl border border-amber-500/30 group-hover:scale-[1.03] transition shadow-sm flex items-center justify-center">
               <Image
                 src="/images/logo-altiora.png"
                 alt="Logo Kabinet Altiora BEM FKIP UIKA"
@@ -40,15 +40,15 @@ export function AuthShell({
             </div>
             <div className="text-center">
               <span className="block font-display text-2xl font-extrabold text-foreground tracking-tight">BEM FKIP UIKA</span>
-              <span className="block text-xs uppercase tracking-[0.2em] text-amber-400 font-semibold mt-1">Kabinet Altiora 2026–2027</span>
+              <span className="block text-xs uppercase tracking-[0.2em] text-accent font-semibold mt-1">Kabinet Altiora 2026–2027</span>
             </div>
           </Link>
         </div>
 
         {/* Centered Main Form Card */}
-        <section className="glass-strong relative w-full overflow-hidden rounded-[2.5rem] border border-glass-border p-6 sm:p-10 shadow-2xl bg-gradient-to-b from-background/95 via-background/90 to-background/95 backdrop-blur-2xl text-left">
+        <section className="glass relative w-full rounded-2xl p-6 sm:p-10 text-left">
           <div className="text-center mb-6">
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400">{eyebrow}</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">{eyebrow}</span>
             <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-foreground mt-1.5">{title}</h1>
             <p className="mt-2 text-xs sm:text-sm leading-relaxed text-muted-foreground max-w-md mx-auto">{description}</p>
           </div>

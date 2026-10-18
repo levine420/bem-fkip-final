@@ -1,7 +1,18 @@
-import { PublicListing } from "@/components/PublicListing";
+import { PublicPageFrame } from "@/components/PublicPageFrame";
+import { PublicPageHero } from "@/components/PublicPageHero";
+import { EmptyState } from "@/components/EmptyState";
 import { getPublicWorkPrograms, getActiveDepartments } from "@/server/public/data";
+import { Briefcase, Clock, Target } from "lucide-react";
 
 export const revalidate = 60;
+
+const statusConfig: Record<string, { label: string; color: string }> = {
+  SELESAI: { label: "Selesai", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  BERJALAN: { label: "Sedang Berjalan", color: "bg-pink-50 text-[#BE185D] border-pink-200" },
+  BELUM_MULAI: { label: "Akan Datang", color: "bg-slate-100 text-slate-600 border-slate-200" },
+  DITUNDA: { label: "Ditunda", color: "bg-yellow-50 text-yellow-700 border-yellow-200" },
+  DIBATALKAN: { label: "Dibatalkan", color: "bg-red-50 text-red-600 border-red-200" },
+};
 
 export default async function ProgramsPage() {
   const [workPrograms, depts] = await Promise.all([
@@ -10,77 +21,62 @@ export default async function ProgramsPage() {
   ]);
 
   return (
-    <PublicListing
-      eyebrow="Organisasi"
-      title="Program Kerja BEM FKIP UIKA"
-      description="Daftar program kerja seluruh departemen dengan transparansi status pelaksanaan, indikator keberhasilan, dan target waktu."
-      breadcrumbs={[{ label: "Organisasi", href: "/organisasi" }, { label: "Program Kerja" }]}
-      toolbar={[
-        { label: "Semua Program Kerja", href: "/organisasi/program-kerja" },
-      ]}
-      emptyTitle="Belum ada program kerja yang tersedia"
-      emptyDescription="Program kerja dikelola oleh Admin Departemen sesuai kewenangannya dan terikat pada periode aktif."
-    >
-      {workPrograms.length === 0 ? (
-        <div className="col-span-full glass rounded-3xl p-10 text-center">
-          <p className="text-sm text-muted-foreground">Belum ada program kerja pada periode aktif ini.</p>
-        </div>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2">
-          {workPrograms.map((proker) => {
-            const dept = depts.find(
-              (d) =>
-                d.id === proker.department_id ||
-                d.slug === proker.department_id ||
-                d.name.toLowerCase().includes(proker.department_id.toLowerCase())
-            );
-            return (
-              <div
-                key={proker.id}
-                className="glass rounded-3xl p-6 transition duration-300 hover:border-accent/50 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-xs font-semibold text-accent uppercase tracking-wider">
-                      {dept ? dept.name : "Unggulan BEM"}
-                    </span>
-                    <span
-                      className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-                        proker.status === "SELESAI"
-                          ? "bg-green-500/20 text-green-300"
-                          : proker.status === "BERJALAN"
-                          ? "bg-yellow-500/20 text-yellow-300"
-                          : "bg-blue-500/20 text-blue-300"
-                      }`}
-                    >
-                      {proker.status === "SELESAI"
-                        ? "Selesai"
-                        : proker.status === "BERJALAN"
-                        ? "Sedang Berjalan"
-                        : "Belum Mulai"}
-                    </span>
-                  </div>
-                  <h3 className="mt-4 text-xl font-semibold text-white">{proker.name}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                    {proker.description}
-                  </p>
-                </div>
+    <PublicPageFrame>
+      <PublicPageHero
+        eyebrow="Matriks Program Kerja"
+        title="Program Kerja BEM FKIP UIKA"
+        description="Daftar program kerja seluruh departemen dengan transparansi status pelaksanaan, indikator keberhasilan, dan target waktu."
+        breadcrumbs={[{ label: "Organisasi", href: "/organisasi" }, { label: "Program Kerja" }]}
+      />
 
-                <div className="mt-6 pt-4 border-t border-glass-border space-y-2 text-xs">
-                  <p>
-                    <span className="text-muted-foreground">Target Waktu:</span>{" "}
-                    <strong className="text-white font-medium">{proker.target_waktu || "Periode Aktif"}</strong>
-                  </p>
-                  <p>
-                    <span className="text-muted-foreground">Sasaran / Target:</span>{" "}
-                    <span className="text-soft font-medium">{proker.sasaran || "Mahasiswa FKIP UIKA"}</span>
-                  </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        {workPrograms.length === 0 ? (
+          <EmptyState
+            title="Belum ada program kerja pada periode aktif"
+            description="Program kerja dikelola oleh Admin Departemen sesuai kewenangannya."
+          />
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2">
+            {workPrograms.map((proker) => {
+              const dept = depts.find(
+                (d) => d.id === proker.department_id || d.slug === proker.department_id
+              );
+              const statusInfo = statusConfig[proker.status] || { label: proker.status, color: "bg-slate-100 text-slate-600 border-slate-200" };
+
+              return (
+                <div
+                  key={proker.id}
+                  className="bg-white rounded-xl border border-slate-200/90 hover:border-pink-300 transition-all duration-200 p-5 flex flex-col justify-between space-y-4"
+                >
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${statusInfo.color}`}>
+                        {statusInfo.label}
+                      </span>
+                      <span className="text-xs text-[#BE185D] font-semibold">
+                        {dept?.name || "Unggulan BEM"}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-bold text-slate-900 leading-snug">{proker.name}</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed">{proker.description}</p>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-500">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-[#E11D74] shrink-0" />
+                      <span>Target: <strong className="text-slate-700">{proker.target_waktu || "Periode Aktif"}</strong></span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Target className="w-3.5 h-3.5 text-[#E11D74] shrink-0 mt-0.5" />
+                      <span>Sasaran: <strong className="text-slate-700">{proker.sasaran || "Mahasiswa FKIP UIKA"}</strong></span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </PublicListing>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </PublicPageFrame>
   );
 }

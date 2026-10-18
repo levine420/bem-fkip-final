@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PortalPage } from "@/components/PortalPage";
@@ -14,14 +14,17 @@ export default function NewAspirationPage() {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const pending = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pending.current) return;
     if (!title || !body) {
       setErrorMsg("Judul dan isi pesan aspirasi wajib diisi.");
       return;
     }
 
+    pending.current = true;
     setLoading(true);
     setErrorMsg("");
 
@@ -47,6 +50,7 @@ export default function NewAspirationPage() {
     } catch (err: any) {
       setErrorMsg(err.message || "Terjadi kesalahan sistem.");
     } finally {
+      pending.current = false;
       setLoading(false);
     }
   };
@@ -67,7 +71,7 @@ export default function NewAspirationPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-border bg-card p-6 shadow-xs">
           {errorMsg && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs text-red-500">
+            <div role="alert" className="rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs text-danger">
               {errorMsg}
             </div>
           )}

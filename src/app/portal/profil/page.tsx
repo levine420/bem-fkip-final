@@ -21,6 +21,8 @@ export default function PortalProfilePage() {
   const router = useRouter();
   const [student, setStudent] = useState<StudentData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [retry, setRetry] = useState(0);
 
   // Form profile states
   const [name, setName] = useState("");
@@ -36,38 +38,46 @@ export default function PortalProfilePage() {
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
 
   useEffect(() => {
+    let live = true;
+    setLoading(true);
+    setLoadError("");
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000); // 5 detik timeout
 
     fetch("/api/public/auth/me", { signal: controller.signal })
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (res.status === 401) { router.push("/auth/login"); return {}; }
+        if (!res.ok) throw new Error("Profil belum berhasil dimuat.");
+        return res.json();
+      })
       .then((data) => {
+        if (!live) return;
         if (data.student) {
           setStudent(data.student);
           setName(data.student.name);
           setAvatarUrl(data.student.avatar_url || "");
         } else {
-          router.push("/auth/login");
+          setLoadError("Profil belum berhasil dimuat. Silakan coba lagi.");
         }
       })
       .catch((err) => {
-        if (err.name !== "AbortError") {
-          router.push("/auth/login");
-        }
+        if (live) setLoadError("Profil belum berhasil dimuat. Periksa koneksi dan coba lagi.");
       })
       .finally(() => {
         clearTimeout(timeout);
-        setLoading(false);
+        if (live) setLoading(false);
       });
 
     return () => {
+      live = false;
       controller.abort();
       clearTimeout(timeout);
     };
-  }, [router]);
+  }, [router, retry]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (profileSubmitting) return;
     setProfileMsg(null);
     setProfileSubmitting(true);
 
@@ -93,6 +103,7 @@ export default function PortalProfilePage() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (passwordSubmitting) return;
     setPasswordMsg(null);
 
     if (newPassword !== confirmPassword) {
@@ -136,7 +147,7 @@ export default function PortalProfilePage() {
     );
   }
 
-  if (!student) return null;
+  if (!student) return <PortalPage activeHref="/portal/profil" title="Profil Mahasiswa" description="Kelola informasi akun mahasiswa."><div role="alert" className="glass rounded-2xl p-6"><p>{loadError || "Profil tidak tersedia."}</p><button type="button" className="button-secondary mt-4" onClick={() => setRetry(value => value + 1)}>Coba lagi</button></div></PortalPage>;
 
   return (
     <PortalPage

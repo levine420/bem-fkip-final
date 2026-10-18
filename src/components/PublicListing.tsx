@@ -26,38 +26,29 @@ export function PublicListing({
 }) {
   return (
     <PublicPageFrame>
-      <div className="relative">
-        {/* Small subtle accent glow */}
-        <div className="pointer-events-none absolute left-0 top-0 -z-10 h-80 w-2/3 rounded-full bg-pink-600/10 blur-[120px]" />
-
-        <PublicPageHero
-          eyebrow={eyebrow}
-          title={title}
-          description={description}
-          breadcrumbs={breadcrumbs}
-          hideBackdrop
-        />
-
-        <section className="relative px-4 pb-12 pt-2 sm:px-6 sm:pb-16">
-          <div className="mx-auto max-w-7xl">
-            {toolbar.length ? (
-              <div className="mb-4 flex flex-wrap items-center gap-2">
-                {toolbar.map((item) => (
-                  <Link
-                    key={item.href + item.label}
-                    href={item.href}
-                    className="focus-ring inline-flex min-h-8 items-center rounded-full border border-glass-border bg-glass px-3.5 text-xs font-semibold text-muted-foreground hover:border-accent/60 hover:text-accent transition"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            ) : null}
-            {note ? <p className="mb-3 text-xs leading-relaxed text-muted-foreground">{note}</p> : null}
-            {children ? children : <EmptyState title={emptyTitle} description={emptyDescription} />}
+      <PublicPageHero
+        eyebrow={eyebrow}
+        title={title}
+        description={description}
+        breadcrumbs={breadcrumbs}
+      />
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        {toolbar.length ? (
+          <div className="mb-5 flex flex-wrap items-center gap-2">
+            {toolbar.map((item) => (
+              <Link
+                key={item.href + item.label}
+                href={item.href}
+                className="inline-flex min-h-8 items-center rounded-full border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-600 hover:border-pink-300 hover:text-[#E11D74] transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
-        </section>
-      </div>
+        ) : null}
+        {note ? <p className="mb-4 text-xs leading-relaxed text-slate-500">{note}</p> : null}
+        {children ? children : <EmptyState title={emptyTitle} description={emptyDescription} />}
+      </section>
     </PublicPageFrame>
   );
 }

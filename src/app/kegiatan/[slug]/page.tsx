@@ -29,7 +29,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
             <div className="text-center">
               <Link
                 href="/kegiatan"
-                className="focus-ring inline-flex items-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover transition shadow-lg"
+                className="focus-ring inline-flex items-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover transition shadow-sm"
               >
                 <ArrowLeft className="size-4" /> Kembali ke Daftar Kegiatan
               </Link>
@@ -45,18 +45,19 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: "Asia/Jakarta",
   });
-  const startTimeStr = new Date(event.start_time).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  const startTimeStr = new Date(event.start_time).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" });
 
   const endDateStr = event.end_time
-    ? new Date(event.end_time).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+    ? new Date(event.end_time).toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", day: "numeric", month: "long", year: "numeric" })
     : null;
   const endTimeStr = event.end_time
-    ? new Date(event.end_time).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+    ? new Date(event.end_time).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" })
     : null;
 
   const regDeadlineStr = event.registration_deadline
-    ? new Date(event.registration_deadline).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })
+    ? new Date(event.registration_deadline).toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })
     : null;
 
   const isOpen = event.registration_status === "TERBUKA";
@@ -78,7 +79,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
         <div className="mx-auto max-w-5xl space-y-8">
           {/* Banner Poster Image */}
           {event.poster_url && (
-            <div className="glass rounded-3xl overflow-hidden shadow-2xl border border-glass-border">
+            <div className="glass rounded-3xl overflow-hidden shadow-sm border border-glass-border">
               <img
                 src={event.poster_url}
                 alt={event.name}
@@ -90,14 +91,14 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
           <div className="grid gap-8 lg:grid-cols-3">
             {/* Main Content (Left 2 Columns) */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="glass rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+              <div className="glass rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-glass-border pb-4">
                   <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full ${
                     isOpen
-                      ? "bg-green-500/20 text-green-300 border border-green-500/30"
-                      : "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
+                      ? "bg-green-500/20 text-success border border-green-500/30"
+                      : "bg-yellow-500/20 text-warning border border-yellow-500/30"
                   }`}>
-                    {isOpen ? "Pendaftaran Terbuka" : "Segera Dibuka / Ditutup"}
+                    {({ TERBUKA: "Pendaftaran Terbuka", PENUH: "Kuota Penuh", TUTUP: "Pendaftaran Ditutup", SEGERA_DIBUKA: "Segera Dibuka" } as Record<string, string>)[event.registration_status] || event.registration_status}
                   </span>
 
                   {event.department?.name && (
@@ -108,7 +109,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
                 </div>
 
                 <div>
-                  <h2 className="text-xl font-bold text-white mb-3">Deskripsi & Rincian Acara</h2>
+                  <h2 className="text-xl font-bold text-foreground mb-3">Deskripsi & Rincian Acara</h2>
                   <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
                     {event.description}
                   </p>
@@ -118,14 +119,14 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
 
             {/* Sidebar Card (Right 1 Column) */}
             <div className="space-y-6">
-              <div className="glass rounded-3xl p-6 space-y-5 shadow-xl border-accent/30">
-                <h3 className="text-base font-bold text-white border-b border-glass-border pb-3">Informasi Acara</h3>
+              <div className="glass rounded-3xl p-6 space-y-5 shadow-sm border-accent/30">
+                <h3 className="text-base font-bold text-foreground border-b border-glass-border pb-3">Informasi Acara</h3>
 
                 <div className="space-y-4 text-xs">
                   <div className="flex items-start gap-3">
                     <Calendar className="size-4 text-accent mt-0.5 shrink-0" />
                     <div>
-                      <p className="font-semibold text-white">Tanggal & Waktu</p>
+                      <p className="font-semibold text-foreground">Tanggal & Waktu</p>
                       <p className="text-muted-foreground">{startDateStr} ({startTimeStr} WIB)</p>
                       {endDateStr && <p className="text-muted-foreground">s.d. {endDateStr} ({endTimeStr} WIB)</p>}
                     </div>
@@ -134,7 +135,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
                   <div className="flex items-start gap-3">
                     <MapPin className="size-4 text-accent mt-0.5 shrink-0" />
                     <div>
-                      <p className="font-semibold text-white">Lokasi Pelaksanaan</p>
+                      <p className="font-semibold text-foreground">Lokasi Pelaksanaan</p>
                       <p className="text-muted-foreground">{event.location}</p>
                     </div>
                   </div>
@@ -142,7 +143,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
                   <div className="flex items-start gap-3">
                     <Users className="size-4 text-accent mt-0.5 shrink-0" />
                     <div>
-                      <p className="font-semibold text-white">Kuota Peserta</p>
+                      <p className="font-semibold text-foreground">Kuota Peserta</p>
                       <p className="text-muted-foreground">{event.max_participants ? `${event.max_participants} Orang` : "Tidak Terbatas"}</p>
                     </div>
                   </div>
@@ -151,7 +152,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
                     <div className="flex items-start gap-3">
                       <Clock className="size-4 text-accent mt-0.5 shrink-0" />
                       <div>
-                        <p className="font-semibold text-white">Batas Pendaftaran</p>
+                        <p className="font-semibold text-foreground">Batas Pendaftaran</p>
                         <p className="text-muted-foreground">{regDeadlineStr} WIB</p>
                       </div>
                     </div>
@@ -162,12 +163,12 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
                   {isOpen ? (
                     <Link
                       href={`/kegiatan/${eventSlugOrId}/daftar`}
-                      className="focus-ring flex w-full items-center justify-center gap-2 rounded-2xl bg-brand py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-hover"
+                      className="focus-ring flex w-full items-center justify-center gap-2 rounded-2xl bg-brand py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-hover"
                     >
                       Daftar Acara Sekarang <ArrowUpRight className="size-4" />
                     </Link>
                   ) : (
-                    <button
+                    <button type="button"
                       disabled
                       className="w-full rounded-2xl bg-muted/20 py-3 text-center text-sm font-semibold text-muted-foreground cursor-not-allowed border border-glass-border"
                     >
@@ -178,7 +179,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
               </div>
 
               <div className="text-center">
-                <Link href="/kegiatan" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-white transition">
+                <Link href="/kegiatan" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition">
                   <ArrowLeft className="size-4" /> Kembali ke Semua Kegiatan
                 </Link>
               </div>

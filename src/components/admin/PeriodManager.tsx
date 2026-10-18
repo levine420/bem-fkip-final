@@ -63,11 +63,11 @@ export function PeriodManager() {
   return <div className="grid gap-4">
     <section className="glass rounded-3xl p-5 sm:p-7">
       <div className="flex flex-wrap items-center justify-between gap-4"><div><h2 className="text-xl font-semibold">Pergantian kepengurusan</h2><p className="mt-2 text-sm text-muted-foreground">Buat draf, lengkapi data resmi, lalu aktifkan. Arsip tidak dapat diedit atau dihapus.</p></div>
-        <button className={`${actionClass} bg-brand`} disabled={busy} onClick={() => { setEditor({ ...emptyEditor }); setFields({}); setError(""); }}>Buat periode</button></div>
+        <button type="button" className={`${actionClass} bg-brand`} disabled={busy} onClick={() => { setEditor({ ...emptyEditor }); setFields({}); setError(""); }}>Buat periode</button></div>
       {data && <p className="mt-4 rounded-xl border border-glass-border p-3 text-sm">{data.active ? <>Periode aktif: <strong>{data.active.name}</strong></> : "Belum ada periode aktif. Aktivasi pertama dapat dilakukan setelah draf lengkap."}</p>}
     </section>
     {notice && <p role="status" className="glass rounded-2xl p-4 text-sm text-soft">{notice}</p>}
-    {error && <div role="alert" className="glass rounded-2xl border-danger/50 p-4"><p className="text-sm text-soft">{error}</p><button className={`${actionClass} mt-3`} disabled={busy} onClick={() => setRefresh((r) => r + 1)}>Muat ulang daftar</button>{editor && <p className="mt-2 text-xs text-muted-foreground">Input form tetap disimpan. Jika data bentrok, batalkan edit dan buka kembali data terbaru.</p>}</div>}
+    {error && <div role="alert" className="glass rounded-2xl border-danger/50 p-4"><p className="text-sm text-soft">{error}</p><button type="button" className={`${actionClass} mt-3`} disabled={busy} onClick={() => setRefresh((r) => r + 1)}>Muat ulang daftar</button>{editor && <p className="mt-2 text-xs text-muted-foreground">Input form tetap disimpan. Jika data bentrok, batalkan edit dan buka kembali data terbaru.</p>}</div>}
     {editor && <form className="glass grid gap-4 rounded-3xl p-5 sm:p-7" onSubmit={save} aria-busy={busy}>
       <h2 className="text-xl font-semibold">{editor.id ? "Edit periode" : "Periode baru"}</h2>
       {field("name", "Nama kabinet")}
@@ -76,25 +76,25 @@ export function PeriodManager() {
       <ImageUploader
         label="Foto / Banner Kabinet Periode (opsional)"
         value={editor.photo_url}
-        onChange={(url) => setEditor({ ...editor, photo_url: url })}
+        onChange={(url) => setEditor(current => current ? { ...current, photo_url: url } : current)}
       />
-      <div className="flex gap-2"><button className={`${actionClass} bg-brand`} disabled={busy}>{busy ? "Menyimpan…" : "Simpan"}</button><button className={actionClass} type="button" disabled={busy} onClick={() => setEditor(null)}>Batal</button></div>
+      <div className="flex gap-2"><button type="submit" className={`${actionClass} bg-brand`} disabled={busy}>{busy ? "Menyimpan…" : "Simpan"}</button><button className={actionClass} type="button" disabled={busy} onClick={() => setEditor(null)}>Batal</button></div>
     </form>}
     <section className="glass rounded-3xl p-5 sm:p-7" aria-busy={loading}>
       <form onSubmit={(event) => { event.preventDefault(); setSearch(q); setPage(1); }} className="grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <label className="text-sm">Cari kabinet<input className="form-control mt-2" value={q} onChange={(e) => setQ(e.target.value)} maxLength={100} type="search" /></label>
         <label className="text-sm">Status<select className="form-control mt-2" value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}><option value="">Semua</option><option value="NONAKTIF">Draf</option><option value="AKTIF">Aktif</option><option value="ARSIP">Arsip</option></select></label>
         <label className="text-sm">Urutkan<select className="form-control mt-2" value={sort} onChange={(e) => { setSort(e.target.value); setPage(1); }}><option value="newest">Tahun terbaru</option><option value="oldest">Tahun terlama</option><option value="name">Nama kabinet</option></select></label>
-        <button className={actionClass}>Cari</button>
+        <button type="submit" className={actionClass}>Cari</button>
       </form>
       {loading ? <p role="status" className="py-8 text-muted-foreground">Memuat periode…</p> : data && <>
         {!data.items.length && <div className="py-10"><h3 className="font-semibold">Tidak ada periode yang ditemukan</h3><p className="mt-2 text-sm text-muted-foreground">Buat periode pertama atau ubah filter pencarian.</p></div>}
         <div className="mt-5 grid gap-3">{data.items.map((item) => <article key={item.id} className="rounded-2xl border border-glass-border p-4">
           <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs text-accent">{labels[item.status]}</p><h3 className="mt-1 font-semibold">{item.name}</h3><p className="text-sm text-muted-foreground">{item.year_start}–{item.year_end}</p></div>
-            {item.status !== "ARSIP" && <div className="flex flex-wrap gap-2"><button className={actionClass} disabled={busy} onClick={() => edit(item)}>Edit</button>{item.status === "NONAKTIF" && <button className={`${actionClass} text-soft`} disabled={busy} onClick={() => activate(item)}>Aktifkan</button>}</div>}</div>
+            {item.status !== "ARSIP" && <div className="flex flex-wrap gap-2"><button type="button" className={actionClass} disabled={busy} onClick={() => edit(item)}>Edit</button>{item.status === "NONAKTIF" && <button type="button" className={`${actionClass} text-soft`} disabled={busy} onClick={() => activate(item)}>Aktifkan</button>}</div>}</div>
           <details className="mt-3 text-sm"><summary className="focus-ring cursor-pointer py-2">Visi & misi</summary><h4 className="mt-2 font-semibold">Visi</h4><p className="whitespace-pre-wrap break-words text-muted-foreground">{item.visi}</p><h4 className="mt-3 font-semibold">Misi</h4><p className="whitespace-pre-wrap break-words text-muted-foreground">{item.misi}</p></details>
         </article>)}</div>
-        <nav aria-label="Halaman periode" className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm"><span>{data.total} periode · Halaman {data.page}</span><div className="flex gap-2"><button className={actionClass} disabled={page === 1 || busy} onClick={() => setPage((p) => p - 1)}>Sebelumnya</button><button className={actionClass} disabled={page * data.page_size >= data.total || busy} onClick={() => setPage((p) => p + 1)}>Berikutnya</button></div></nav>
+        <nav aria-label="Halaman periode" className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm"><span>{data.total} periode · Halaman {data.page}</span><div className="flex gap-2"><button type="button" className={actionClass} disabled={page === 1 || busy} onClick={() => setPage((p) => p - 1)}>Sebelumnya</button><button type="button" className={actionClass} disabled={page * data.page_size >= data.total || busy} onClick={() => setPage((p) => p + 1)}>Berikutnya</button></div></nav>
       </>}
     </section>
   </div>;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useId, useEffect } from "react";
 import Image from "next/image";
 import { Upload, Link as LinkIcon, X, CheckCircle, Image as ImageIcon, Loader2 } from "lucide-react";
 
@@ -78,9 +78,25 @@ export function ImageUploader({
   const [errorMsg, setErrorMsg] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pending = useRef(false);
+  const uploadController = useRef<AbortController | null>(null);
+  const onChangeRef = useRef(onChange);
+  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
+  useEffect(() => () => uploadController.current?.abort(), []);
+  const inputId = useId();
+  const [urlDraft, setUrlDraft] = useState(value);
+  useEffect(() => { setUrlDraft(value); }, [value]);
+  const applyUrl = () => {
+    try {
+      const url = new URL(urlDraft);
+      if (!["https:", "http:"].includes(url.protocol)) throw new Error();
+      onChange(url.href);
+      setErrorMsg("");
+    } catch { setErrorMsg("Masukkan URL gambar lengkap dengan https:// atau http://."); }
+  };
 
   const handleFileUpload = async (rawFile: File) => {
-    if (!rawFile) return;
+    if (!rawFile || pending.current) return;
 
     if (!rawFile.type.startsWith("image/")) {
       setErrorMsg("Pilih file gambar (JPG, PNG, WEBP, GIF).");
@@ -92,17 +108,22 @@ export function ImageUploader({
       return;
     }
 
+    pending.current = true;
+    const controller = new AbortController();
+    uploadController.current = controller;
     setUploading(true);
     setErrorMsg("");
 
     try {
       const file = await compressImage(rawFile);
+      if (controller.signal.aborted) return;
       const formData = new FormData();
       formData.append("file", file);
 
       const res = await fetch(apiEndpoint, {
         method: "POST",
         body: formData,
+        signal: controller.signal,
       });
 
       let data: any = {};
@@ -114,29 +135,17 @@ export function ImageUploader({
       }
 
       if (res.ok && data.success && data.url) {
-        onChange(data.url);
+        if (!controller.signal.aborted) onChangeRef.current(data.url);
         return;
       }
 
-      // Fallback: convert compressed file to base64 if server upload endpoint fails or returns data URL
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        if (result) {
-          onChange(result);
-          setErrorMsg("");
-        } else {
-          setErrorMsg(data.error?.message || "Gagal mengunggah gambar dari perangkat.");
-        }
-      };
-      reader.onerror = () => {
-        setErrorMsg("Gagal memproses berkas gambar.");
-      };
-      reader.readAsDataURL(file);
+      throw new Error(data.error?.message || "Gagal mengunggah gambar. Silakan pilih kembali berkas untuk mencoba lagi.");
     } catch (err: any) {
-      setErrorMsg(err?.message || "Gagal memproses berkas gambar.");
+      if (!controller.signal.aborted) setErrorMsg(err?.message || "Gagal memproses berkas gambar.");
     } finally {
+      pending.current = false;
       setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -154,10 +163,10 @@ export function ImageUploader({
 
   return (
     <div className="space-y-3">
-      {label && <label className="block text-sm font-semibold text-foreground">{label}</label>}
+      {label && <label htmlFor={inputId} className="block text-sm font-semibold text-foreground">{label}</label>}
 
       {/* Image Preview Box if value exists */}
-      {value ? (
+      {value && (
         <div className="relative overflow-hidden rounded-2xl border border-glass-border bg-card p-3 shadow-md">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
@@ -172,10 +181,10 @@ export function ImageUploader({
               </div>
               <div className="min-w-0">
                 <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-500">
-                  <CheckCircle className="h-3.5 w-3.5" /> Gambar Terpasang
+                  <CheckCircle className="h-3.5 w-3.5" /> Gambar dipilih
                 </span>
                 <p className="mt-1 truncate text-xs text-muted-foreground max-w-xs">
-                  {value.startsWith('data:image/') 
+                  {value.startsWith('data:image/')
                     ? `Poster kegiatan · ${(value.length / 1024).toFixed(1)} KB`
                     : value.split('/').pop() || 'Gambar poster'
                   }
@@ -202,13 +211,16 @@ export function ImageUploader({
             </div>
           </div>
         </div>
-      ) : (
+      )}
+      {(
         <div className="rounded-2xl border border-border bg-card p-4 shadow-xs space-y-3">
           {/* Mode Tabs */}
-          <div className="flex items-center gap-2 border-b border-border/60 pb-3">
+          <div className="flex flex-wrap items-center gap-2 border-b border-border/60 pb-3">
             <button
               type="button"
               onClick={() => setTab("file")}
+              disabled={uploading}
+              aria-pressed={tab === "file"}
               className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
                 tab === "file"
                   ? "bg-brand text-white shadow-xs"
@@ -220,6 +232,8 @@ export function ImageUploader({
             <button
               type="button"
               onClick={() => setTab("url")}
+              disabled={uploading}
+              aria-pressed={tab === "url"}
               className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
                 tab === "url"
                   ? "bg-brand text-white shadow-xs"
@@ -231,7 +245,7 @@ export function ImageUploader({
           </div>
 
           {errorMsg && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-500">
+            <div role="alert" className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-danger">
               {errorMsg}
             </div>
           )}
@@ -244,7 +258,12 @@ export function ImageUploader({
               }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
+              role="button"
+              tabIndex={uploading ? -1 : 0}
+              aria-label="Pilih gambar untuk diunggah"
+              aria-disabled={uploading}
+              onKeyDown={(event) => { if (!uploading && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); fileInputRef.current?.click(); } }}
+              onClick={(event) => { if (!uploading && event.target !== fileInputRef.current) fileInputRef.current?.click(); }}
               className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center cursor-pointer transition ${
                 dragOver
                   ? "border-brand bg-brand/10"
@@ -253,6 +272,8 @@ export function ImageUploader({
             >
               <input
                 ref={fileInputRef}
+                id={inputId}
+                disabled={uploading}
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
@@ -283,12 +304,15 @@ export function ImageUploader({
           ) : (
             <div>
               <input
+                id={inputId}
                 type="url"
                 className="form-control"
                 placeholder="https://..."
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
+                value={urlDraft}
+                onChange={(e) => setUrlDraft(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyUrl(); } }}
               />
+              <button type="button" className="button-secondary mt-3" onClick={applyUrl}>Gunakan gambar</button>
               <span className="mt-1 block text-[11px] text-muted-foreground">
                 {placeholder}
               </span>

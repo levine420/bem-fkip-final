@@ -1,4 +1,6 @@
 "use client";
+import { Pagination } from "@/components/Pagination";
+import { Modal } from "@/components/Modal";
 import { useEffect, useState } from "react";
 import { actionClass, adminApi, errorMessage } from "./api";
 
@@ -31,11 +33,11 @@ const statusLabels: Record<WorkProgram["status"], string> = {
 };
 
 const statusColors: Record<WorkProgram["status"], string> = {
-  BELUM_MULAI: "bg-blue-500/20 text-blue-300",
-  BERJALAN: "bg-yellow-500/20 text-yellow-300",
-  SELESAI: "bg-green-500/20 text-green-300",
-  DITUNDA: "bg-orange-500/20 text-orange-300",
-  DIBATALKAN: "bg-red-500/20 text-red-300",
+  BELUM_MULAI: "bg-blue-500/20 text-foreground",
+  BERJALAN: "bg-yellow-500/20 text-warning",
+  SELESAI: "bg-green-500/20 text-success",
+  DITUNDA: "bg-orange-500/20 text-warning",
+  DIBATALKAN: "bg-red-500/20 text-danger",
 };
 
 export function ProgramKerjaManager() {
@@ -178,7 +180,7 @@ export function ProgramKerjaManager() {
               Kelola daftar program kerja, target pelaksanaan, dan status capaian organisasi/departemen.
             </p>
           </div>
-          <button onClick={openCreateModal} className={`${actionClass} bg-brand`}>
+          <button type="button" onClick={openCreateModal} className={`${actionClass} bg-brand`}>
             + Tambah Program Kerja
           </button>
         </div>
@@ -232,7 +234,7 @@ export function ProgramKerjaManager() {
               <option value="DIBATALKAN">Dibatalkan</option>
             </select>
           </label>
-          <button className={`${actionClass} bg-brand/50`} disabled={loading}>
+          <button type="submit" className={`${actionClass} bg-brand/50`} disabled={loading}>
             {loading ? "Memuat…" : "Terapkan"}
           </button>
         </form>
@@ -291,10 +293,10 @@ export function ProgramKerjaManager() {
                           <option value="DITUNDA">Ditunda</option>
                           <option value="DIBATALKAN">Dibatalkan</option>
                         </select>
-                        <button onClick={() => openEditModal(item)} className="text-accent hover:underline text-xs" disabled={busy}>
+                        <button type="button" onClick={() => openEditModal(item)} className="text-accent hover:underline text-xs" disabled={busy}>
                           Edit
                         </button>
-                        <button onClick={() => handleDelete(item)} className="text-soft hover:underline text-xs" disabled={busy}>
+                        <button type="button" onClick={() => handleDelete(item)} className="text-soft hover:underline text-xs" disabled={busy}>
                           Hapus
                         </button>
                       </div>
@@ -307,11 +309,14 @@ export function ProgramKerjaManager() {
         )}
       </section>
 
+      {data && <Pagination page={page} pageSize={data.page_size} total={data.total} busy={busy || loading} onPage={setPage} />}
+
       {/* Modal Form */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="glass rounded-3xl p-6 w-full max-w-lg shadow-2xl">
+        <Modal label="Program kerja" busy={busy} onClose={() => setIsModalOpen(false)}>
+          <div className="glass rounded-3xl p-6 w-full max-w-lg shadow-sm">
             <h3 className="text-lg font-semibold">{editingItem ? "Edit Program Kerja" : "Tambah Program Kerja"}</h3>
+            {error && <p role="alert" className="mt-4 rounded-lg border p-3 text-sm">{error}</p>}
             <form onSubmit={handleSave} className="mt-4 grid gap-3">
               <label className="text-sm">
                 Nama Program Kerja *
@@ -391,7 +396,7 @@ export function ProgramKerjaManager() {
               </div>
             </form>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

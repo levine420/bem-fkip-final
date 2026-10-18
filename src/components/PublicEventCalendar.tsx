@@ -1,481 +1,250 @@
 "use client";
-
-import { useState, useMemo, useRef } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Calendar as CalendarIcon,
-  MapPin,
-  Users,
-  Clock,
-  ArrowUpRight,
-  CalendarDays,
-} from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Clock, MapPin, Filter } from "lucide-react";
 
 export type EventItem = {
-  id: string;
-  name: string;
-  slug: string | null;
-  description: string;
-  location: string;
-  poster_url: string | null;
-  start_time: Date | string;
-  end_time: Date | string | null;
-  registration_deadline: Date | string | null;
-  max_participants: number | null;
-  registration_status: string;
-  status: string;
+  id: string; name: string; slug: string | null; description: string;
+  location: string; poster_url: string | null; start_time: Date | string;
+  end_time: Date | string | null; registration_deadline: Date | string | null;
+  max_participants: number | null; registration_status: string; status: string;
   department: { name: string } | null;
 };
 
-// Helper: Extract YYYY-MM-DD in Asia/Jakarta (WIB)
-function getWibDateKey(dateInput: Date | string): string {
-  const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
-  const formatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Jakarta",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  return formatter.format(date); // Format: YYYY-MM-DD
-}
+const dateKey = (value: Date | string) =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(value));
 
-// Helper: Format header date string in Indonesian (e.g., "Sabtu, 26 September 2026")
-function formatIndonesianDateStr(dateKey: string): string {
-  const [y, m, d] = dateKey.split("-").map(Number);
-  const date = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
-  return date.toLocaleDateString("id-ID", {
-    timeZone: "Asia/Jakarta",
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
+const dateLabel = (key: string) =>
+  new Date(key + "T12:00:00+07:00").toLocaleDateString("id-ID", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta",
   });
-}
 
-export function PublicEventCalendar({ events = [] }: { events: EventItem[] }) {
-  // 1. Group events by WIB Date Key
-  const eventsByDate = useMemo(() => {
-    const map: Record<string, EventItem[]> = {};
-    for (const ev of events) {
-      const key = getWibDateKey(ev.start_time);
-      if (!map[key]) map[key] = [];
-      map[key].push(ev);
-    }
+const MONTH_NAMES = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+const regLabel: Record<string, string> = {
+  TERBUKA: "Pendaftaran Terbuka",
+  PENUH: "Kuota Penuh",
+  TUTUP: "Pendaftaran Ditutup",
+  SEGERA_DIBUKA: "Segera Dibuka",
+};
+
+export function PublicEventCalendar({ events = [], today = dateKey(new Date()) }: { events: EventItem[]; today?: string }) {
+  const [selected, setSelected] = useState(today);
+  const [month, setMonth] = useState(today.slice(0, 7));
+  const [department, setDepartment] = useState("");
+
+  const departments = useMemo(
+    () => [...new Set(events.map((e) => e.department?.name || "BEM FKIP UIKA"))].sort(),
+    [events]
+  );
+
+  const byDate = useMemo(() => {
+    const map = new Map<string, EventItem[]>();
+    events
+      .filter((e) => !department || (e.department?.name || "BEM FKIP UIKA") === department)
+      .forEach((e) => {
+        const key = dateKey(e.start_time);
+        map.set(key, [...(map.get(key) || []), e]);
+      });
     return map;
-  }, [events]);
+  }, [events, department]);
 
-  // 2. Initial Condition Setup
-  const { initialYear, initialMonthIndex, initialLockedDateKey } = useMemo(() => {
-    const todayKey = getWibDateKey(new Date());
-
-    // Priority: closest upcoming event (start_time >= today)
-    const sortedUpcoming = [...events]
-      .filter((ev) => getWibDateKey(ev.start_time) >= todayKey)
-      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
-
-    const targetEvent = sortedUpcoming[0] || events[0] || null;
-    const targetDateKey = targetEvent ? getWibDateKey(targetEvent.start_time) : todayKey;
-
-    const [y, m] = targetDateKey.split("-").map(Number);
-    return {
-      initialYear: y,
-      initialMonthIndex: m - 1, // 0-indexed
-      initialLockedDateKey: targetDateKey,
-    };
-  }, [events]);
-
-  // State
-  const [currentYear, setCurrentYear] = useState<number>(initialYear);
-  const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(initialMonthIndex);
-  const [lockedDateKey, setLockedDateKey] = useState<string>(initialLockedDateKey);
-  const [hoverDateKey, setHoverDateKey] = useState<string | null>(null);
-
-  const eventPanelRef = useRef<HTMLDivElement>(null);
-
-  // Month navigation
-  const handlePrevMonth = () => {
-    if (currentMonthIndex === 0) {
-      setCurrentYear((y) => y - 1);
-      setCurrentMonthIndex(11);
-    } else {
-      setCurrentMonthIndex((m) => m - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (currentMonthIndex === 11) {
-      setCurrentYear((y) => y + 1);
-      setCurrentMonthIndex(0);
-    } else {
-      setCurrentMonthIndex((m) => m + 1);
-    }
-  };
-
-  // Header month text
-  const monthHeaderLabel = new Date(
-    Date.UTC(currentYear, currentMonthIndex, 1, 12, 0, 0)
-  ).toLocaleDateString("id-ID", {
-    month: "long",
-    year: "numeric",
-    timeZone: "Asia/Jakarta",
+  const [year, monthNum] = month.split("-").map(Number);
+  const first = new Date(Date.UTC(year, monthNum - 1, 1));
+  const offset = (first.getUTCDay() + 6) % 7;
+  const count = new Date(Date.UTC(year, monthNum, 0)).getUTCDate();
+  const cells = Array.from({ length: Math.ceil((offset + count) / 7) * 7 }, (_, i) => {
+    const day = i - offset + 1;
+    return day > 0 && day <= count ? `${month}-${String(day).padStart(2, "0")}` : null;
   });
 
-  // Calculate 35/42 Grid Cells (Mon-Sun starting Monday)
-  const calendarGridCells = useMemo(() => {
-    const cells = [];
-    const firstDayOfMonth = new Date(Date.UTC(currentYear, currentMonthIndex, 1, 12, 0, 0));
-    // Day of week: Sunday = 0, Monday = 1... -> Monday = 0 index
-    const firstDayOfWeekIndex = (firstDayOfMonth.getUTCDay() + 6) % 7;
+  const changeMonth = (delta: number) =>
+    setMonth((v) => {
+      const [y, m] = v.split("-").map(Number);
+      return new Date(Date.UTC(y, m - 1 + delta, 1)).toISOString().slice(0, 7);
+    });
 
-    const daysInMonth = new Date(
-      Date.UTC(currentYear, currentMonthIndex + 1, 0, 12, 0, 0)
-    ).getUTCDate();
-    const daysInPrevMonth = new Date(
-      Date.UTC(currentYear, currentMonthIndex, 0, 12, 0, 0)
-    ).getUTCDate();
-
-    // Trailing days from previous month
-    for (let i = firstDayOfWeekIndex - 1; i >= 0; i--) {
-      const day = daysInPrevMonth - i;
-      const prevMonthIdx = currentMonthIndex === 0 ? 11 : currentMonthIndex - 1;
-      const prevYear = currentMonthIndex === 0 ? currentYear - 1 : currentYear;
-      const monthStr = String(prevMonthIdx + 1).padStart(2, "0");
-      const dayStr = String(day).padStart(2, "0");
-      const dateKey = `${prevYear}-${monthStr}-${dayStr}`;
-      cells.push({
-        dateKey,
-        dayNumber: day,
-        isCurrentMonth: false,
-        events: eventsByDate[dateKey] || [],
-      });
-    }
-
-    // Days in current month
-    const currMonthStr = String(currentMonthIndex + 1).padStart(2, "0");
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dayStr = String(day).padStart(2, "0");
-      const dateKey = `${currentYear}-${currMonthStr}-${dayStr}`;
-      cells.push({
-        dateKey,
-        dayNumber: day,
-        isCurrentMonth: true,
-        events: eventsByDate[dateKey] || [],
-      });
-    }
-
-    // Leading days for next month
-    const totalNeeded = cells.length > 35 ? 42 : 35;
-    const needNextDays = totalNeeded - cells.length;
-
-    const nextMonthIdx = currentMonthIndex === 11 ? 0 : currentMonthIndex + 1;
-    const nextYear = currentMonthIndex === 11 ? currentYear + 1 : currentYear;
-    const nextMonthStr = String(nextMonthIdx + 1).padStart(2, "0");
-
-    for (let day = 1; day <= needNextDays; day++) {
-      const dayStr = String(day).padStart(2, "0");
-      const dateKey = `${nextYear}-${nextMonthStr}-${dayStr}`;
-      cells.push({
-        dateKey,
-        dayNumber: day,
-        isCurrentMonth: false,
-        events: eventsByDate[dateKey] || [],
-      });
-    }
-
-    return cells;
-  }, [currentYear, currentMonthIndex, eventsByDate]);
-
-  // Active date logic
-  const activeDateKey = hoverDateKey || lockedDateKey;
-  const activeEvents = eventsByDate[activeDateKey] || [];
-  const todayKey = getWibDateKey(new Date());
-
-  // Date selection handler
-  const handleSelectDate = (dateKey: string, cellEvents: EventItem[]) => {
-    setLockedDateKey(dateKey);
-    setHoverDateKey(null);
-
-    // Scroll to event panel on mobile if below viewport
-    if (cellEvents.length > 0 && typeof window !== "undefined" && window.innerWidth < 1024) {
-      setTimeout(() => {
-        eventPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 50);
-    }
-  };
-
-  const dayNames = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+  const selectDate = (key: string) => { setSelected(key); setMonth(key.slice(0, 7)); };
+  const activeEvents = byDate.get(selected) || [];
+  const nextDate = [...byDate.keys()].filter((k) => k > selected).sort()[0];
 
   return (
-    <div className="grid gap-6 lg:grid-cols-12 items-start">
-      {/* LEFT COLUMN: Calendar Card (~40-45% width on desktop -> lg:col-span-5) */}
-      <div className="lg:col-span-5 space-y-4">
-        <div className="glass rounded-3xl p-5 sm:p-6 shadow-xl border border-glass-border space-y-5">
-          {/* Month Header Navigation */}
-          <div className="flex items-center justify-between border-b border-glass-border pb-4">
-            <div>
-              <h3 className="text-lg font-bold text-white capitalize">{monthHeaderLabel}</h3>
-              <p className="text-xs text-muted-foreground">Pilih tanggal untuk melihat agenda acara</p>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={handlePrevMonth}
-                aria-label="Bulan Sebelumnya"
-                className="focus-ring flex size-9 items-center justify-center rounded-xl bg-white/5 border border-glass-border text-white hover:bg-brand/30 hover:border-accent/40 transition"
-              >
-                <ChevronLeft className="size-4" />
-              </button>
-              <button
-                type="button"
-                onClick={handleNextMonth}
-                aria-label="Bulan Berikutnya"
-                className="focus-ring flex size-9 items-center justify-center rounded-xl bg-white/5 border border-glass-border text-white hover:bg-brand/30 hover:border-accent/40 transition"
-              >
-                <ChevronRight className="size-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Calendar Grid */}
-          <div onMouseLeave={() => setHoverDateKey(null)}>
-            {/* Days of week header */}
-            <div className="grid grid-cols-7 gap-1 text-center mb-2">
-              {dayNames.map((d) => (
-                <span key={d} className="text-xs font-bold text-accent uppercase tracking-wider py-1">
-                  {d}
-                </span>
-              ))}
-            </div>
-
-            {/* Date Cells Grid */}
-            <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
-              {calendarGridCells.map((cell) => {
-                const { dateKey, dayNumber, isCurrentMonth, events: cellEvents } = cell;
-                const hasEvents = cellEvents.length > 0;
-                const isLocked = dateKey === lockedDateKey;
-                const isHovered = dateKey === hoverDateKey;
-                const isToday = dateKey === todayKey;
-
-                let cellStyle = "bg-white/5 text-muted-foreground/60 hover:bg-white/10 hover:text-white";
-
-                if (isCurrentMonth) {
-                  if (hasEvents) {
-                    cellStyle = "bg-brand/20 border border-brand/40 text-white font-bold hover:bg-brand/40 hover:border-accent/60 shadow-xs";
-                  } else {
-                    cellStyle = "text-white/80 hover:bg-white/10 hover:text-white";
-                  }
-                } else {
-                  cellStyle = "text-muted-foreground/30 hover:bg-white/5";
-                }
-
-                if (isLocked) {
-                  cellStyle = "bg-brand/50 border-2 border-accent text-white font-extrabold shadow-[0_0_15px_rgba(236,72,153,0.35)] scale-105 z-10";
-                } else if (isHovered) {
-                  cellStyle = "bg-white/20 border border-white/30 text-white font-bold";
-                }
-
-                return (
-                  <button
-                    key={dateKey}
-                    type="button"
-                    tabIndex={0}
-                    onClick={() => handleSelectDate(dateKey, cellEvents)}
-                    onMouseEnter={() => hasEvents && setHoverDateKey(dateKey)}
-                    onFocus={() => hasEvents && setHoverDateKey(dateKey)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        handleSelectDate(dateKey, cellEvents);
-                      }
-                    }}
-                    className={`relative aspect-square flex flex-col items-center justify-between p-1 sm:p-1.5 rounded-2xl transition-all duration-200 select-none ${cellStyle}`}
-                  >
-                    <span className={`text-xs sm:text-sm font-semibold ${isToday ? "underline underline-offset-4 decoration-accent font-extrabold" : ""}`}>
-                      {dayNumber}
-                    </span>
-
-                    {/* Indicator for Events */}
-                    {hasEvents && (
-                      <div className="flex items-center justify-center gap-1 w-full pb-0.5">
-                        {cellEvents.length === 1 ? (
-                          <span className="size-1.5 rounded-full bg-accent animate-pulse" />
-                        ) : (
-                          <span className="text-[9px] sm:text-[10px] font-extrabold bg-accent text-white px-1.5 py-0.2 rounded-full shadow-xs">
-                            +{cellEvents.length}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Legend Footer */}
-          <div className="pt-3 border-t border-glass-border flex items-center justify-between text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-accent" /> Tanggal Ada Kegiatan
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2.5 rounded-full border border-accent bg-brand/40" /> Tanggal Terpilih
-            </span>
-          </div>
+    <div className="space-y-6">
+      {/* Filter row */}
+      <div className="flex flex-wrap items-center gap-4 pb-4 border-b border-slate-200">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 shrink-0">
+          <Filter className="w-3.5 h-3.5 text-slate-400" /> Penyelenggara:
         </div>
+        <div className="flex items-center gap-2 overflow-x-auto">
+          {["", ...departments].map((dept) => (
+            <button
+              key={dept || "__all__"}
+              type="button"
+              onClick={() => setDepartment(dept)}
+              className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors shrink-0 ${
+                department === dept
+                  ? "bg-[#E11D74] text-white shadow-sm"
+                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+              }`}
+            >
+              {dept || "Semua"}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => selectDate(today)}
+          className="ml-auto text-xs rounded-lg border border-slate-200 px-3 py-1.5 font-medium text-slate-700 hover:border-pink-300 hover:text-[#E11D74] transition-colors shrink-0"
+        >
+          Hari Ini
+        </button>
       </div>
 
-      {/* RIGHT COLUMN: Event Panel (~55-60% width on desktop -> lg:col-span-7) */}
-      <div ref={eventPanelRef} className="lg:col-span-7 space-y-5">
-        <div className="glass rounded-3xl p-5 sm:p-6 border border-glass-border shadow-xl space-y-4">
-          {/* Panel Header */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-glass-border pb-4">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="size-5 text-accent" />
-              <h3 className="text-base font-bold text-white">
-                {formatIndonesianDateStr(activeDateKey)}
-              </h3>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {activeDateKey === todayKey && (
-                <span className="text-[10px] bg-accent/20 text-accent border border-accent/30 font-bold px-2.5 py-0.5 rounded-full">
-                  Hari Ini
-                </span>
-              )}
-              <span className="text-[10px] bg-white/10 text-muted-foreground font-semibold px-2.5 py-0.5 rounded-full">
-                {activeEvents.length} Agenda Kegiatan
-              </span>
+      {/* Two-column layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* LEFT: Calendar */}
+        <div className="lg:col-span-6 bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-5">
+          {/* Month navigator */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">
+              {MONTH_NAMES[monthNum - 1]} {year}
+            </h2>
+            <div className="flex items-center gap-1">
+              <button type="button" onClick={() => changeMonth(-1)} aria-label="Bulan sebelumnya"
+                className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button type="button" onClick={() => changeMonth(1)} aria-label="Bulan berikutnya"
+                className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors">
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          {/* Panel Content Body */}
+          {/* Weekday labels */}
+          <div className="grid grid-cols-7 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+            {["Sen","Sel","Rab","Kam","Jum","Sab","Min"].map((d) => <span key={d}>{d}</span>)}
+          </div>
+
+          {/* Days */}
+          <div className="grid grid-cols-7 gap-1.5">
+            {cells.map((key, i) =>
+              key ? (
+                <button
+                  key={key}
+                  type="button"
+                  data-date={key}
+                  onClick={() => selectDate(key)}
+                  aria-pressed={key === selected}
+                  aria-label={`${dateLabel(key)}, ${byDate.get(key)?.length || 0} kegiatan`}
+                  className={`relative h-11 rounded-xl flex flex-col items-center justify-center p-1 transition-colors duration-150 text-sm font-semibold select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 cursor-pointer ${
+                    key === selected
+                      ? "bg-[#E11D74] text-white shadow-md shadow-pink-500/25"
+                      : byDate.has(key)
+                      ? "bg-pink-50 text-[#BE185D] hover:bg-pink-100 border border-pink-200/70 font-bold"
+                      : "text-slate-700 hover:bg-slate-100 bg-white"
+                  }`}
+                >
+                  <span>{Number(key.slice(-2))}</span>
+                  {byDate.has(key) && (
+                    <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${key === selected ? "bg-white" : "bg-[#E11D74]"}`} />
+                  )}
+                </button>
+              ) : (
+                <span key={`blank-${i}`} className="h-11 rounded-xl bg-slate-50/50" />
+              )
+            )}
+          </div>
+
+          {/* Legend */}
+          <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-3">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#E11D74]" />
+              <span>Ada Agenda</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#E11D74] ring-2 ring-pink-300" />
+              <span>Dipilih</span>
+            </div>
+            <span className="text-[11px] text-slate-400">Total {events.length} kegiatan</span>
+          </div>
+        </div>
+
+        {/* RIGHT: Event detail panel */}
+        <div className="lg:col-span-6 space-y-4">
+          {/* Date header */}
+          <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between shadow-xs">
+            <div>
+              <p className="text-xs text-slate-500 font-medium">Agenda pada tanggal:</p>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">{dateLabel(selected)}</h3>
+            </div>
+            <span className={`rounded-md px-3 py-1 text-xs font-bold ${activeEvents.length > 0 ? "bg-pink-50 text-[#BE185D] border border-pink-200" : "bg-slate-100 text-slate-500"}`}>
+              {activeEvents.length} Kegiatan
+            </span>
+          </div>
+
+          {/* Events or empty */}
           {activeEvents.length === 0 ? (
-            <div className="glass rounded-3xl p-8 sm:p-12 text-center border-glass-border space-y-3">
-              <div className="mx-auto size-12 rounded-2xl bg-white/5 border border-glass-border flex items-center justify-center text-muted-foreground">
-                <CalendarIcon className="size-6 text-accent/60" />
-              </div>
-              <h4 className="text-base font-bold text-white">Tidak ada kegiatan pada tanggal ini</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed max-w-sm mx-auto">
-                Pilih tanggal yang memiliki tanda indikator warna pink di kalender untuk melihat detail agenda acara BEM FKIP UIKA.
-              </p>
+            <div className="rounded-2xl border border-dashed border-slate-200 p-8 text-center bg-white">
+              <CalendarDays className="w-8 h-8 mx-auto mb-3 text-slate-300" />
+              <h4 className="font-semibold text-slate-900">Belum ada kegiatan pada tanggal ini</h4>
+              <p className="mt-1 text-xs text-slate-500">Pilih tanggal bertanda titik pink untuk melihat agenda.</p>
+              {nextDate && (
+                <button type="button" onClick={() => selectDate(nextDate)}
+                  className="mt-4 rounded-lg border border-slate-200 px-4 py-2 text-xs font-medium text-slate-700 hover:border-pink-300 hover:text-[#E11D74] transition-colors">
+                  Ke Agenda Berikutnya
+                </button>
+              )}
             </div>
           ) : (
-            <div className="space-y-5 max-h-[750px] overflow-y-auto pr-1">
-              {activeEvents.map((ev) => {
-                const eventSlugOrId = ev.slug || ev.id;
-                const isOpen = ev.registration_status === "TERBUKA";
-
-                const startTimeStr = new Date(ev.start_time).toLocaleTimeString("id-ID", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  timeZone: "Asia/Jakarta",
-                });
-                const endTimeStr = ev.end_time
-                  ? new Date(ev.end_time).toLocaleTimeString("id-ID", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      timeZone: "Asia/Jakarta",
-                    })
-                  : null;
-
-                return (
-                  <div
-                    key={ev.id}
-                    className="glass rounded-3xl overflow-hidden border border-glass-border hover:border-accent/40 transition shadow-xl flex flex-col justify-between"
-                  >
-                    {/* Poster Banner */}
-                    {ev.poster_url ? (
-                      <div className="relative h-48 sm:h-56 w-full overflow-hidden bg-black/40 border-b border-glass-border">
-                        <img
-                          src={ev.poster_url}
-                          alt={ev.name}
-                          className="w-full h-full object-cover brightness-95 transition duration-500 hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                        <span
-                          className={`absolute top-3 right-3 text-xs font-bold px-3 py-1 rounded-full backdrop-blur-md shadow-md ${
-                            isOpen
-                              ? "bg-green-500/80 text-white border border-green-400/40"
-                              : "bg-yellow-500/80 text-white border border-yellow-400/40"
-                          }`}
-                        >
-                          {isOpen ? "Pendaftaran Terbuka" : "Segera Dibuka"}
+            <div className="space-y-4">
+              {activeEvents.map((event) => (
+                <article key={event.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-pink-300 transition-colors duration-200">
+                  {event.poster_url && (
+                    <div className="relative h-48 w-full bg-slate-100">
+                      <img src={event.poster_url} alt={event.name} className="w-full h-full object-cover" loading="lazy" />
+                      <div className="absolute top-3 left-3">
+                        <span className={`rounded-md px-2.5 py-1 text-xs font-bold ${event.registration_status === "TERBUKA" ? "bg-emerald-100 text-emerald-700" : "bg-pink-100 text-[#BE185D]"}`}>
+                          {regLabel[event.registration_status] || event.registration_status}
                         </span>
-                        {ev.department?.name && (
-                          <span className="absolute bottom-3 left-4 rounded-full bg-accent/90 text-white text-[10px] font-bold px-2.5 py-0.5 uppercase tracking-wider backdrop-blur-md">
-                            {ev.department.name}
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="relative h-24 w-full overflow-hidden bg-gradient-to-br from-brand/30 via-purple-900/20 to-black/60 p-4 flex items-end justify-between border-b border-glass-border">
-                        <span
-                          className={`text-xs font-bold px-3 py-1 rounded-full ${
-                            isOpen
-                              ? "bg-green-500/20 text-green-300 border border-green-500/30"
-                              : "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
-                          }`}
-                        >
-                          {isOpen ? "Pendaftaran Terbuka" : "Segera Dibuka"}
-                        </span>
-                        {ev.department?.name && (
-                          <span className="rounded-full bg-accent/20 text-accent text-[10px] font-semibold px-2.5 py-0.5 border border-accent/30">
-                            {ev.department.name}
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="p-6 flex flex-col flex-1 justify-between space-y-4">
-                      <div>
-                        <div className="flex flex-wrap items-center gap-3 text-xs text-accent font-semibold mb-2">
-                          <span className="flex items-center gap-1">
-                            <Clock className="size-3.5 shrink-0" /> {startTimeStr} {endTimeStr ? `s.d. ${endTimeStr}` : ""} WIB
-                          </span>
-                        </div>
-                        <h3 className="text-xl font-bold text-white hover:text-accent transition">
-                          <Link href={`/kegiatan/${eventSlugOrId}`}>{ev.name}</Link>
-                        </h3>
-                        <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                          {ev.description}
-                        </p>
-                      </div>
-
-                      <div className="pt-4 border-t border-glass-border space-y-3">
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1.5">
-                            <MapPin className="size-4 text-accent shrink-0" /> {ev.location}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Users className="size-4 text-accent shrink-0" /> Kuota: {ev.max_participants || "Tidak Terbatas"}
-                          </span>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex items-center gap-2 pt-1">
-                          <Link
-                            href={`/kegiatan/${eventSlugOrId}`}
-                            className="focus-ring flex-1 text-center rounded-xl border border-glass-border px-3 py-2 text-xs font-semibold text-white hover:border-accent hover:text-accent transition"
-                          >
-                            Detail Acara
-                          </Link>
-                          {isOpen && (
-                            <Link
-                              href={`/kegiatan/${eventSlugOrId}/daftar`}
-                              className="focus-ring flex-1 text-center rounded-xl bg-brand px-3 py-2 text-xs font-semibold text-white hover:bg-brand-hover transition inline-flex items-center justify-center gap-1 shadow-md"
-                            >
-                              Daftar Acara <ArrowUpRight className="size-3.5" />
-                            </Link>
-                          )}
-                        </div>
                       </div>
                     </div>
+                  )}
+                  <div className="p-5 space-y-3">
+                    {event.department && (
+                      <p className="text-xs font-semibold text-[#BE185D]">{event.department.name}</p>
+                    )}
+                    <h4 className="text-lg font-extrabold text-slate-900 leading-tight">
+                      <Link href={`/kegiatan/${event.slug || event.id}`} className="hover:text-[#E11D74] transition-colors">
+                        {event.name}
+                      </Link>
+                    </h4>
+                    <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">{event.description}</p>
+                    <div className="grid grid-cols-2 gap-2 py-3 border-y border-slate-100 text-xs text-slate-600">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-[#E11D74] shrink-0" />
+                        <span>{new Date(event.start_time).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" })} WIB</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-[#E11D74] shrink-0" />
+                        <span className="line-clamp-1">{event.location}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link href={`/kegiatan/${event.slug || event.id}`}
+                        className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-medium text-slate-700 hover:border-pink-300 hover:text-[#E11D74] transition-colors">
+                        Detail Kegiatan
+                      </Link>
+                      {event.registration_status === "TERBUKA" && (
+                        <Link href={`/kegiatan/${event.slug || event.id}/daftar`}
+                          className="rounded-lg bg-[#E11D74] px-4 py-2 text-xs font-medium text-white hover:bg-[#BE185D] transition-colors">
+                          Daftar Sekarang
+                        </Link>
+                      )}
+                    </div>
                   </div>
-                );
-              })}
+                </article>
+              ))}
             </div>
           )}
         </div>

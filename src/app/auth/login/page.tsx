@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthShell } from "@/components/AuthShell";
@@ -11,14 +11,17 @@ export default function StudentLoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const pending = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pending.current) return;
     if (!email || !password) {
       setErrorMsg("Email dan password wajib diisi.");
       return;
     }
 
+    pending.current = true;
     setLoading(true);
     setErrorMsg("");
 
@@ -39,6 +42,7 @@ export default function StudentLoginPage() {
     } catch (err: any) {
       setErrorMsg(err.message || "Terjadi kesalahan sistem.");
     } finally {
+      pending.current = false;
       setLoading(false);
     }
   };
@@ -59,7 +63,7 @@ export default function StudentLoginPage() {
     >
       <form onSubmit={handleSubmit} className="grid gap-4">
         {errorMsg && (
-          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs text-red-500">
+          <div role="alert" className="rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs text-danger">
             {errorMsg}
           </div>
         )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { use } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Send } from "lucide-react";
@@ -13,42 +13,49 @@ export default function EventRegisterPage({ params }: { params: Promise<{ slug: 
   const [name, setName] = useState("");
   const [nim, setNim] = useState("");
   const [email, setEmail] = useState("");
-  const [prodi, setProdi] = useState("Pendidikan Bahasa Inggris");
+  const [prodi, setProdi] = useState("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const pending = useRef(false);
+  const [programError, setProgramError] = useState("");
+  const [programRetry, setProgramRetry] = useState(0);
 
   const [studyPrograms, setStudyPrograms] = useState<{ id: string; name: string; code: string }[]>([]);
 
   useEffect(() => {
-    fetch("/api/public/auth/me")
+    const controller = new AbortController();
+    setProgramError("");
+    fetch("/api/public/auth/me", { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
-        if (data.student) {
-          setName(data.student.name || "");
-          setNim(data.student.nim || "");
-          setEmail(data.student.email || "");
+        if (!controller.signal.aborted && data.student) {
+          setName(value => value || data.student.name || "");
+          setNim(value => value || data.student.nim || "");
+          setEmail(value => value || data.student.email || "");
           if (data.student.program_studi_name) {
-            setProdi(data.student.program_studi_name);
+            setProdi(value => value || data.student.program_studi_name);
           }
         }
       })
       .catch(() => {});
 
-    fetch("/api/public/study-programs")
+    fetch("/api/public/study-programs", { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
-        if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+        if (!controller.signal.aborted && data.data && Array.isArray(data.data) && data.data.length > 0) {
           setStudyPrograms(data.data);
-        }
+        } else if (!controller.signal.aborted) setProgramError("Daftar program studi belum tersedia.");
       })
-      .catch(() => {});
-  }, []);
+      .catch(() => { if (!controller.signal.aborted) setProgramError("Daftar program studi gagal dimuat."); });
+    return () => controller.abort();
+  }, [programRetry]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (busy) return;
+    if (pending.current) return;
+    pending.current = true;
     setBusy(true);
     setErrorMsg("");
 
@@ -68,6 +75,7 @@ export default function EventRegisterPage({ params }: { params: Promise<{ slug: 
     } catch (err: any) {
       setErrorMsg(err?.message || "Terjadi kesalahan saat pendaftaran. Coba lagi.");
     } finally {
+      pending.current = false;
       setBusy(false);
     }
   }
@@ -88,39 +96,37 @@ export default function EventRegisterPage({ params }: { params: Promise<{ slug: 
       <section className="px-4 pb-24 sm:px-6">
         <div className="mx-auto max-w-2xl">
           {submitted ? (
-            <div className="glass rounded-3xl p-8 text-center border-accent/40 shadow-2xl">
-              <div className="mx-auto size-16 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center mb-4 border border-green-500/30">
+            <div className="glass rounded-3xl p-8 text-center border-accent/40 shadow-sm">
+              <div className="mx-auto size-16 rounded-full bg-green-500/20 text-success flex items-center justify-center mb-4 border border-green-500/30">
                 <CheckCircle2 className="size-10" />
               </div>
-              <h3 className="text-2xl font-bold text-white">Pendaftaran Berhasil!</h3>
+              <h3 className="text-2xl font-bold text-foreground">Pendaftaran Berhasil!</h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 Data pendaftaran Anda untuk kegiatan <span className="text-accent font-semibold">{slug}</span> telah tersimpan di database BEM FKIP UIKA dan sudah masuk ke Admin Panel.
               </p>
               <div className="mt-6 p-4 rounded-2xl bg-white/5 border border-glass-border text-left text-xs space-y-2 font-mono">
-                <p><span className="text-muted-foreground">Nama:</span> <strong className="text-white">{name}</strong></p>
-                <p><span className="text-muted-foreground">NIM:</span> <strong className="text-white">{nim}</strong></p>
-                <p><span className="text-muted-foreground">Program Studi:</span> <strong className="text-white">{prodi}</strong></p>
-                <p><span className="text-muted-foreground">Status Pendaftaran:</span> <strong className="text-green-400">TERDAFTAR (MENUNGGU KONFIRMASI)</strong></p>
+                <p><span className="text-muted-foreground">Nama:</span> <strong className="text-foreground">{name}</strong></p>
+                <p><span className="text-muted-foreground">NIM:</span> <strong className="text-foreground">{nim}</strong></p>
+                <p><span className="text-muted-foreground">Program Studi:</span> <strong className="text-foreground">{prodi}</strong></p>
+                <p><span className="text-muted-foreground">Status Pendaftaran:</span> <strong className="text-success">TERDAFTAR (MENUNGGU KONFIRMASI)</strong></p>
               </div>
-              <div className="mt-8 flex justify-center gap-3">
+              <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Link href="/portal/kegiatan" className="focus-ring rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover">
                   Cek di Portal Mahasiswa
                 </Link>
-                <Link href="/admin/layanan/kegiatan" className="focus-ring rounded-full border border-glass-border px-5 py-2.5 text-sm font-semibold hover:border-accent">
-                  Cek di Admin Panel
+                <Link href={`/kegiatan/${slug}`} className="focus-ring rounded-full border border-glass-border px-5 py-2.5 text-sm font-semibold hover:border-accent">
+                  Kembali ke Kegiatan
                 </Link>
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl">
+            <form onSubmit={handleSubmit} className="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm">
               <div className="flex items-center justify-between border-b border-glass-border pb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Data Peserta Mahasiswa</h3>
+                  <h3 className="text-lg font-semibold text-foreground">Data Peserta Mahasiswa</h3>
                   <p className="text-xs text-muted-foreground">Pastikan data yang dimasukkan sesuai dengan KTM Anda.</p>
                 </div>
-                <span className="rounded-full bg-accent/20 text-accent font-semibold px-3 py-1 text-xs">
-                  Sesi Terverifikasi
-                </span>
+
               </div>
 
               {errorMsg && (
@@ -171,10 +177,13 @@ export default function EventRegisterPage({ params }: { params: Promise<{ slug: 
                 <label className="text-sm font-medium">
                   Program Studi *
                   <select
+                    required
+                    disabled={busy || !studyPrograms.length}
                     className="form-control mt-1.5"
                     value={prodi}
                     onChange={(e) => setProdi(e.target.value)}
                   >
+                    <option value="">Pilih program studi</option>
                     {studyPrograms.length > 0 ? (
                       studyPrograms.map((sp) => (
                         <option key={sp.id} value={sp.name}>
@@ -182,18 +191,13 @@ export default function EventRegisterPage({ params }: { params: Promise<{ slug: 
                         </option>
                       ))
                     ) : (
-                      <>
-                        <option value="Pendidikan Bahasa Inggris">Pendidikan Bahasa Inggris (PBI)</option>
-                        <option value="Pendidikan Matematika">Pendidikan Matematika (PMAT)</option>
-                        <option value="Pendidikan Masyarakat / Pendidikan Luar Sekolah">Pendidikan Masyarakat / Pendidikan Luar Sekolah (PLS)</option>
-                        <option value="Teknologi Pendidikan">Teknologi Pendidikan (TP)</option>
-                        <option value="Pendidikan Vokasional Desain Fashion">Pendidikan Vokasional Desain Fashion (PVDF)</option>
-                      </>
+                      <option disabled value="">Program studi belum tersedia</option>
                     )}
                   </select>
                 </label>
               </div>
 
+              {programError && <div role="alert" className="rounded-lg border p-3 text-sm">{programError} <button type="button" className="underline" onClick={() => setProgramRetry(value => value + 1)}>Muat ulang</button></div>}
               <label className="text-sm font-medium">
                 Catatan Tambahan / Motivasi Mengikuti Acara
                 <textarea
@@ -204,17 +208,17 @@ export default function EventRegisterPage({ params }: { params: Promise<{ slug: 
                 />
               </label>
 
-              <div className="pt-4 flex items-center justify-between gap-4 border-t border-glass-border">
-                <Link href="/kegiatan" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-white">
+              <div className="pt-4 flex flex-wrap items-center justify-between gap-4 border-t border-glass-border">
+                <Link href="/kegiatan" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
                   <ArrowLeft className="size-4" /> Batal
                 </Link>
 
                 <button
                   type="submit"
-                  disabled={busy}
+                  disabled={busy || !prodi || !studyPrograms.length}
                   className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-white hover:bg-brand-hover disabled:opacity-50"
                 >
-                  {busy ? "Memproses Pendaftaran…" : <><Send className="size-4" /> Kirim Pendaftaran Sekarang</>}
+                  {busy ? "Memproses Pendaftaran…" : <><Send className="size-4" /> Kirim Pendaftaran</>}
                 </button>
               </div>
             </form>

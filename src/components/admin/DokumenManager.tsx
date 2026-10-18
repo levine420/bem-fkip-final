@@ -1,4 +1,6 @@
 "use client";
+import { Pagination } from "@/components/Pagination";
+import { Modal } from "@/components/Modal";
 import { useEffect, useState } from "react";
 import { actionClass, adminApi, errorMessage } from "./api";
 
@@ -122,7 +124,7 @@ export function DokumenManager() {
           category: docCategory,
           is_public: isPublic,
         });
-        setNotice(`Dokumen "${docName}" berhasil diunggah/ditambahkan.`);
+        setNotice(`Dokumen "${docName}" berhasil ditambahkan ke daftar.`);
       }
       setIsModalOpen(false);
       setRefresh((r) => r + 1);
@@ -192,8 +194,8 @@ export function DokumenManager() {
               Kelola berkas publik & arsip internal BEM (LPJ, SK, Proposal, AD/ART).
             </p>
           </div>
-          <button onClick={openCreateModal} className={`${actionClass} bg-brand`}>
-            + Unggah Dokumen Baru
+          <button type="button" onClick={openCreateModal} className={`${actionClass} bg-brand`}>
+            + Tambah Informasi Dokumen
           </button>
         </div>
       </section>
@@ -256,7 +258,7 @@ export function DokumenManager() {
               <option value="false">Internal BEM</option>
             </select>
           </label>
-          <button className={`${actionClass} bg-brand/50`} disabled={loading}>
+          <button type="submit" className={`${actionClass} bg-brand/50`} disabled={loading}>
             {loading ? "Memuat…" : "Terapkan"}
           </button>
         </form>
@@ -266,7 +268,7 @@ export function DokumenManager() {
         {!loading && data && data.items.length === 0 && (
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              {search || category || isPublicFilter ? "Tidak ada dokumen yang cocok dengan filter." : "Belum ada dokumen terunggah."}
+              {search || category || isPublicFilter ? "Tidak ada dokumen yang cocok dengan filter." : "Belum ada dokumen dalam daftar."}
             </p>
           </div>
         )}
@@ -298,10 +300,10 @@ export function DokumenManager() {
                     </td>
                     <td className="py-3 text-xs text-muted-foreground">{formatDate(doc.uploaded_at)}</td>
                     <td className="py-3 text-xs">
-                      <button
+                      <button type="button"
                         onClick={() => handleTogglePublic(doc)}
                         className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium cursor-pointer transition ${
-                          doc.is_public ? "bg-green-500/20 text-green-300 hover:bg-green-500/30" : "bg-gray-500/20 text-gray-300 hover:bg-gray-500/30"
+                          doc.is_public ? "bg-green-500/20 text-success hover:bg-green-500/30" : "bg-gray-500/20 text-muted-foreground hover:bg-gray-500/30"
                         }`}
                         title="Klik untuk mengubah akses publik"
                       >
@@ -310,16 +312,17 @@ export function DokumenManager() {
                     </td>
                     <td className="py-3 text-right">
                       <div className="flex justify-end items-center gap-2">
-                        <button
-                          onClick={() => alert(`Simulasi Unduh: ${doc.original_filename}`)}
+                        <button type="button"
+                          disabled
+                          title="Layanan unduhan dokumen belum tersedia"
                           className="text-accent hover:underline text-xs"
                         >
                           Unduh
                         </button>
-                        <button onClick={() => openEditModal(doc)} className="text-accent hover:underline text-xs" disabled={busy}>
+                        <button type="button" onClick={() => openEditModal(doc)} className="text-accent hover:underline text-xs" disabled={busy}>
                           Edit
                         </button>
-                        <button onClick={() => handleDelete(doc)} className="text-soft hover:underline text-xs" disabled={busy}>
+                        <button type="button" onClick={() => handleDelete(doc)} className="text-soft hover:underline text-xs" disabled={busy}>
                           Hapus
                         </button>
                       </div>
@@ -332,11 +335,15 @@ export function DokumenManager() {
         )}
       </section>
 
+      {data && <Pagination page={page} pageSize={data.page_size} total={data.total} busy={busy || loading} onPage={setPage} />}
+
       {/* Modal Form */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="glass rounded-3xl p-6 w-full max-w-lg shadow-2xl">
-            <h3 className="text-lg font-semibold">{editingItem ? "Edit Dokumen" : "Unggah Dokumen Baru"}</h3>
+        <Modal label="Dokumen" busy={busy} onClose={() => setIsModalOpen(false)}>
+          <div className="glass rounded-3xl p-6 w-full max-w-lg shadow-sm">
+            <h3 className="text-lg font-semibold">{editingItem ? "Edit Dokumen" : "Tambah Informasi Dokumen"}</h3>
+            {error && <p role="alert" className="mt-4 rounded-lg border p-3 text-sm">{error}</p>}
+            <p className="mt-2 text-sm text-muted-foreground">Formulir ini mencatat informasi dokumen. Unggah berkas dan unduhan belum tersedia.</p>
             <form onSubmit={handleSave} className="mt-4 grid gap-3">
               <label className="text-sm">
                 Nama Dokumen / Judul Berkas *
@@ -420,7 +427,7 @@ export function DokumenManager() {
               </div>
             </form>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

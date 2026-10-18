@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthShell } from "@/components/AuthShell";
@@ -16,6 +16,10 @@ export default function RegisterPage() {
   const [studyPrograms, setStudyPrograms] = useState<StudyProgram[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const pending = useRef(false);
+  const [programLoading, setProgramLoading] = useState(true);
+  const [programError, setProgramError] = useState("");
+  const [programRetry, setProgramRetry] = useState(0);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -28,25 +32,35 @@ export default function RegisterPage() {
   });
 
   useEffect(() => {
+    let live = true;
+    setProgramLoading(true);
+    setProgramError("");
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
 
     fetch("/api/public/study-programs", { signal: controller.signal })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Daftar program studi gagal dimuat.");
+        return res.json();
+      })
       .then((data) => {
+        if (!live) return;
         if (data.data && Array.isArray(data.data) && data.data.length > 0) {
           setStudyPrograms(data.data);
-          setFormData((prev) => ({ ...prev, program_studi_id: data.data[0].id }));
+          setFormData((prev) => ({ ...prev, program_studi_id: prev.program_studi_id || data.data[0].id }));
+        } else {
+          setProgramError("Daftar program studi belum tersedia. Silakan coba lagi.");
         }
       })
-      .catch(() => {})
-      .finally(() => clearTimeout(timeout));
+      .catch(() => { if (live) setProgramError("Daftar program studi gagal dimuat. Periksa koneksi dan coba lagi."); })
+      .finally(() => { clearTimeout(timeout); if (live) setProgramLoading(false); });
 
     return () => {
+      live = false;
       controller.abort();
       clearTimeout(timeout);
     };
-  }, []);
+  }, [programRetry]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -55,6 +69,8 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pending.current) return;
+    if (programLoading || !studyPrograms.length || !formData.program_studi_id) return;
     setErrorMsg("");
 
     if (formData.password !== formData.confirmPassword) {
@@ -67,6 +83,7 @@ export default function RegisterPage() {
       return;
     }
 
+    pending.current = true;
     setLoading(true);
 
     try {
@@ -94,6 +111,7 @@ export default function RegisterPage() {
     } catch (err: any) {
       setErrorMsg(err.message || "Terjadi kesalahan pendaftaran.");
     } finally {
+      pending.current = false;
       setLoading(false);
     }
   };
@@ -114,7 +132,7 @@ export default function RegisterPage() {
     >
       <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
         {errorMsg && (
-          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs text-red-500 sm:col-span-2">
+          <div role="alert" className="rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs text-danger sm:col-span-2">
             {errorMsg}
           </div>
         )}
@@ -167,9 +185,9 @@ export default function RegisterPage() {
             value={formData.program_studi_id}
             onChange={handleChange}
             required
-            disabled={loading}
+            disabled={loading || programLoading || !studyPrograms.length}
           >
-            {studyPrograms.length === 0 && <option value="">Loading prodi...</option>}
+            {studyPrograms.length === 0 && <option value="">{programLoading ? "Memuat program studi…" : "Program studi belum tersedia"}</option>}
             {studyPrograms.map((sp) => (
               <option key={sp.id} value={sp.id}>
                 {sp.name} ({sp.code})
@@ -177,6 +195,11 @@ export default function RegisterPage() {
             ))}
           </select>
         </label>
+
+        {programError && <div role="alert" className="rounded-xl border p-3 text-sm sm:col-span-2">
+          <p>{programError}</p>
+          <button type="button" className="button-secondary mt-3" disabled={programLoading || loading} onClick={() => setProgramRetry(value => value + 1)}>Muat ulang program studi</button>
+        </div>}
 
         <label className="text-sm font-semibold">
           Angkatan *
@@ -222,7 +245,7 @@ export default function RegisterPage() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || programLoading || !studyPrograms.length || !formData.program_studi_id}
           className="bg-brand hover:bg-brand-dark min-h-12 rounded-full px-5 text-sm font-semibold text-white transition disabled:opacity-50 sm:col-span-2"
         >
           {loading ? "Mendaftarkan Akun..." : "Daftar Akun Mahasiswa"}

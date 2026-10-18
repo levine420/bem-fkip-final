@@ -5,20 +5,23 @@ export function SectionHeading({
   title,
   description,
   action,
+  icon,
 }: {
   eyebrow: string;
   title: ReactNode;
   description?: string;
   action?: ReactNode;
+  icon?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
       <div className="max-w-2xl">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">{eyebrow}</span>
-        <h2 className="mt-3 font-display text-3xl font-extrabold leading-tight sm:text-4xl">{title}</h2>
-        {description ? (
-          <p className="mt-3.5 text-sm leading-relaxed text-muted-foreground sm:text-base">{description}</p>
-        ) : null}
+        <div className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#BE185D]">
+          {icon}
+          <span>{eyebrow}</span>
+        </div>
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{title}</h2>
+        {description ? <p className="mt-1 text-sm text-slate-500">{description}</p> : null}
       </div>
       {action}
     </div>

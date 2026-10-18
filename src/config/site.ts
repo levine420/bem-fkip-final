@@ -7,12 +7,11 @@ export const siteConfig = {
     "Menjadi platform digital terpadu yang menghubungkan mahasiswa FKIP UIKA dengan layanan, informasi, dan aspirasi secara transparan, efisien, dan berkelanjutan lintas periode kepengurusan.",
   publicNavigation: [
     { label: "Beranda", href: "/" },
+    { label: "Kegiatan", href: "/kegiatan" },
+    { label: "Warta FKIP", href: "/berita" },
+    { label: "Departemen", href: "/organisasi/departemen" },
     { label: "Tentang", href: "/tentang" },
-    { label: "Organisasi", href: "/organisasi" },
-    { label: "Berita", href: "/berita" },
-    { label: "Kegiatan", href: "/kegiatan/kalender" },
-    { label: "Dokumen", href: "/dokumen" },
-    { label: "Kontak", href: "/kontak" },
+    { label: "Suara FKIP", href: "/layanan/bank-aspirasi" },
   ],
   quickLinks: [
     { title: "Berita & Pengumuman", description: "Sumber publikasi resmi BEM FKIP UIKA.", href: "/berita" },

@@ -1,4 +1,6 @@
-import { PublicListing } from "@/components/PublicListing";
+import { Archive } from "lucide-react";
+import { PublicPageFrame } from "@/components/PublicPageFrame";
+import { PublicPageHero } from "@/components/PublicPageHero";
 
 const archiveCabinets = [
   {
@@ -21,45 +23,40 @@ const archiveCabinets = [
 
 export default function CabinetArchivePage() {
   return (
-    <PublicListing
-      eyebrow="Organisasi"
-      title="Arsip Kepengurusan Kabinet"
-      description="Dokumentasi kepengurusan periode terdahulu tetap disajikan dalam mode read-only untuk kesinambungan sejarah organisasi BEM FKIP UIKA."
-      breadcrumbs={[{ label: "Organisasi", href: "/organisasi" }, { label: "Arsip Kabinet" }]}
-      toolbar={[
-        { label: "Semua Arsip", href: "/organisasi/arsip-kabinet" },
-        { label: "Mode Read-Only", href: "/organisasi/arsip-kabinet" },
-      ]}
-      emptyTitle="Belum ada periode arsip"
-      emptyDescription="Ketika periode aktif diganti, periode lama berstatus Arsip dan tampil di halaman ini."
-    >
-      <div className="grid gap-6 sm:grid-cols-2">
-        {archiveCabinets.map((kab) => (
-          <div key={kab.id} className="glass rounded-3xl p-6 transition duration-300 hover:border-accent/50 flex flex-col justify-between">
-            <div>
-              <span className="rounded-full bg-accent/20 text-accent font-semibold px-3 py-1 text-xs">
-                Arsip Read-Only
-              </span>
-              <h3 className="mt-3 text-xl font-bold text-white">{kab.name}</h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Presidium: <strong className="text-white">{kab.ketua}</strong> & <strong className="text-white">{kab.wakil}</strong>
-              </p>
-              <p className="mt-3 text-sm text-soft leading-relaxed">
-                "{kab.visi}"
-              </p>
-            </div>
+    <PublicPageFrame>
+      <PublicPageHero
+        eyebrow="Arsip Kepengurusan"
+        title="Arsip Kabinet BEM FKIP UIKA"
+        description="Dokumentasi kepengurusan periode terdahulu tetap disajikan dalam mode read-only untuk kesinambungan sejarah organisasi."
+        breadcrumbs={[{ label: "Organisasi", href: "/organisasi" }, { label: "Arsip Kabinet" }]}
+      />
 
-            <div className="mt-6 pt-4 border-t border-glass-border space-y-1.5 text-xs">
-              <p className="font-semibold text-accent mb-1">Capaian Utama:</p>
-              {kab.achievements.map((ach, idx) => (
-                <p key={idx} className="text-muted-foreground flex items-center gap-1.5">
-                  <span className="size-1.5 rounded-full bg-accent" /> {ach}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <div className="grid gap-6 sm:grid-cols-2">
+          {archiveCabinets.map((kab) => (
+            <div key={kab.id} className="bg-white rounded-xl border border-slate-200/90 hover:border-pink-300 transition-all duration-200 p-6 flex flex-col justify-between">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-3 py-1 text-xs font-semibold">
+                  <Archive className="w-3.5 h-3.5" /> Arsip Read-Only
+                </span>
+                <h3 className="mt-3 text-lg font-bold text-slate-900">{kab.name}</h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  Presidium: <strong className="text-slate-700">{kab.ketua}</strong> & <strong className="text-slate-700">{kab.wakil}</strong>
                 </p>
-              ))}
+                <p className="mt-3 text-sm text-slate-600 leading-relaxed italic">"{kab.visi}"</p>
+              </div>
+              <div className="mt-5 pt-4 border-t border-slate-100 space-y-1.5 text-xs">
+                <p className="font-semibold text-[#BE185D] mb-2">Capaian Utama:</p>
+                {kab.achievements.map((ach, idx) => (
+                  <p key={idx} className="text-slate-500 flex items-center gap-1.5">
+                    <span className="size-1.5 rounded-full bg-[#E11D74] shrink-0" /> {ach}
+                  </p>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </PublicListing>
+    </PublicPageFrame>
   );
 }

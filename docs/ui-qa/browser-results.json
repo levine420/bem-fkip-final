@@ -1,0 +1,834 @@
+{
+  "checkedAt": "2026-09-22T08:01:15.612Z",
+  "pages": [
+    {
+      "route": "/",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kabinet artolia"
+    },
+    {
+      "route": "/",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kabinet artolia"
+    },
+    {
+      "route": "/",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kabinet artolia"
+    },
+    {
+      "route": "/",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kabinet artolia"
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kabinet artolia"
+    },
+    {
+      "route": "/kegiatan",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kalender & Agenda BEM FKIP UIKA"
+    },
+    {
+      "route": "/kegiatan",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kalender & Agenda BEM FKIP UIKA"
+    },
+    {
+      "route": "/kegiatan",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kalender & Agenda BEM FKIP UIKA"
+    },
+    {
+      "route": "/kegiatan",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kalender & Agenda BEM FKIP UIKA"
+    },
+    {
+      "route": "/kegiatan",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kalender & Agenda BEM FKIP UIKA"
+    },
+    {
+      "route": "/kegiatan/kalender",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kalender & Agenda BEM FKIP UIKA"
+    },
+    {
+      "route": "/kegiatan/kalender",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kalender & Agenda BEM FKIP UIKA"
+    },
+    {
+      "route": "/kegiatan/kalender",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kalender & Agenda BEM FKIP UIKA"
+    },
+    {
+      "route": "/kegiatan/kalender",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kalender & Agenda BEM FKIP UIKA"
+    },
+    {
+      "route": "/kegiatan/kalender",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kalender & Agenda BEM FKIP UIKA"
+    },
+    {
+      "route": "/berita",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Warta BEM FKIP UIKA"
+    },
+    {
+      "route": "/berita",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Warta BEM FKIP UIKA"
+    },
+    {
+      "route": "/berita",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Warta BEM FKIP UIKA"
+    },
+    {
+      "route": "/berita",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Warta BEM FKIP UIKA"
+    },
+    {
+      "route": "/berita",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Warta BEM FKIP UIKA"
+    },
+    {
+      "route": "/organisasi/departemen",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Departemen BEM FKIP UIKA"
+    },
+    {
+      "route": "/organisasi/departemen",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Departemen BEM FKIP UIKA"
+    },
+    {
+      "route": "/organisasi/departemen",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Departemen BEM FKIP UIKA"
+    },
+    {
+      "route": "/organisasi/departemen",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Departemen BEM FKIP UIKA"
+    },
+    {
+      "route": "/organisasi/departemen",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Departemen BEM FKIP UIKA"
+    },
+    {
+      "route": "/tentang",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Mengenal BEM FKIP UIKA dan kepengurusannya"
+    },
+    {
+      "route": "/tentang",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Mengenal BEM FKIP UIKA dan kepengurusannya"
+    },
+    {
+      "route": "/tentang",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Mengenal BEM FKIP UIKA dan kepengurusannya"
+    },
+    {
+      "route": "/tentang",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Mengenal BEM FKIP UIKA dan kepengurusannya"
+    },
+    {
+      "route": "/tentang",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Mengenal BEM FKIP UIKA dan kepengurusannya"
+    },
+    {
+      "route": "/tentang/visi-misi",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Visi & Misi Kabinet artolia"
+    },
+    {
+      "route": "/tentang/visi-misi",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Visi & Misi Kabinet artolia"
+    },
+    {
+      "route": "/tentang/visi-misi",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Visi & Misi Kabinet artolia"
+    },
+    {
+      "route": "/tentang/visi-misi",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Visi & Misi Kabinet artolia"
+    },
+    {
+      "route": "/tentang/visi-misi",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Visi & Misi Kabinet artolia"
+    },
+    {
+      "route": "/organisasi/struktur-kepengurusan",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Struktur Kepengurusan"
+    },
+    {
+      "route": "/organisasi/struktur-kepengurusan",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Struktur Kepengurusan"
+    },
+    {
+      "route": "/organisasi/struktur-kepengurusan",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Struktur Kepengurusan"
+    },
+    {
+      "route": "/organisasi/struktur-kepengurusan",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Struktur Kepengurusan"
+    },
+    {
+      "route": "/organisasi/struktur-kepengurusan",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Struktur Kepengurusan"
+    },
+    {
+      "route": "/layanan/bank-aspirasi",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Bank Aspirasi"
+    },
+    {
+      "route": "/layanan/bank-aspirasi",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Bank Aspirasi"
+    },
+    {
+      "route": "/layanan/bank-aspirasi",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Bank Aspirasi"
+    },
+    {
+      "route": "/layanan/bank-aspirasi",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Bank Aspirasi"
+    },
+    {
+      "route": "/layanan/bank-aspirasi",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Bank Aspirasi"
+    },
+    {
+      "route": "/dokumen",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Perpustakaan Dokumen Organisasi"
+    },
+    {
+      "route": "/dokumen",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Perpustakaan Dokumen Organisasi"
+    },
+    {
+      "route": "/dokumen",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Perpustakaan Dokumen Organisasi"
+    },
+    {
+      "route": "/dokumen",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Perpustakaan Dokumen Organisasi"
+    },
+    {
+      "route": "/dokumen",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Perpustakaan Dokumen Organisasi"
+    },
+    {
+      "route": "/auth/login",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Masuk ke akun mahasiswa"
+    },
+    {
+      "route": "/auth/login",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Masuk ke akun mahasiswa"
+    },
+    {
+      "route": "/auth/login",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Masuk ke akun mahasiswa"
+    },
+    {
+      "route": "/auth/login",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Masuk ke akun mahasiswa"
+    },
+    {
+      "route": "/auth/login",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Masuk ke akun mahasiswa"
+    },
+    {
+      "route": "/auth/daftar",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Buat akun Portal Mahasiswa"
+    },
+    {
+      "route": "/auth/daftar",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Buat akun Portal Mahasiswa"
+    },
+    {
+      "route": "/auth/daftar",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Buat akun Portal Mahasiswa"
+    },
+    {
+      "route": "/auth/daftar",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Buat akun Portal Mahasiswa"
+    },
+    {
+      "route": "/auth/daftar",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Buat akun Portal Mahasiswa"
+    },
+    {
+      "route": "/admin/login",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Login Dashboard Admin"
+    },
+    {
+      "route": "/admin/login",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Login Dashboard Admin"
+    },
+    {
+      "route": "/admin/login",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Login Dashboard Admin"
+    },
+    {
+      "route": "/admin/login",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Login Dashboard Admin"
+    },
+    {
+      "route": "/admin/login",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Login Dashboard Admin"
+    },
+    {
+      "route": "/portal/aspirasi/baru",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kirim Aspirasi Baru"
+    },
+    {
+      "route": "/portal/aspirasi/baru",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kirim Aspirasi Baru"
+    },
+    {
+      "route": "/portal/aspirasi/baru",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kirim Aspirasi Baru"
+    },
+    {
+      "route": "/portal/aspirasi/baru",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kirim Aspirasi Baru"
+    },
+    {
+      "route": "/portal/aspirasi/baru",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Kirim Aspirasi Baru"
+    },
+    {
+      "route": "/kontak",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Hubungi BEM FKIP UIKA"
+    },
+    {
+      "route": "/kontak",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Hubungi BEM FKIP UIKA"
+    },
+    {
+      "route": "/kontak",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Hubungi BEM FKIP UIKA"
+    },
+    {
+      "route": "/kontak",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Hubungi BEM FKIP UIKA"
+    },
+    {
+      "route": "/kontak",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Hubungi BEM FKIP UIKA"
+    },
+    {
+      "route": "/galeri",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Galeri Dokumentasi"
+    },
+    {
+      "route": "/galeri",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Galeri Dokumentasi"
+    },
+    {
+      "route": "/galeri",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Galeri Dokumentasi"
+    },
+    {
+      "route": "/galeri",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Galeri Dokumentasi"
+    },
+    {
+      "route": "/galeri",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Galeri Dokumentasi"
+    },
+    {
+      "route": "/organisasi/program-kerja",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Program Kerja BEM FKIP UIKA"
+    },
+    {
+      "route": "/organisasi/program-kerja",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Program Kerja BEM FKIP UIKA"
+    },
+    {
+      "route": "/organisasi/program-kerja",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Program Kerja BEM FKIP UIKA"
+    },
+    {
+      "route": "/organisasi/program-kerja",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Program Kerja BEM FKIP UIKA"
+    },
+    {
+      "route": "/organisasi/program-kerja",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "overflowing": [],
+      "unlabeledButtons": 0,
+      "h1": "Program Kerja BEM FKIP UIKA"
+    }
+  ],
+  "interactions": [
+    {
+      "name": "Menu opens on first click",
+      "pass": true
+    },
+    {
+      "name": "Escape closes menu and restores scrolling",
+      "pass": true
+    },
+    {
+      "name": "Navigation closes menu",
+      "pass": true
+    },
+    {
+      "name": "Calendar next month",
+      "pass": true
+    },
+    {
+      "name": "Calendar tap date",
+      "pass": true
+    },
+    {
+      "name": "Calendar arrow keyboard",
+      "pass": true
+    },
+    {
+      "name": "Filter preserves date",
+      "pass": true
+    },
+    {
+      "name": "News search submits query",
+      "pass": true
+    },
+    {
+      "name": "Invalid news page remains usable",
+      "pass": true
+    },
+    {
+      "name": "Out of range news page redirects",
+      "pass": true
+    },
+    {
+      "name": "Program load failure disables registration",
+      "pass": true
+    },
+    {
+      "name": "Program retry restores options and preserves input",
+      "pass": true
+    },
+    {
+      "name": "Aspiration failure retains input and releases submit",
+      "pass": true
+    },
+    {
+      "name": "One intercepted submit, no server write",
+      "pass": true
+    },
+    {
+      "name": "Reduced motion CSS",
+      "pass": true
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": []
+}

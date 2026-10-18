@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
 import Link from "next/link";
 import { Menu, X, Globe, LogOut } from "lucide-react";
 
@@ -20,6 +20,15 @@ export function MobileNavMenu({
   extraAction?: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const toggle = useRef<HTMLButtonElement>(null);
+  const menuId = useId();
+  useEffect(() => { setIsOpen(false); }, [activeHref]);
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { setIsOpen(false); toggle.current?.focus(); } };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen]);
 
   return (
     <div className="lg:hidden mb-4">
@@ -35,19 +44,22 @@ export function MobileNavMenu({
           </div>
         </Link>
 
-        <button
+        <button type="button"
+          ref={toggle}
+          aria-expanded={isOpen}
+          aria-controls={menuId}
           onClick={() => setIsOpen(!isOpen)}
           className="focus-ring inline-flex items-center gap-1.5 rounded-xl border border-glass-border bg-brand/10 px-3 py-2 text-xs font-bold text-brand hover:bg-brand hover:text-white transition"
-          aria-label="Toggle navigation menu"
+          aria-label={isOpen ? "Tutup navigasi" : "Buka navigasi"}
         >
           {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          <span>{isOpen ? "Tutup" : "Menu Navigasi"}</span>
+          <span>{isOpen ? "Tutup" : "Menu"}</span>
         </button>
       </div>
 
       {/* Expanded Menu Drawer */}
       {isOpen && (
-        <div className="mt-2 rounded-2xl border border-border bg-card p-4 shadow-xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div id={menuId} className="reveal mt-2 rounded-2xl border border-border bg-card p-4 shadow-sm space-y-3">
           <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-2">
             Pilihan Menu Navigasi ({navigation.length})
           </div>
@@ -58,6 +70,7 @@ export function MobileNavMenu({
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={active ? "page" : undefined}
                   onClick={() => setIsOpen(false)}
                   className={`rounded-xl px-3.5 py-2.5 text-xs font-semibold transition ${
                     active

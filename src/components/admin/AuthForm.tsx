@@ -9,7 +9,7 @@ export function AdminAuthForm({ changePassword = false }: { changePassword?: boo
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const [email, setEmail] = useState("admin@bemfkip.uika.ac.id");
+  const [email, setEmail] = useState("");
   const [passwordVal, setPasswordVal] = useState("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -35,11 +35,6 @@ export function AdminAuthForm({ changePassword = false }: { changePassword?: boo
     }
   }
 
-  const fillDefaultAdmin = () => {
-    setEmail("admin@bemfkip.uika.ac.id");
-    setPasswordVal("SuperAdmin2024!");
-    setError("");
-  };
 
   return (
     <form onSubmit={submit} className="grid gap-4" aria-busy={busy}>
@@ -95,18 +90,6 @@ export function AdminAuthForm({ changePassword = false }: { changePassword?: boo
         </button>
       </div>
 
-      {!changePassword && (
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={fillDefaultAdmin}
-            className="text-xs font-semibold text-accent hover:underline focus-ring rounded"
-          >
-            Isi Otomatis Kredensial Super Admin BEM
-          </button>
-        </div>
-      )}
-
       {changePassword && (
         <>
           <p className="text-xs text-muted-foreground">
@@ -139,12 +122,12 @@ export function AdminAuthForm({ changePassword = false }: { changePassword?: boo
         </div>
       )}
 
-      <button className={`${actionClass} bg-brand font-semibold text-white`} disabled={busy}>
+      <button type="submit" className={`${actionClass} bg-brand font-semibold text-white`} disabled={busy}>
         {busy ? "Memproses…" : changePassword ? "Simpan password baru" : "Masuk Admin"}
       </button>
 
       <p className="text-xs text-muted-foreground">
-        Sesi berakhir setelah 60 menit tanpa aktivitas. Password bawaan: <code className="text-accent">SuperAdmin2024!</code>
+        Sesi berakhir setelah 60 menit tanpa aktivitas. Gunakan akun yang diberikan oleh pengelola.
       </p>
     </form>
   );
@@ -156,10 +139,11 @@ export function LogoutButton() {
 
   return (
     <div>
-      <button
+      <button type="button"
         className={actionClass}
         disabled={busy}
         onClick={async () => {
+          if (busy) return;
           setBusy(true);
           setError("");
           try {

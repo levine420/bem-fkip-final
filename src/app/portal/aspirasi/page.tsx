@@ -83,12 +83,12 @@ export default async function PortalAspirationsPage() {
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                         asp.status === "SELESAI"
-                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          ? "bg-emerald-500/10 text-emerald-600 dark:text-success"
                           : asp.status === "DIPROSES"
-                          ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                          ? "bg-blue-500/10 text-blue-600 dark:text-foreground"
                           : asp.status === "DITOLAK"
-                          ? "bg-red-500/10 text-red-600 dark:text-red-400"
-                          : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                          ? "bg-red-500/10 text-red-600 dark:text-danger"
+                          : "bg-amber-500/10 text-amber-600 dark:text-accent"
                       }`}
                     >
                       {asp.status === "SELESAI" && <CheckCircle2 className="h-3 w-3" />}

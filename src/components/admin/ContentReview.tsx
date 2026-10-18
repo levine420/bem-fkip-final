@@ -44,14 +44,14 @@ export function ContentReview() {
     setLoading(true);
     setError("");
     setData(null);
-    
+
     const params = new URLSearchParams({ status: "MENUNGGU_REVIEW" });
-    
+
     adminApi<Result>(`/api/admin/contents?${params}`)
       .then((result) => { if (live) setData(result); })
       .catch((cause) => { if (live) setError(errorMessage(cause)); })
       .finally(() => { if (live) setLoading(false); });
-    
+
     return () => { live = false; };
   }, [refresh]);
 
@@ -60,7 +60,7 @@ export function ContentReview() {
     setBusy(true);
     setError("");
     setNotice("");
-    
+
     try {
       await adminApi(`/api/admin/contents/${item.id}/publish`, "POST");
       setNotice(`"${item.title}" telah diterbitkan.`);
@@ -75,11 +75,11 @@ export function ContentReview() {
   async function revise(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!selectedId || busy || !reviewNote.trim()) return;
-    
+
     setBusy(true);
     setError("");
     setNotice("");
-    
+
     try {
       await adminApi(`/api/admin/contents/${selectedId}/revise`, "POST", { review_note: reviewNote });
       const item = data?.items.find((i) => i.id === selectedId);
@@ -99,7 +99,7 @@ export function ContentReview() {
     setBusy(true);
     setError("");
     setNotice("");
-    
+
     try {
       await adminApi(`/api/admin/contents/${item.id}`, "DELETE");
       setNotice(`"${item.title}" telah dihapus.`);
@@ -143,7 +143,7 @@ export function ContentReview() {
       {error && (
         <div role="alert" className="glass rounded-2xl border-danger/50 p-4">
           <p className="text-sm text-soft">{error}</p>
-          <button
+          <button type="button"
             className={`${actionClass} mt-3`}
             disabled={busy}
             onClick={() => setRefresh((r) => r + 1)}
@@ -175,7 +175,7 @@ export function ContentReview() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-semibold">{item.title}</h3>
-                    <span className="rounded-full bg-yellow-500/20 px-2 py-1 text-xs font-medium text-yellow-300">
+                    <span className="rounded-full bg-yellow-500/20 px-2 py-1 text-xs font-medium text-warning">
                       {categoryLabels[item.category]}
                     </span>
                   </div>
@@ -207,20 +207,20 @@ export function ContentReview() {
                   Lihat konten lengkap
                 </summary>
                 <div
-                  className="prose prose-invert mt-4 max-w-none rounded-2xl border border-glass-border p-4"
+                  className="article-content mt-4 max-w-none rounded-2xl border border-glass-border p-4"
                   dangerouslySetInnerHTML={{ __html: item.body }}
                 />
               </details>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                <button
+                <button type="button"
                   className={`${actionClass} bg-green-600 hover:bg-green-700`}
                   onClick={() => publish(item)}
                   disabled={busy}
                 >
                   Terbitkan
                 </button>
-                <button
+                <button type="button"
                   className={`${actionClass} bg-orange-600 hover:bg-orange-700`}
                   onClick={() => {
                     setSelectedId(item.id);
@@ -231,7 +231,7 @@ export function ContentReview() {
                 >
                   Minta Revisi
                 </button>
-                <button
+                <button type="button"
                   className={`${actionClass} bg-red-600 hover:bg-red-700`}
                   onClick={() => deleteContent(item)}
                   disabled={busy}
@@ -259,7 +259,7 @@ export function ContentReview() {
                     Catatan akan dikirim ke penulis. Konten akan kembali ke status REVISI.
                   </p>
                   <div className="mt-3 flex gap-2">
-                    <button className={`${actionClass} bg-orange-600`} disabled={busy}>
+                    <button type="submit" className={`${actionClass} bg-orange-600`} disabled={busy}>
                       {busy ? "Mengirim…" : "Kirim Revisi"}
                     </button>
                     <button

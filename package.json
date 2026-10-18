@@ -14,12 +14,13 @@
     "admin:bootstrap": "node scripts/bootstrap-admin.mjs"
   },
   "dependencies": {
+    "@prisma/client": "6.19.0",
+    "bcryptjs": "3.0.3",
     "lucide-react": "^0.575.0",
+    "motion": "^14.3.0",
     "next": "16.2.9",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "@prisma/client": "6.19.0",
-    "bcryptjs": "3.0.3",
     "server-only": "0.0.1"
   },
   "devDependencies": {
@@ -27,9 +28,10 @@
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "prisma": "6.19.0",
     "tailwindcss": "^4.2.1",
-    "typescript": "^5.8.3",
-    "prisma": "6.19.0"
+    "tsx": "^4.23.15",
+    "typescript": "^5.8.3"
   },
   "type": "module"
 }

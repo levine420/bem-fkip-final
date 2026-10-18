@@ -65,10 +65,10 @@ export function UserManager({ cohort }: { cohort: "admins" | "students" }) {
     <section className="glass grid gap-4 rounded-3xl p-5 sm:p-7">
       <nav aria-label="Pengelolaan pengguna" className="flex flex-wrap gap-2"><Link href="/admin/pengguna/admin" className={actionClass} aria-current={!students ? "page" : undefined}>Akun Admin</Link><Link href="/admin/pengguna/mahasiswa" className={actionClass} aria-current={students ? "page" : undefined}>Mahasiswa</Link><Link href="/admin/program-studi" className={actionClass}>Program Studi</Link></nav>
       <p className="text-sm text-muted-foreground">{students ? "Hanya akun mahasiswa yang sudah terdaftar. Panel ini tidak membuat akun, mengedit identitas akademik, atau melewati verifikasi email." : "Akun dan assignment terpisah dari roster/pengurus. Email, role, departemen dan periode tidak dipindahkan lewat edit akun. Periode berikutnya memakai akun Admin baru."}</p>
-      {!students && <button className={`${actionClass} w-fit bg-brand`} disabled={busy || loading || !data} onClick={create}>Tambah Admin</button>}
+      {!students && <button type="button" className={`${actionClass} w-fit bg-brand`} disabled={busy || loading || !data} onClick={create}>Tambah Admin</button>}
     </section>
     {notice && <p role="status" className="glass rounded-2xl p-4 text-sm text-soft">{notice}</p>}
-    {error && <div role="alert" className="glass rounded-2xl p-4 text-sm text-soft"><p>{error}</p><button className={`${actionClass} mt-3`} disabled={busy} onClick={() => setRefresh((r) => r + 1)}>Muat ulang daftar</button>{(editor || action) && <p className="mt-2 text-xs">Form tetap terbuka. Jika versi atau periode berubah, batalkan lalu buka data terbaru.</p>}</div>}
+    {error && <div role="alert" className="glass rounded-2xl p-4 text-sm text-soft"><p>{error}</p><button type="button" className={`${actionClass} mt-3`} disabled={busy} onClick={() => setRefresh((r) => r + 1)}>Muat ulang daftar</button>{(editor || action) && <p className="mt-2 text-xs">Form tetap terbuka. Jika versi atau periode berubah, batalkan lalu buka data terbaru.</p>}</div>}
     {Object.keys(fields).length > 0 && <ul role="alert" className="glass rounded-2xl p-4 text-sm text-soft">{Object.entries(fields).map(([key, value]) => <li key={key}>{key}: {value}</li>)}</ul>}
     {editor && <form onSubmit={save} aria-busy={busy} className="glass grid gap-4 rounded-3xl p-5 sm:p-7">
       <h2 className="font-semibold">{editor.id ? "Edit nama akun" : "Akun Admin baru"}</h2>
@@ -86,7 +86,7 @@ export function UserManager({ cohort }: { cohort: "admins" | "students" }) {
         <label className="text-sm">Konfirmasi password<input className="form-control mt-2" required type="password" autoComplete="new-password" disabled={busy} value={editor.confirmation} onChange={(e) => setEditor({ ...editor, confirmation: e.target.value })} /></label>
         <p className="text-xs text-muted-foreground">Minimal 12 karakter dengan huruf besar, kecil, angka; maksimal 72 byte UTF-8. Tidak ada kredensial default atau pengiriman password melalui email.</p>
       </>}
-      <div className="flex gap-2"><button className={`${actionClass} bg-brand`} disabled={busy || (!editor.id && editor.role === "ADMIN" && !editor.department)}>{busy ? "Menyimpan…" : "Simpan"}</button><button className={actionClass} type="button" disabled={busy} onClick={() => setEditor(null)}>Batal</button></div>
+      <div className="flex gap-2"><button type="submit" className={`${actionClass} bg-brand`} disabled={busy || (!editor.id && editor.role === "ADMIN" && !editor.department)}>{busy ? "Menyimpan…" : "Simpan"}</button><button className={actionClass} type="button" disabled={busy} onClick={() => setEditor(null)}>Batal</button></div>
     </form>}
     {action && <form onSubmit={applyAction} aria-busy={busy} className="glass grid gap-4 rounded-3xl p-5 sm:p-7">
       <h2 className="font-semibold">{labels[action.action]} · {action.target.name}</h2><p className="text-sm text-muted-foreground">{action.target.email}</p>
@@ -94,12 +94,12 @@ export function UserManager({ cohort }: { cohort: "admins" | "students" }) {
       <label className="text-sm">Alasan (10–500 karakter; jangan isi password)<textarea className="form-control mt-2" required minLength={10} maxLength={500} disabled={busy} value={action.reason} onChange={(e) => setAction({ ...action, reason: e.target.value })} /></label>
       {action.action === "reset-password" && <><label className="text-sm">Password sementara<input className="form-control mt-2" required type="password" autoComplete="new-password" minLength={12} disabled={busy} value={action.password} onChange={(e) => setAction({ ...action, password: e.target.value })} /></label><label className="text-sm">Konfirmasi password<input className="form-control mt-2" required type="password" autoComplete="new-password" disabled={busy} value={action.confirmation} onChange={(e) => setAction({ ...action, confirmation: e.target.value })} /></label></>}
       <label className="flex items-start gap-3 text-sm"><input type="checkbox" required className="mt-1" disabled={busy} checked={action.confirmed} onChange={(e) => setAction({ ...action, confirmed: e.target.checked })} />Saya memahami dampak tindakan pada akun yang disebut di atas.</label>
-      <div className="flex gap-2"><button className={`${actionClass} bg-brand`} disabled={busy || !action.confirmed}>{busy ? "Memproses…" : labels[action.action]}</button><button type="button" className={actionClass} disabled={busy} onClick={() => setAction(null)}>Batal</button></div>
+      <div className="flex gap-2"><button type="submit" className={`${actionClass} bg-brand`} disabled={busy || !action.confirmed}>{busy ? "Memproses…" : labels[action.action]}</button><button type="button" className={actionClass} disabled={busy} onClick={() => setAction(null)}>Batal</button></div>
     </form>}
     <section className="glass grid gap-4 rounded-3xl p-5 sm:p-7" aria-busy={loading}>
       <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); setSearch(q); setPage(1); }}>
         <label className="min-w-0 flex-1 text-sm">{students ? "Cari nama, email, NIM, atau prodi" : "Cari nama atau email"}<input className="form-control mt-2" type="search" maxLength={100} disabled={busy} value={q} onChange={(e) => setQ(e.target.value)} /></label>
-        <label className="text-sm">Status<select className="form-control mt-2" disabled={busy} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}><option value="">Semua</option><option value="AKTIF">Aktif</option><option value="NONAKTIF">Nonaktif</option><option value="BELUM_VERIFIKASI">Belum verifikasi</option></select></label><button className={actionClass} disabled={busy}>Cari</button>
+        <label className="text-sm">Status<select className="form-control mt-2" disabled={busy} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}><option value="">Semua</option><option value="AKTIF">Aktif</option><option value="NONAKTIF">Nonaktif</option><option value="BELUM_VERIFIKASI">Belum verifikasi</option></select></label><button type="submit" className={actionClass} disabled={busy}>Cari</button>
       </form>
       {students && <OrganizationPicker label="Filter program studi" path="/api/admin/study-programs" value={program} clearLabel="Semua program studi" disabled={busy} onChange={(item) => { setProgram(item); setPage(1); }} />}
       {loading ? <p role="status" className="py-6 text-muted-foreground">Memuat akun…</p> : data && <>
@@ -112,16 +112,16 @@ export function UserManager({ cohort }: { cohort: "admins" | "students" }) {
             <h3 className="break-words font-semibold">{user.name}{self ? " · akun lu" : ""}</h3><p className="mt-1 break-words text-sm text-muted-foreground">{user.email}</p><p className="mt-2 text-xs text-accent">{user.role} · {user.account_status}{user.must_change_password && user.role !== "MAHASISWA" ? " · wajib ganti password" : ""}</p>
             {students ? <p className="mt-2 text-sm text-muted-foreground">NIM: {user.nim ?? "Tidak tersedia"} · {user.study_program?.name ?? "Prodi tidak tersedia"} · Angkatan {user.angkatan ?? "tidak tersedia"}</p>
               : <p className="mt-2 text-sm text-muted-foreground">{a ? `${a.department.name} · ${a.period.name} · ${a.revoked_at ? "Assignment dicabut" : a.period.status}` : user.role === "SUPER_ADMIN" ? "Akses lintas periode" : "Assignment tidak tersedia"}</p>}
-            <div className="mt-3 flex flex-wrap gap-2">{editable && <button className={actionClass} disabled={busy} onClick={() => edit(user)}>Edit nama</button>}
-              {!self && user.account_status !== "NONAKTIF" && <button className={actionClass} disabled={busy} onClick={() => chooseAction(user, "disable")}>Nonaktifkan</button>}
-              {!self && enable && <button className={actionClass} disabled={busy} onClick={() => chooseAction(user, "enable")}>Aktifkan kembali</button>}
-              {!self && user.role === "ADMIN" && a && !a.revoked_at && a.period.status !== "ARSIP" && <button className={`${actionClass} text-soft`} disabled={busy} onClick={() => chooseAction(user, "revoke")}>Cabut assignment</button>}
-              {!self && editable && <button className={actionClass} disabled={busy} onClick={() => chooseAction(user, "reset-password")}>Reset password</button>}
+            <div className="mt-3 flex flex-wrap gap-2">{editable && <button type="button" className={actionClass} disabled={busy} onClick={() => edit(user)}>Edit nama</button>}
+              {!self && user.account_status !== "NONAKTIF" && <button type="button" className={actionClass} disabled={busy} onClick={() => chooseAction(user, "disable")}>Nonaktifkan</button>}
+              {!self && enable && <button type="button" className={actionClass} disabled={busy} onClick={() => chooseAction(user, "enable")}>Aktifkan kembali</button>}
+              {!self && user.role === "ADMIN" && a && !a.revoked_at && a.period.status !== "ARSIP" && <button type="button" className={`${actionClass} text-soft`} disabled={busy} onClick={() => chooseAction(user, "revoke")}>Cabut assignment</button>}
+              {!self && editable && <button type="button" className={actionClass} disabled={busy} onClick={() => chooseAction(user, "reset-password")}>Reset password</button>}
               {self && <Link className={actionClass} href="/admin/ganti-password">Ganti password pribadi</Link>}
             </div>
           </article>;
         })}
-        <nav aria-label="Halaman pengguna" className="flex flex-wrap items-center justify-between gap-3 text-sm"><span>{data.total} akun · Halaman {page}</span><div className="flex gap-2"><button className={actionClass} disabled={busy || page === 1} onClick={() => setPage(page - 1)}>Sebelumnya</button><button className={actionClass} disabled={busy || page * data.page_size >= data.total} onClick={() => setPage(page + 1)}>Berikutnya</button></div></nav>
+        <nav aria-label="Halaman pengguna" className="flex flex-wrap items-center justify-between gap-3 text-sm"><span>{data.total} akun · Halaman {page}</span><div className="flex gap-2"><button type="button" className={actionClass} disabled={busy || page === 1} onClick={() => setPage(page - 1)}>Sebelumnya</button><button type="button" className={actionClass} disabled={busy || page * data.page_size >= data.total} onClick={() => setPage(page + 1)}>Berikutnya</button></div></nav>
       </>}
     </section>
   </div>;

@@ -1,66 +1,117 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowUpRight, Calendar, FileText, MapPin, Users } from "lucide-react";
-import { SectionHeading } from "@/components/SectionHeading";
+import { motion } from "motion/react";
+import {
+  ArrowRight,
+  Calendar,
+  Clock,
+  MapPin,
+  Users,
+  Building2,
+  BookOpen,
+  FileText,
+  ArrowUpRight,
+} from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 
-const deptGradients = [
-  "from-pink-600/30 to-purple-600/10",
-  "from-blue-600/30 to-cyan-600/10",
-  "from-green-600/30 to-emerald-600/10",
-  "from-orange-600/30 to-yellow-600/10",
-  "from-red-600/30 to-pink-600/10",
-  "from-violet-600/30 to-indigo-600/10",
-];
-const deptAccents = ["text-pink-400", "text-blue-400", "text-green-400", "text-orange-400", "text-red-400", "text-violet-400"];
 
+/* ─── Section Header (light-mode style matching reference) ─── */
+function SectionHeader({
+  icon: Icon,
+  eyebrow,
+  title,
+  description,
+  action,
+}: {
+  icon: React.ElementType;
+  eyebrow: string;
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+      <div>
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#BE185D] mb-1">
+          <Icon className="w-4 h-4" />
+          <span>{eyebrow}</span>
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{title}</h2>
+        {description && <p className="text-sm text-slate-500 mt-1">{description}</p>}
+      </div>
+      {action}
+    </div>
+  );
+}
+
+/* ─── View-all pill button ─── */
+function ViewAllBtn({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:border-pink-300 hover:text-[#E11D74] transition-colors whitespace-nowrap"
+    >
+      {label} <ArrowRight className="w-4 h-4 text-[#E11D74]" />
+    </Link>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   HOME DEPARTMENTS
+═══════════════════════════════════════════════ */
 export function HomeDepartments({ departments }: { departments?: any[] }) {
   const deptList = departments || [];
 
   return (
-    <section id="departemen" className="relative px-4 py-24 sm:px-6">
-      <div className="relative mx-auto max-w-7xl">
-        <SectionHeading
-          eyebrow="Departemen"
-          title="Struktur bidang kerja pada periode aktif"
-          description="Setiap departemen memiliki profil, pengurus, program kerja, dan publikasi terkait."
-          action={
-            <Link href="/organisasi/departemen" className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full border border-glass-border px-5 text-sm font-semibold hover:border-accent/60 hover:text-accent">
-              Semua departemen <ArrowUpRight className="size-4" />
-            </Link>
-          }
+    <section id="departemen" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <div className="bg-gradient-to-br from-pink-50/60 via-white to-slate-50 rounded-2xl border border-pink-100/80 p-6 sm:p-10">
+        <SectionHeader
+          icon={Building2}
+          eyebrow="Struktur Eksekutif"
+          title="Departemen & Biro Kerja"
+          description="Setiap departemen memiliki fokus kerja terarah untuk melayani mahasiswa dan sivitas FKIP UIKA."
+          action={<ViewAllBtn href="/organisasi/departemen" label="Semua departemen" />}
         />
         {deptList.length === 0 ? (
-          <div className="mt-10">
-            <EmptyState
-              title="Belum ada data departemen"
-              description="Departemen akan tampil di sini setelah ditambahkan melalui Admin Panel."
-            />
-          </div>
+          <EmptyState
+            title="Belum ada data departemen"
+            description="Departemen akan tampil di sini setelah ditambahkan melalui Admin Panel."
+          />
         ) : (
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {deptList.map((dept, i) => (
-              <Link
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {deptList.map((dept) => (
+              <motion.div
                 key={dept.id}
-                href={`/organisasi/departemen/${dept.slug || dept.id}`}
-                className="glass rounded-3xl overflow-hidden transition duration-300 hover:border-accent/50 flex flex-col group"
+                whileHover={{ y: -4, transition: { duration: 0.18 } }}
+                className="group"
               >
-                <div className={`h-2 w-full bg-gradient-to-r ${deptGradients[i % deptGradients.length]}`} />
-                <div className="p-6 flex flex-col flex-1 justify-between">
-                  <div>
-                    <div className={`size-14 rounded-2xl bg-gradient-to-br ${deptGradients[i % deptGradients.length]} border border-white/10 flex items-center justify-center mb-4 font-black text-2xl ${deptAccents[i % deptAccents.length]} transition-transform group-hover:scale-110`}>
-                      {dept.name.slice(0, 1).toUpperCase()}
+                <Link
+                  href={`/organisasi/departemen/${dept.slug || dept.id}`}
+                  className="block p-5 bg-white rounded-xl border border-slate-200/80 hover:border-pink-300 hover:shadow-md transition-all duration-200 h-full flex flex-col justify-between"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-pink-50 text-[#BE185D] border border-pink-200">
+                        {dept.name.slice(0, 4).toUpperCase()}
+                      </span>
                     </div>
-                    <h3 className="text-lg font-semibold text-white">{dept.name}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{dept.description}</p>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900 group-hover:text-[#E11D74] transition-colors">
+                        {dept.name}
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                        {dept.description}
+                      </p>
+                    </div>
                   </div>
-                  <div className={`mt-6 border-t border-glass-border pt-4 flex justify-between items-center text-xs ${deptAccents[i % deptAccents.length]} transition-transform group-hover:translate-x-1`}>
-                    <span>Lihat Profil Departemen</span>
-                    <ArrowUpRight className="size-4" />
+                  <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="text-slate-500">Lihat Profil</span>
+                    <span className="text-[#E11D74] font-bold group-hover:translate-x-0.5 transition-transform">
+                      Eksplorasi →
+                    </span>
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </motion.div>
             ))}
           </div>
         )}
@@ -69,290 +120,389 @@ export function HomeDepartments({ departments }: { departments?: any[] }) {
   );
 }
 
+/* ═══════════════════════════════════════════════
+   HOME PROGRAMS
+═══════════════════════════════════════════════ */
 export function HomePrograms({ programs, departments }: { programs?: any[]; departments?: any[] }) {
   const programList = (programs || []).slice(0, 6);
   const deptList = departments || [];
 
+  const statusMap: Record<string, { label: string; cls: string }> = {
+    SELESAI: { label: "Selesai", cls: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
+    BERJALAN: { label: "Sedang Berjalan", cls: "bg-yellow-50 text-yellow-700 border border-yellow-200" },
+    BELUM_MULAI: { label: "Belum Mulai", cls: "bg-blue-50 text-blue-700 border border-blue-200" },
+    DITUNDA: { label: "Ditunda", cls: "bg-slate-100 text-slate-600 border border-slate-200" },
+    DIBATALKAN: { label: "Dibatalkan", cls: "bg-red-50 text-red-600 border border-red-200" },
+  };
+
   return (
-    <section id="program-kerja" className="relative px-4 py-24 sm:px-6">
-      <div className="relative mx-auto max-w-7xl">
-        <SectionHeading
-          eyebrow="Program Kerja"
-          title="Transparansi pelaksanaan program kerja"
-          description="Program kerja dikelompokkan per departemen dan periode, dengan status yang diperbarui oleh pengurus."
-          action={
-            <Link href="/organisasi/program-kerja" className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full border border-glass-border px-5 text-sm font-semibold hover:border-accent/60 hover:text-accent">
-              Lihat program kerja <ArrowUpRight className="size-4" />
-            </Link>
-          }
+    <section id="program-kerja" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <SectionHeader
+        icon={ArrowRight}
+        eyebrow="Program Kerja"
+        title="Transparansi pelaksanaan program kerja"
+        description="Program kerja dikelompokkan per departemen dan periode, dengan status yang diperbarui oleh pengurus."
+        action={<ViewAllBtn href="/organisasi/program-kerja" label="Lihat program kerja" />}
+      />
+      {programList.length === 0 ? (
+        <EmptyState
+          title="Belum ada program kerja"
+          description="Program kerja akan tampil di sini setelah ditambahkan oleh Admin Departemen."
         />
-        {programList.length === 0 ? (
-          <div className="mt-10">
-            <EmptyState
-              title="Belum ada program kerja"
-              description="Program kerja akan tampil di sini setelah ditambahkan oleh Admin Departemen."
-            />
-          </div>
-        ) : (
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {programList.map((proker) => {
-              const dept = deptList.find((d) => d.id === proker.department_id || d.slug === proker.department_id);
-              return (
-                <div key={proker.id} className="glass rounded-3xl overflow-hidden transition duration-300 hover:border-accent/50 flex flex-col justify-between p-6">
-                  <div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold text-accent uppercase tracking-wider">
-                        {dept?.name || "BEM FKIP UIKA"}
-                      </span>
-                      <span
-                        className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-                          proker.status === "SELESAI"
-                            ? "bg-green-500/20 text-green-300"
-                            : proker.status === "BERJALAN"
-                            ? "bg-yellow-500/20 text-yellow-300"
-                            : "bg-blue-500/20 text-blue-300"
-                        }`}
-                      >
-                        {proker.status === "SELESAI" ? "Selesai" : proker.status === "BERJALAN" ? "Sedang Berjalan" : "Belum Mulai"}
-                      </span>
-                    </div>
-                    <h3 className="mt-3 text-lg font-semibold text-white">{proker.name}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-3">{proker.description}</p>
+      ) : (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {programList.map((proker) => {
+            const dept = deptList.find(
+              (d) => d.id === proker.department_id || d.slug === proker.department_id
+            );
+            const status = statusMap[proker.status] || { label: proker.status, cls: "bg-slate-100 text-slate-600 border border-slate-200" };
+            return (
+              <motion.div
+                key={proker.id}
+                whileHover={{ y: -3, transition: { duration: 0.18 } }}
+                className="p-5 bg-white rounded-xl border border-slate-200/90 hover:border-pink-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="text-xs font-semibold text-[#BE185D]">
+                      {dept?.name || "BEM FKIP UIKA"}
+                    </span>
+                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${status.cls}`}>
+                      {status.label}
+                    </span>
                   </div>
-                  <div className="mt-6 pt-4 border-t border-glass-border text-xs text-muted-foreground">
-                    <span className="text-white font-medium">Target Waktu:</span> {proker.target_waktu || "Periode Aktif"}
-                  </div>
+                  <h3 className="text-base font-bold text-slate-900">{proker.name}</h3>
+                  <p className="mt-1.5 text-sm text-slate-500 leading-relaxed line-clamp-3">
+                    {proker.description}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                  <span className="text-slate-700 font-medium">Target:</span>{" "}
+                  {proker.target_waktu || "Belum ditentukan"}
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }
 
+/* ═══════════════════════════════════════════════
+   HOME EVENTS
+═══════════════════════════════════════════════ */
 export function HomeEvents({ events }: { events?: any[] }) {
   const eventList = events || [];
 
-  return (
-    <section id="kegiatan" className="relative px-4 py-24 sm:px-6">
-      <div className="relative mx-auto max-w-7xl">
-        <SectionHeading
-          eyebrow="Kegiatan"
-          title="Agenda BEM dan pendaftaran kegiatan"
-          description="Kegiatan publik memiliki detail waktu, lokasi, penyelenggara, status pendaftaran, dan kuota jika berlaku."
-          action={
-            <Link href="/kegiatan/kalender" className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full border border-glass-border px-5 text-sm font-semibold hover:border-accent/60 hover:text-accent">
-              Kalender kegiatan <ArrowUpRight className="size-4" />
-            </Link>
-          }
-        />
-        {eventList.length === 0 ? (
-          <div className="mt-10">
-            <EmptyState
-              title="Belum ada agenda kegiatan berstatus Terbit"
-              description="Kegiatan baru akan otomatis muncul setelah diterbitkan melalui Admin."
-            />
-          </div>
-        ) : (
-          <div className="mt-10 grid gap-6 sm:grid-cols-2">
-            {eventList.map((ev) => {
-              const eventSlugOrId = ev.slug || ev.id;
-              const isOpen = ev.registration_status === "TERBUKA";
+  const regStatusMap: Record<string, string> = {
+    TERBUKA: "Pendaftaran Terbuka",
+    PENUH: "Kuota Penuh",
+    TUTUP: "Pendaftaran Ditutup",
+    SEGERA_DIBUKA: "Segera Dibuka",
+  };
 
-              return (
-                <div key={ev.id} className="glass rounded-3xl overflow-hidden transition duration-300 hover:border-accent/50 flex flex-col justify-between shadow-lg">
-                  {/* Poster / Banner Image */}
+  return (
+    <section id="kegiatan" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <SectionHeader
+        icon={Calendar}
+        eyebrow="Agenda Terdekat"
+        title="Kegiatan Mahasiswa FKIP"
+        description="Jadwal kegiatan akademik, pelatihan kepemimpinan, dan aksi sosial terdekat."
+        action={<ViewAllBtn href="/kegiatan/kalender" label="Buka Kalender Lengkap" />}
+      />
+      {eventList.length === 0 ? (
+        <EmptyState
+          title="Belum ada agenda kegiatan berstatus Terbit"
+          description="Kegiatan baru akan otomatis muncul setelah diterbitkan melalui Admin."
+        />
+      ) : (
+        <div className="grid gap-6 md:grid-cols-3">
+          {eventList.map((ev) => {
+            const eventSlugOrId = ev.slug || ev.id;
+            const isOpen = ev.registration_status === "TERBUKA";
+            const formattedDate = new Date(ev.start_time).toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+              timeZone: "Asia/Jakarta",
+            });
+            return (
+              <motion.div
+                key={ev.id}
+                whileHover={{ y: -4, transition: { duration: 0.18 } }}
+                className="group bg-white rounded-xl border border-slate-200/90 hover:border-pink-300 hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden"
+              >
+                <div className="relative h-44 w-full overflow-hidden bg-slate-100">
                   {ev.poster_url ? (
-                    <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-black/40 border-b border-glass-border">
-                      <img
-                        src={ev.poster_url}
-                        alt={ev.name}
-                        className="w-full h-full object-cover brightness-90 transition duration-500 hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <span
-                        className={`absolute top-3 right-3 text-xs font-bold px-3 py-1 rounded-full backdrop-blur-md shadow-md ${
-                          isOpen
-                            ? "bg-green-500/80 text-white border border-green-400/40"
-                            : "bg-yellow-500/80 text-white border border-yellow-400/40"
-                        }`}
-                      >
-                        {isOpen ? "Pendaftaran Terbuka" : "Segera Dibuka"}
-                      </span>
-                    </div>
+                    <img
+                      src={ev.poster_url}
+                      alt={ev.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
                   ) : (
-                    <div className="relative h-24 w-full overflow-hidden bg-gradient-to-br from-brand/30 via-purple-900/20 to-black/60 p-4 flex items-end justify-between border-b border-glass-border">
-                      <span
-                        className={`text-xs font-bold px-3 py-1 rounded-full ${
-                          isOpen
-                            ? "bg-green-500/20 text-green-300 border border-green-500/30"
-                            : "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
-                        }`}
-                      >
-                        {isOpen ? "Pendaftaran Terbuka" : "Segera Dibuka"}
-                      </span>
+                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-pink-50 to-slate-100">
+                      <Calendar className="size-12 text-pink-200" />
                     </div>
                   )}
+                  <div className="absolute top-3 left-3">
+                    <span
+                      className={`text-[11px] font-bold px-2.5 py-1 rounded-full backdrop-blur-md ${
+                        isOpen ? "bg-emerald-500/90 text-white" : "bg-slate-700/80 text-white"
+                      }`}
+                    >
+                      {regStatusMap[ev.registration_status] || ev.registration_status}
+                    </span>
+                  </div>
+                </div>
 
-                  <div className="p-6 flex flex-col flex-1 justify-between space-y-4">
-                    <div>
-                      <div className="flex items-center gap-2 text-xs font-semibold text-accent mb-2">
-                        <Calendar className="size-4 shrink-0" />
-                        <span>{new Date(ev.start_time).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span>
-                      </div>
-                      <h3 className="text-xl font-bold text-white hover:text-accent transition">
-                        <Link href={`/kegiatan/${eventSlugOrId}`}>{ev.name}</Link>
-                      </h3>
-                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-3">{ev.description}</p>
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[#BE185D]">
+                      <Clock className="size-3.5 shrink-0" />
+                      <span>{formattedDate}</span>
                     </div>
-
-                    <div className="pt-4 border-t border-glass-border space-y-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1.5">
-                          <MapPin className="size-4 text-accent shrink-0" /> {ev.location}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <Users className="size-4 text-accent shrink-0" /> Kuota: {ev.max_participants ?? "∞"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 pt-1">
+                    <h3 className="text-base font-bold text-slate-900 group-hover:text-[#E11D74] transition-colors line-clamp-2 leading-snug">
+                      <Link href={`/kegiatan/${eventSlugOrId}`}>{ev.name}</Link>
+                    </h3>
+                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                      {ev.description}
+                    </p>
+                  </div>
+                  <div className="space-y-1.5 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="size-3.5 text-slate-400 shrink-0" />
+                      <span className="line-clamp-1">{ev.location}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="size-3.5 text-slate-400 shrink-0" />
+                      <span>Kuota: {ev.max_participants ?? "∞"}</span>
+                    </div>
+                    <div className="flex items-center gap-2 pt-1">
+                      <Link
+                        href={`/kegiatan/${eventSlugOrId}`}
+                        className="flex-1 text-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-pink-300 hover:text-[#E11D74] transition-colors"
+                      >
+                        Detail Acara
+                      </Link>
+                      {isOpen && (
                         <Link
-                          href={`/kegiatan/${eventSlugOrId}`}
-                          className="focus-ring flex-1 text-center rounded-xl border border-glass-border px-3 py-2 text-xs font-semibold text-white hover:border-accent hover:text-accent transition"
+                          href={`/kegiatan/${eventSlugOrId}/daftar`}
+                          className="flex-1 text-center rounded-lg bg-[#E11D74] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BE185D] transition-colors inline-flex items-center justify-center gap-1"
                         >
-                          Detail Acara
+                          Daftar <ArrowUpRight className="size-3" />
                         </Link>
-                        {isOpen && (
-                          <Link
-                            href={`/kegiatan/${eventSlugOrId}/daftar`}
-                            className="focus-ring flex-1 text-center rounded-xl bg-brand px-3 py-2 text-xs font-semibold text-white hover:bg-brand-hover transition inline-flex items-center justify-center gap-1 shadow-md"
-                          >
-                            Daftar Acara <ArrowUpRight className="size-3.5" />
-                          </Link>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }
 
+/* ═══════════════════════════════════════════════
+   HOME NEWS — Editorial Layout (reference style)
+═══════════════════════════════════════════════ */
 export function HomeNews({ contents }: { contents?: any[] }) {
   const newsList = contents || [];
+  const featured = newsList[0];
+  const rest = newsList.slice(1, 4);
 
   return (
-    <section id="berita" className="relative px-4 py-24 sm:px-6">
-      <div className="relative mx-auto max-w-7xl">
-        <SectionHeading
-          eyebrow="Berita & Pengumuman"
-          title="Kanal publikasi resmi BEM FKIP UIKA"
-          description="Konten publikasi resmi yang diterbitkan oleh tim pengurus BEM FKIP UIKA."
-          action={
-            <Link href="/berita" className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full border border-glass-border px-5 text-sm font-semibold hover:border-accent/60 hover:text-accent">
-              Semua berita <ArrowUpRight className="size-4" />
-            </Link>
-          }
+    <section id="berita" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <SectionHeader
+        icon={BookOpen}
+        eyebrow="Warta FKIP Terkini"
+        title="Informasi, Prestasi & Opini"
+        description="Publikasi resmi, rilis advokasi, dan kabar prestasi mahasiswa keguruan."
+        action={<ViewAllBtn href="/berita" label="Lihat Semua Berita" />}
+      />
+      {newsList.length === 0 ? (
+        <EmptyState
+          title="Belum ada berita berstatus Terbit"
+          description="Berita baru akan muncul di sini setelah disetujui dan diterbitkan oleh Super Admin."
         />
-        {newsList.length === 0 ? (
-          <div className="mt-10">
-            <EmptyState
-              title="Belum ada berita berstatus Terbit"
-              description="Berita baru akan muncul di sini setelah disetujui dan diterbitkan oleh Super Admin."
-            />
-          </div>
-        ) : (
-          <div className="mt-10 grid gap-6 sm:grid-cols-3">
-            {newsList.slice(0, 3).map((news: any) => {
-              const thumbnail = news.thumbnail_url || "/images/news-scholarship.png";
-
-              return (
-                <Link key={news.id} href={`/berita/${news.slug}`} className="glass rounded-3xl overflow-hidden transition duration-300 hover:border-accent/50 flex flex-col justify-between shadow-lg">
-                  <div className="relative h-44 w-full overflow-hidden">
-                    <Image src={thumbnail} alt={news.title} fill className="object-cover brightness-75 transition duration-500 hover:scale-105" unoptimized />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                    <span className="absolute bottom-3 left-4 rounded-full bg-accent/90 text-white text-[10px] font-bold px-2.5 py-0.5 uppercase">
-                      {news.category}
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {featured && (
+            <motion.div
+              whileHover={{ y: -3, transition: { duration: 0.18 } }}
+              className="lg:col-span-7 group bg-white rounded-2xl border border-slate-200/90 overflow-hidden hover:border-pink-300 hover:shadow-md transition-all duration-200 flex flex-col"
+            >
+              <Link href={`/berita/${featured.slug}`} className="flex flex-col flex-1">
+                <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-slate-100">
+                  {featured.thumbnail_url ? (
+                    <img
+                      src={featured.thumbnail_url}
+                      alt={featured.title}
+                      className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                      loading="eager"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-pink-50 to-slate-100">
+                      <BookOpen className="size-16 text-pink-200" />
+                    </div>
+                  )}
+                  <div className="absolute top-4 left-4">
+                    <span className="rounded-md bg-[#E11D74] px-3 py-1 text-xs font-bold text-white">
+                      Berita Utama
                     </span>
                   </div>
-                  <div className="p-5 flex flex-col flex-1 justify-between">
-                    <div>
-                      <h3 className="text-base font-semibold text-white line-clamp-2 leading-snug">{news.title}</h3>
-                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{news.excerpt}</p>
+                </div>
+                <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <span className="font-semibold text-[#BE185D]">{featured.category}</span>
+                      {featured.published_at && (
+                        <>
+                          <span>•</span>
+                          <time dateTime={new Date(featured.published_at).toISOString()}>
+                            {new Date(featured.published_at).toLocaleDateString("id-ID", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                              timeZone: "Asia/Jakarta",
+                            })}
+                          </time>
+                        </>
+                      )}
                     </div>
-                    <div className="mt-4 pt-3 border-t border-glass-border flex justify-between items-center text-xs text-muted-foreground">
-                      <span>{news.published_at ? new Date(news.published_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Terbaru"}</span>
-                      <span className="text-accent flex items-center gap-1 font-medium">{news.reading_time || 3} min <ArrowUpRight className="size-3" /></span>
-                    </div>
+                    <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 group-hover:text-[#E11D74] transition-colors leading-tight">
+                      {featured.title}
+                    </h3>
+                    {featured.excerpt && (
+                      <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">
+                        {featured.excerpt}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs text-slate-500">
+                    {featured.author && (
+                      <span className="font-medium text-slate-700">Oleh: {featured.author.name}</span>
+                    )}
+                    <span className="text-[#BE185D] font-bold group-hover:underline flex items-center gap-1">
+                      Baca Selengkapnya →
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          )}
+
+          <div className="lg:col-span-5 space-y-4 flex flex-col justify-between">
+            {rest.map((article) => (
+              <motion.div
+                key={article.id}
+                whileHover={{ x: 4, transition: { duration: 0.18 } }}
+                className="group"
+              >
+                <Link
+                  href={`/berita/${article.slug}`}
+                  className="flex gap-4 items-start p-4 bg-white rounded-xl border border-slate-200/90 hover:border-pink-300 hover:shadow-sm transition-all duration-200"
+                >
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden bg-slate-100 shrink-0">
+                    {article.thumbnail_url ? (
+                      <img
+                        src={article.thumbnail_url}
+                        alt={article.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <BookOpen className="size-8 text-slate-300" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <div className="text-[11px] font-semibold text-[#BE185D]">{article.category}</div>
+                    <h4 className="text-sm font-bold text-slate-900 group-hover:text-[#E11D74] transition-colors line-clamp-2 leading-snug">
+                      {article.title}
+                    </h4>
+                    {article.published_at && (
+                      <time
+                        className="text-[11px] text-slate-400"
+                        dateTime={new Date(article.published_at).toISOString()}
+                      >
+                        {new Date(article.published_at).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                          timeZone: "Asia/Jakarta",
+                        })}
+                      </time>
+                    )}
                   </div>
                 </Link>
-              );
-            })}
+              </motion.div>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </section>
   );
 }
 
+/* ═══════════════════════════════════════════════
+   HOME DOCUMENTS
+═══════════════════════════════════════════════ */
 export function HomeDocuments({ documents }: { documents?: any[] }) {
   const docList = (documents || []).slice(0, 6);
 
   return (
-    <section id="dokumen" className="relative px-4 py-24 sm:px-6">
-      <div className="relative mx-auto max-w-7xl">
-        <SectionHeading
-          eyebrow="Dokumen"
-          title="Arsip publik organisasi yang terstruktur"
-          description="Dokumen resmi organisasi BEM FKIP UIKA (AD/ART, SK, LPJ, dan Proposal) yang dapat diunduh publik."
-          action={
-            <Link href="/dokumen" className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full border border-glass-border px-5 text-sm font-semibold hover:border-accent/60 hover:text-accent">
-              Semua dokumen <ArrowUpRight className="size-4" />
-            </Link>
-          }
+    <section id="dokumen" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <SectionHeader
+        icon={FileText}
+        eyebrow="Dokumen"
+        title="Arsip publik organisasi yang terstruktur"
+        description="Dokumen resmi organisasi BEM FKIP UIKA (AD/ART, SK, LPJ, dan Proposal) yang tersedia untuk ditelusuri."
+        action={<ViewAllBtn href="/dokumen" label="Semua dokumen" />}
+      />
+      {docList.length === 0 ? (
+        <EmptyState
+          title="Belum ada dokumen publik"
+          description="Dokumen resmi yang ditandai sebagai publik akan otomatis tampil di sini."
         />
-        {docList.length === 0 ? (
-          <div className="mt-10">
-            <EmptyState
-              title="Belum ada dokumen publik"
-              description="Dokumen resmi yang ditandai sebagai publik akan otomatis tampil di sini."
-            />
-          </div>
-        ) : (
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            {docList.map((doc) => (
-              <div key={doc.id} className="glass rounded-3xl p-5 transition duration-300 hover:border-accent/50 flex flex-col justify-between">
-                <div className="relative h-28 w-full rounded-2xl overflow-hidden bg-gradient-to-br from-red-500/20 to-orange-500/10 flex items-center justify-center mb-4 border border-white/5">
-                  <FileText className="size-12 text-red-400/60" />
-                  <span className="absolute top-2 right-2 text-[10px] font-bold bg-red-500/30 text-red-300 rounded-md px-1.5 py-0.5">PDF</span>
-                  <div className="absolute bottom-2 left-3 text-[10px] font-semibold text-accent uppercase tracking-wider">{doc.category}</div>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-white line-clamp-2">{doc.name}</h4>
-                  <p className="text-xs text-muted-foreground mt-1 font-mono">{doc.original_filename}</p>
-                </div>
-                <div className="mt-4 pt-3 border-t border-glass-border flex justify-between items-center text-xs">
-                  <span className="text-muted-foreground">{(doc.file_size / 1024 / 1024).toFixed(2)} MB</span>
-                  <Link
-                    href="/dokumen"
-                    className="focus-ring rounded-lg border border-glass-border px-3 py-1 text-xs font-medium hover:border-accent hover:text-accent"
-                  >
-                    Lihat Dokumen
-                  </Link>
-                </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {docList.map((doc) => (
+            <motion.div
+              key={doc.id}
+              whileHover={{ y: -3, transition: { duration: 0.18 } }}
+              className="p-5 bg-white rounded-xl border border-slate-200/90 hover:border-pink-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+            >
+              <div className="relative h-28 w-full rounded-lg overflow-hidden bg-slate-50 flex items-center justify-center mb-4 border border-slate-100">
+                <FileText className="size-12 text-red-300" />
+                <span className="absolute top-2 right-2 text-[10px] font-bold bg-red-50 text-red-500 rounded-md px-1.5 py-0.5 border border-red-100">
+                  PDF
+                </span>
+                <span className="absolute bottom-2 left-3 text-[10px] font-semibold text-[#BE185D] uppercase tracking-wider">
+                  {doc.category}
+                </span>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <div>
+                <h4 className="font-semibold text-sm text-slate-900 line-clamp-2">{doc.name}</h4>
+                <p className="text-xs text-slate-400 mt-1 font-mono truncate">{doc.original_filename}</p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                <span className="text-slate-400">{(doc.file_size / 1024 / 1024).toFixed(2)} MB</span>
+                <Link
+                  href="/dokumen"
+                  className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700 hover:border-pink-300 hover:text-[#E11D74] transition-colors"
+                >
+                  Lihat Dokumen
+                </Link>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

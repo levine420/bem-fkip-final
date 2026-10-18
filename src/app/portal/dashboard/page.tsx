@@ -36,7 +36,7 @@ export default async function PortalDashboardPage() {
                   {student.program_studi_name || "FKIP UIKA"} (Angkatan {student.angkatan || "-"})
                 </p>
                 <div className="mt-1 flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-600 dark:text-success">
                     <CheckCircle2 className="h-3 w-3" /> Status Akun: {student.account_status}
                   </span>
                 </div>
@@ -56,7 +56,7 @@ export default async function PortalDashboardPage() {
           <div className="rounded-2xl border border-border bg-card p-5 shadow-xs transition hover:border-brand/40">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">Kegiatan Didaftarkan</span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-foreground">
                 <Calendar className="h-4 w-4" />
               </div>
             </div>
@@ -67,7 +67,7 @@ export default async function PortalDashboardPage() {
           <div className="rounded-2xl border border-border bg-card p-5 shadow-xs transition hover:border-brand/40">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">Aspirasi Dikirim</span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-accent">
                 <MessageSquare className="h-4 w-4" />
               </div>
             </div>

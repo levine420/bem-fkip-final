@@ -1,292 +1,136 @@
 "use client";
-
-import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
-import { ChevronLeft, ChevronRight, UserCircle, X, ShieldCheck, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, X, Award } from "lucide-react";
+import { Modal } from "@/components/Modal";
+import { EmptyState } from "@/components/EmptyState";
 
 export type DepartmentMemberItem = {
-  id: string;
-  name: string;
-  position: string;
-  photo_url: string | null;
-  display_order: number;
+  id: string; name: string; position: string; photo_url: string | null; display_order: number;
 };
 
-export function DepartmentTeamCarousel({
-  members = [],
-  departmentName = "",
-}: {
-  members: DepartmentMemberItem[];
-  departmentName?: string;
-}) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<DepartmentMemberItem | null>(null);
+export function DepartmentTeamCarousel({ members = [], departmentName = "" }: { members: DepartmentMemberItem[]; departmentName?: string }) {
+  const track = useRef<HTMLDivElement>(null);
+  const [selected, setSelected] = useState<DepartmentMemberItem | null>(null);
+  const [edges, setEdges] = useState({ left: false, right: false });
 
-  // 1. Separate Head of Department from Staff Members
-  const headMember = members.find(
-    (m) =>
-      m.position.toLowerCase().includes("kepala") ||
-      m.position.toLowerCase().includes("kadep") ||
-      m.position.toLowerCase().includes("ketua")
-  );
+  const team = useMemo(() => {
+    const sorted = [...members].sort((a, b) => a.display_order - b.display_order);
+    const head = sorted.find((m) => /kepala|kadep|ketua/i.test(m.position));
+    return { head, items: head ? [head, ...sorted.filter((m) => m.id !== head.id)] : sorted };
+  }, [members]);
 
-  const staffMembers = members.filter((m) => m.id !== headMember?.id);
-
-  // Combine: Head is ALWAYS 1st card
-  const teamList = headMember ? [headMember, ...staffMembers] : staffMembers;
-
-  // 2. Scroll check handler
-  const handleScroll = () => {
-    if (!scrollRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-    setCanScrollLeft(scrollLeft > 5);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
+  const updateEdges = () => {
+    const el = track.current;
+    if (el) setEdges({ left: el.scrollLeft > 4, right: el.scrollLeft + el.clientWidth < el.scrollWidth - 4 });
   };
 
   useEffect(() => {
-    handleScroll();
-    window.addEventListener("resize", handleScroll);
-    return () => window.removeEventListener("resize", handleScroll);
-  }, [teamList]);
+    updateEdges();
+    const observer = new ResizeObserver(updateEdges);
+    if (track.current) observer.observe(track.current);
+    return () => observer.disconnect();
+  }, [members]);
 
-  // ESC key listener for modal
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setSelectedMember(null);
-      }
-    };
-    if (selectedMember) {
-      window.addEventListener("keydown", handleKeyDown);
-    }
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedMember]);
+  const move = (dir: number) =>
+    track.current?.scrollBy({
+      left: dir * (track.current.clientWidth * 0.8),
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+    });
 
-  const scrollLeft = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: -320, behavior: "smooth" });
-    }
-  };
-
-  const scrollRight = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 320, behavior: "smooth" });
-    }
-  };
-
-  if (teamList.length === 0) {
-    return (
-      <div className="glass rounded-3xl p-8 text-center border border-glass-border">
-        <div className="mx-auto size-12 rounded-2xl bg-white/5 border border-glass-border flex items-center justify-center text-muted-foreground mb-3">
-          <UserCircle className="size-6 text-accent/60" />
-        </div>
-        <p className="text-sm font-semibold text-white">Belum ada anggota tim yang terdaftar</p>
-        <p className="text-xs text-muted-foreground mt-1">
-          Daftar anggota pengurus departemen ini akan tampil otomatis di sini setelah diisi oleh pengurus.
-        </p>
+  const portrait = (member: DepartmentMemberItem, large = false) =>
+    member.photo_url ? (
+      <img src={member.photo_url} alt="" loading="lazy"
+        className={`${large ? "w-28 h-28" : "w-20 h-20"} mx-auto rounded-2xl object-cover ring-4 ring-pink-100 shadow-sm`} />
+    ) : (
+      <div className={`${large ? "w-28 h-28 text-2xl" : "w-20 h-20 text-xl"} mx-auto grid place-items-center rounded-2xl bg-pink-50 text-[#BE185D] font-bold ring-4 ring-pink-100`}>
+        {member.name.split(" ").slice(0, 2).map((p) => p[0]).join("")}
       </div>
     );
-  }
 
   return (
-    <div className="space-y-4">
-      {/* Header Section */}
-      <div className="flex items-center justify-between">
+    <section className="min-w-0 space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Sparkles className="size-5 text-accent" /> Tim Departemen
-          </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Gesper ke kanan/kiri untuk melihat pengurus dan anggota staff {departmentName}
-          </p>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Susunan Pengurus Departemen</h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Fungsionaris yang menggerakkan program kerja {departmentName}.</p>
         </div>
-
-        {/* Desktop Controls */}
-        <div className="hidden sm:flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={scrollLeft}
-            disabled={!canScrollLeft}
-            aria-label="Geser Kiri"
-            className="focus-ring flex size-9 items-center justify-center rounded-xl bg-white/5 border border-glass-border text-white hover:bg-brand/30 hover:border-accent/40 transition disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <ChevronLeft className="size-4" />
+        <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+          <button type="button" aria-label="Geser kiri" disabled={!edges.left} onClick={() => move(-1)}
+            className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors disabled:opacity-40">
+            <ChevronLeft className="w-4 h-4" />
           </button>
-          <button
-            type="button"
-            onClick={scrollRight}
-            disabled={!canScrollRight}
-            aria-label="Geser Kanan"
-            className="focus-ring flex size-9 items-center justify-center rounded-xl bg-white/5 border border-glass-border text-white hover:bg-brand/30 hover:border-accent/40 transition disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <ChevronRight className="size-4" />
+          <button type="button" aria-label="Geser kanan" disabled={!edges.right} onClick={() => move(1)}
+            className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors disabled:opacity-40">
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Carousel Track */}
-      <div className="relative w-full overflow-hidden">
+      {!team.items.length ? (
+        <EmptyState title="Belum ada pengurus yang ditampilkan" description="Profil pengurus akan tersedia setelah dipublikasikan." />
+      ) : (
         <div
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className="flex gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar py-2 px-0.5 text-left"
+          ref={track}
+          onScroll={updateEdges}
+          className="flex gap-4 overflow-x-auto pb-4 pt-1 px-1 scroll-smooth"
+          style={{ scrollbarWidth: "thin", scrollbarColor: "#f9a8d4 transparent" }}
         >
-          {teamList.map((member) => {
-            const isHead = member.id === headMember?.id;
-
-            const initials = member.name
-              .split(" ")
-              .slice(0, 2)
-              .map((n) => n[0])
-              .join("")
-              .toUpperCase();
-
+          {team.items.map((member) => {
+            const isHead = member.id === team.head?.id;
             return (
-              <div
+              <button
                 key={member.id}
-                onClick={() => setSelectedMember(member)}
-                className={`snap-start shrink-0 w-[82vw] sm:w-[calc(50%-10px)] md:w-[calc(33.333%-14px)] lg:w-[calc(25%-15px)] flex flex-col justify-between glass rounded-3xl p-5 border transition shadow-xl cursor-pointer group ${
-                  isHead
-                    ? "border-amber-500/50 bg-gradient-to-b from-amber-500/10 via-transparent to-transparent hover:border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.15)]"
-                    : "border-glass-border hover:border-accent/50"
+                type="button"
+                onClick={() => setSelected(member)}
+                className={`w-52 sm:w-60 shrink-0 bg-white rounded-2xl border hover:border-pink-300 transition-all duration-150 p-5 flex flex-col justify-between space-y-4 text-left ${
+                  isHead ? "border-pink-200 shadow-sm" : "border-slate-200/90 shadow-xs"
                 }`}
               >
-                <div className="space-y-4">
-                  {/* Portrait Image Container */}
-                  <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-black/40 border border-glass-border">
-                    {member.photo_url ? (
-                      <Image
-                        src={member.photo_url}
-                        alt={member.name}
-                        fill
-                        className="object-cover object-[center_top] transition duration-500 group-hover:scale-105"
-                        sizes="(max-width: 640px) 82vw, (max-width: 1024px) 33vw, 25vw"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand/40 via-purple-900/30 to-black font-black text-3xl text-amber-300">
-                        {initials}
-                      </div>
-                    )}
-
-                    {/* Badge Overlay */}
-                    <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
-                      {isHead ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/90 text-black shadow-md backdrop-blur-md">
-                          <ShieldCheck className="size-3" /> Kepala Departemen
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-black/70 text-accent border border-accent/30 backdrop-blur-md">
-                          Staff Departemen
-                        </span>
-                      )}
+                <div className="space-y-3">
+                  {isHead && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-[#BE185D] uppercase tracking-wider">Pimpinan Departemen</span>
+                      <Award className="w-4 h-4 text-[#E11D74]" />
                     </div>
-                  </div>
-
-                  {/* Member Name & Position */}
-                  <div>
-                    <h3 className="text-base font-bold text-white group-hover:text-accent transition line-clamp-1">
-                      {member.name}
-                    </h3>
-                    <p className={`text-xs font-medium mt-0.5 ${isHead ? "text-amber-300 font-semibold" : "text-muted-foreground"}`}>
-                      {member.position || (isHead ? "Kepala Departemen" : "Staff")}
-                    </p>
+                  )}
+                  {portrait(member, isHead)}
+                  <div className="text-center space-y-0.5">
+                    <h4 className="text-sm font-bold text-slate-900 line-clamp-1">{member.name}</h4>
+                    <p className="text-xs text-[#BE185D] font-medium line-clamp-1">{member.position}</p>
                   </div>
                 </div>
-
-                <div className="mt-4 pt-3 border-t border-glass-border flex justify-end">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedMember(member);
-                    }}
-                    className="text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1"
-                  >
-                    Lihat Profil &rarr;
-                  </button>
-                </div>
-              </div>
+                <span className="block text-right text-xs font-semibold text-[#E11D74] pt-2 border-t border-slate-100">
+                  Lihat profil →
+                </span>
+              </button>
             );
           })}
         </div>
-      </div>
-
-      {/* MEMBER DETAIL MODAL */}
-      {selectedMember && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200"
-          onClick={() => setSelectedMember(null)}
-        >
-          <div
-            className="glass rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl border border-accent/40 space-y-6 relative overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <button
-              type="button"
-              onClick={() => setSelectedMember(null)}
-              aria-label="Tutup"
-              className="absolute top-4 right-4 text-muted-foreground hover:text-white size-8 rounded-full bg-white/10 flex items-center justify-center transition"
-            >
-              <X className="size-4" />
-            </button>
-
-            <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
-              {/* Photo */}
-              <div className="relative aspect-[3/4] w-36 sm:w-40 shrink-0 overflow-hidden rounded-2xl border-2 border-accent/40 shadow-xl bg-black/40">
-                {selectedMember.photo_url ? (
-                  <Image
-                    src={selectedMember.photo_url}
-                    alt={selectedMember.name}
-                    fill
-                    className="object-cover object-[center_top]"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand via-purple-900 to-black text-3xl font-black text-amber-300">
-                    {selectedMember.name
-                      .split(" ")
-                      .slice(0, 2)
-                      .map((n) => n[0])
-                      .join("")
-                      .toUpperCase()}
-                  </div>
-                )}
-              </div>
-
-              {/* Info Details */}
-              <div className="space-y-3 flex-1">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-accent/20 text-accent border border-accent/30">
-                    {selectedMember.id === headMember?.id ? "Kepala Departemen" : "Staff Departemen"}
-                  </span>
-                  <h3 className="text-xl font-bold text-white mt-2">{selectedMember.name}</h3>
-                  <p className="text-sm font-semibold text-accent mt-0.5">{selectedMember.position}</p>
-                  {departmentName && (
-                    <p className="text-xs text-muted-foreground mt-0.5">{departmentName}</p>
-                  )}
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-white/5 border border-glass-border text-xs text-muted-foreground space-y-1.5">
-                  <p className="font-semibold text-white">Identitas Pengurus Resmi</p>
-                  <p>Anggota tim terverifikasi pada kepengurusan BEM FKIP UIKA Bogor periode aktif.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-2 text-right">
-              <button
-                type="button"
-                onClick={() => setSelectedMember(null)}
-                className="focus-ring rounded-xl bg-brand px-5 py-2 text-xs font-semibold text-white hover:bg-brand-hover transition"
-              >
-                Tutup Profil
-              </button>
-            </div>
-          </div>
-        </div>
       )}
-    </div>
+
+      {/* Mobile swipe hint */}
+      <p className="text-right text-[11px] text-slate-400 sm:hidden">← Geser untuk melihat anggota lainnya →</p>
+
+      {/* Profile modal */}
+      {selected && (
+        <Modal label={`Profil ${selected.name}`} onClose={() => setSelected(null)}>
+          <div className="mb-4 flex justify-end">
+            <button type="button" aria-label="Tutup" onClick={() => setSelected(null)}
+              className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900 transition-colors">
+              <X size={20} />
+            </button>
+          </div>
+          {portrait(selected, true)}
+          <h3 className="mt-4 text-center text-2xl font-bold text-slate-900">{selected.name}</h3>
+          <p className="mt-1 text-center font-medium text-[#BE185D]">{selected.position}</p>
+          <p className="mt-1 text-center text-sm text-slate-500">{departmentName}</p>
+          <button type="button" onClick={() => setSelected(null)}
+            className="mt-6 w-full rounded-lg border border-slate-200 py-2.5 text-sm font-medium text-slate-700 hover:border-pink-300 hover:text-[#E11D74] transition-colors">
+            Tutup Profil
+          </button>
+        </Modal>
+      )}
+    </section>
   );
 }

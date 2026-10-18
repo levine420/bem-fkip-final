@@ -41,11 +41,9 @@ export function OrganizationManager({ kind }: { kind: OrganizationKind }) {
   const readOnly = currentPeriod?.status === "ARSIP";
   const departmentPath = period ? `/api/admin/departments?period_id=${encodeURIComponent(period.id)}` : "";
   function edit(item: OrganizationItem) {
-    console.log("Edit clicked for item:", item);
     const next: Editor = { ...blank, id: item.id, version: item.version, name: item.name };
     if ("slug" in item) { next.slug = item.slug; next.description = item.description ?? ""; next.logo_url = item.logo_url ?? ""; }
     else { next.position = item.position; next.photo_url = item.photo_url ?? ""; next.display_order = String(item.display_order); next.department = item.department; }
-    console.log("Setting editor to:", next);
     setEditor(next); setFields({}); setError(""); setNotice("");
     // Scroll to form after state update
     setTimeout(() => {
@@ -98,7 +96,7 @@ export function OrganizationManager({ kind }: { kind: OrganizationKind }) {
       {!initializing && !period && !error && <p className="text-sm text-muted-foreground">Belum ada periode. Super Admin perlu membuat periode di menu Periode terlebih dahulu.</p>}
       {readOnly && <p role="status" className="rounded-xl border border-glass-border p-3 text-sm text-soft">Arsip · hanya baca, termasuk untuk Super Admin.</p>}
       {currentPeriod?.status === "NONAKTIF" && <p className="text-sm text-muted-foreground">Persiapan organisasi periode draf. Perubahan di sini tidak mengaktifkan periode atau akun Admin.</p>}
-      {data?.can_create && <button className={`${actionClass} w-fit bg-brand`} disabled={busy || loading} onClick={() => { setEditor({ ...blank }); setFields({}); setError(""); setNotice(""); }}>Tambah {isDepartment ? "departemen" : isBoard ? "pengurus" : "anggota"}</button>}
+      {data?.can_create && <button type="button" className={`${actionClass} w-fit bg-brand`} disabled={busy || loading} onClick={() => { setEditor({ ...blank }); setFields({}); setError(""); setNotice(""); }}>Tambah {isDepartment ? "departemen" : isBoard ? "pengurus" : "anggota"}</button>}
     </section>
     {notice && <p role="status" className="glass rounded-2xl p-4 text-sm text-soft">{notice}</p>}
     {error && <div role="alert" className="glass rounded-2xl p-4 text-sm text-soft"><p>{error}</p><button type="button" className={`${actionClass} mt-3`} disabled={busy} onClick={() => period ? setRefresh((r) => r + 1) : setInitRetry((r) => r + 1)}>Muat ulang daftar</button>
@@ -110,7 +108,7 @@ export function OrganizationManager({ kind }: { kind: OrganizationKind }) {
         <ImageUploader
           label="Logo Departemen (opsional)"
           value={editor.logo_url}
-          onChange={(url) => setEditor({ ...editor, logo_url: url })}
+          onChange={(url) => setEditor(current => current ? { ...current, logo_url: url } : current)}
         />
       </> : <>
         {field("position", "Jabatan")}{field("display_order", "Urutan tampil — mulai dari 1")}
@@ -121,15 +119,15 @@ export function OrganizationManager({ kind }: { kind: OrganizationKind }) {
         <ImageUploader
           label="Foto Pengurus / Anggota (opsional)"
           value={editor.photo_url}
-          onChange={(url) => setEditor({ ...editor, photo_url: url })}
+          onChange={(url) => setEditor(current => current ? { ...current, photo_url: url } : current)}
         />
       </>}
-      <div className="flex gap-2"><button className={`${actionClass} bg-brand`} disabled={busy || !!readOnly}>{busy ? "Menyimpan…" : "Simpan"}</button><button type="button" className={actionClass} disabled={busy} onClick={() => setEditor(null)}>Batal</button></div>
+      <div className="flex gap-2"><button type="submit" className={`${actionClass} bg-brand`} disabled={busy || !!readOnly}>{busy ? "Menyimpan…" : "Simpan"}</button><button type="button" className={actionClass} disabled={busy} onClick={() => setEditor(null)}>Batal</button></div>
     </form>}
     {period && <section className="glass grid gap-4 rounded-3xl p-5 sm:p-7" aria-busy={loading}>
       <form onSubmit={(e) => { e.preventDefault(); setSearch(query); setPage(1); }} className="flex flex-wrap items-end gap-3">
         <label className="min-w-0 flex-1 text-sm">{isDepartment ? "Cari nama departemen" : "Cari nama atau jabatan"}<input type="search" className="form-control mt-2" value={query} maxLength={100} disabled={busy} onChange={(e) => setQuery(e.target.value)} /></label>
-        <button className={actionClass} disabled={busy}>Cari</button></form>
+        <button type="submit" className={actionClass} disabled={busy}>Cari</button></form>
       {!isDepartment && <OrganizationPicker key={period.id} label="Filter departemen" path={departmentPath} value={departmentFilter} clearLabel="Semua dalam lingkup akses" disabled={busy}
         onChange={(item) => { setDepartmentFilter(item); setPage(1); }} />}
       {loading ? <p role="status" className="py-5 text-muted-foreground">Memuat data organisasi…</p> : data && <>
@@ -138,11 +136,11 @@ export function OrganizationManager({ kind }: { kind: OrganizationKind }) {
           <div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><h3 className="break-words font-semibold">{item.name}</h3>
             {"slug" in item ? <><p className="mt-1 break-words text-xs text-accent">{item.slug}</p><p className="mt-2 whitespace-pre-wrap break-words text-sm text-muted-foreground">{item.description || "Deskripsi belum diisi."}</p></>
               : <><p className="mt-1 break-words text-sm text-soft">{item.position}</p><p className="mt-1 text-xs text-muted-foreground">{item.department?.name ?? "Pengurus inti / tanpa departemen"} · Urutan {item.display_order}</p></>}
-          </div>{!readOnly && <div className="flex gap-2"><button className={actionClass} disabled={busy} onClick={() => edit(item)}>Edit</button>{data.can_delete && <button className={`${actionClass} text-soft`} disabled={busy} onClick={() => remove(item)}>Hapus</button>}</div>}</div>
+          </div>{!readOnly && <div className="flex gap-2"><button type="button" className={actionClass} disabled={busy} onClick={() => edit(item)}>Edit</button>{data.can_delete && <button type="button" className={`${actionClass} text-soft`} disabled={busy} onClick={() => remove(item)}>Hapus</button>}</div>}</div>
         </article>)}
         <nav aria-label={`Halaman ${title[kind]}`} className="flex flex-wrap items-center justify-between gap-3 text-sm"><span>{data.total} data · Halaman {data.page}</span><div className="flex gap-2">
-          <button className={actionClass} disabled={busy || page === 1} onClick={() => setPage(page - 1)}>Sebelumnya</button>
-          <button className={actionClass} disabled={busy || page * data.page_size >= data.total} onClick={() => setPage(page + 1)}>Berikutnya</button></div></nav>
+          <button type="button" className={actionClass} disabled={busy || page === 1} onClick={() => setPage(page - 1)}>Sebelumnya</button>
+          <button type="button" className={actionClass} disabled={busy || page * data.page_size >= data.total} onClick={() => setPage(page + 1)}>Berikutnya</button></div></nav>
       </>}
     </section>}
   </div>;

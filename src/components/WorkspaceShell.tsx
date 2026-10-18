@@ -26,7 +26,7 @@ export function WorkspaceShell({
   extraSidebarAction?: ReactNode;
 }) {
   return (
-    <div className={`min-h-screen bg-background px-3 py-3 sm:px-5 sm:py-5 ${mobileBottomNavigation ? "pb-24 lg:pb-5" : ""}`}>
+    <div className={`workspace-shell min-h-screen bg-background px-3 py-3 sm:px-5 sm:py-5 ${mobileBottomNavigation ? "pb-24 lg:pb-5" : ""}`}>
       <div className="mx-auto grid max-w-[1500px] gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
         {/* Desktop Sidebar */}
         <aside className="glass-strong hidden h-fit rounded-3xl p-4 lg:block lg:sticky lg:top-5">
@@ -41,7 +41,7 @@ export function WorkspaceShell({
             {navigation.map((item) => {
               const active = activeHref === item.href;
               return (
-                <Link key={item.href} href={item.href} className={`focus-ring rounded-xl px-3 py-3 text-sm transition-colors ${active ? "bg-[var(--glass-bg-strong)] font-semibold text-foreground" : "text-muted-foreground hover:bg-[var(--glass-bg)] hover:text-foreground"}`}>
+                <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`focus-ring rounded-xl px-3 py-3 text-sm transition-colors ${active ? "font-semibold" : "text-muted-foreground hover:bg-muted"}`}>
                   {item.label}
                 </Link>
               );
@@ -77,7 +77,7 @@ export function WorkspaceShell({
       </div>
 
       {mobileBottomNavigation ? (
-        <nav aria-label="Mobile bottom navigation" className="glass-strong fixed inset-x-3 bottom-3 z-50 grid grid-cols-4 gap-1 rounded-2xl p-2 lg:hidden shadow-2xl">
+        <nav aria-label="Mobile bottom navigation" className="glass-strong fixed inset-x-3 bottom-3 z-50 grid grid-cols-4 gap-1 rounded-2xl p-2 lg:hidden shadow-sm">
           {navigation.slice(0, 4).map((item) => {
             const active = activeHref === item.href;
             return <Link key={item.href} href={item.href} className={`focus-ring rounded-xl px-1 py-2.5 text-center text-[11px] font-medium ${active ? "bg-brand text-white font-semibold" : "text-muted-foreground"}`}>{item.label}</Link>;

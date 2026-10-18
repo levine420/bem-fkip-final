@@ -101,16 +101,16 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
   async function save(event: FormEvent<HTMLFormElement>, submitReview = false) {
     event.preventDefault();
     if (busy) return;
-    
+
     setBusy(true);
     setError("");
     setFields({});
-    
+
     const tags = editor.tags
       .split(",")
       .map((t) => t.trim())
       .filter((t) => t);
-    
+
     const payload = {
       title: editor.title,
       slug: editor.slug || undefined,
@@ -122,7 +122,7 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
       meta_title: editor.meta_title || undefined,
       meta_description: editor.meta_description || undefined,
     };
-    
+
     try {
       if (mode === "create") {
         const result = await adminApi<Content>("/api/admin/contents", "POST", payload);
@@ -163,7 +163,7 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
     }
   ) {
     const { multiline = false, rows = 3, placeholder = "", maxLength = 1000, type = "text" } = props || {};
-    
+
     const inputProps = {
       id: `content-${key}`,
       name: key,
@@ -177,7 +177,7 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
       onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
         setEditor({ ...editor, [key]: e.target.value }),
     };
-    
+
     return (
       <div>
         <label htmlFor={`content-${key}`} className="text-sm font-semibold">
@@ -217,7 +217,7 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
     return (
       <div className="glass rounded-3xl p-5 sm:p-7">
         <p className="text-sm text-soft">{error}</p>
-        <button className={`${actionClass} mt-4`} onClick={() => router.back()}>
+        <button type="button" className={`${actionClass} mt-4`} onClick={() => router.back()}>
           Kembali
         </button>
       </div>
@@ -230,7 +230,7 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
     <div className="grid gap-4">
       {existing && existing.status === "REVISI" && existing.review_note && (
         <div className="glass rounded-3xl border-orange-500/50 p-5 sm:p-7">
-          <h3 className="font-semibold text-orange-400">Catatan Revisi dari Super Admin</h3>
+          <h3 className="font-semibold text-warning">Catatan Revisi dari Super Admin</h3>
           <p className="mt-2 text-sm text-muted-foreground whitespace-pre-wrap">{existing.review_note}</p>
         </div>
       )}
@@ -263,7 +263,7 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
               maxLength: 200,
               placeholder: "Kosongkan untuk auto-generate dari judul",
             })}
-            
+
             <div className="grid gap-4 sm:grid-cols-2">
               {field("category", "Kategori *")}
               {field("tags", "Tags", {
@@ -319,7 +319,7 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
             )}
 
             <div className="flex flex-wrap gap-2">
-              <button className={`${actionClass} bg-brand`} disabled={busy}>
+              <button type="submit" className={`${actionClass} bg-brand`} disabled={busy}>
                 {busy ? "Menyimpan…" : "Simpan sebagai Draf"}
               </button>
               {canSubmitReview && (
@@ -369,7 +369,7 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
             <div>
               <p className="text-xs text-muted-foreground">KONTEN</p>
               <div
-                className="prose prose-invert mt-2 max-w-none"
+                className="article-content mt-2 max-w-none"
                 dangerouslySetInnerHTML={{ __html: editor.body || "(Belum ada konten)" }}
               />
             </div>

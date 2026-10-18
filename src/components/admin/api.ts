@@ -41,7 +41,7 @@ export async function adminApi<T>(path: string, method = "GET", body?: unknown):
       }
       throw new ApiError(response.status, "SERVER_ERROR", `Terjadi kesalahan pada server (${response.status}).`);
     }
-    result = {};
+    throw new ApiError(response.status, "INVALID_RESPONSE", "Respons server tidak dapat dibaca. Periksa data terbaru sebelum mencoba lagi.");
   }
 
   if (!response.ok) {
@@ -57,6 +57,9 @@ export async function adminApi<T>(path: string, method = "GET", body?: unknown):
       result.error?.message ?? "Permintaan gagal.",
       result.error?.fields
     );
+  }
+  if (!result || typeof result !== "object" || !("data" in result)) {
+    throw new ApiError(response.status, "INVALID_RESPONSE", "Respons server tidak lengkap. Periksa data terbaru sebelum mencoba lagi.");
   }
   return result.data as T;
 }

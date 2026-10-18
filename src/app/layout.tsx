@@ -55,8 +55,14 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="id">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+      </head>
       {/* overscrollBehavior none inline ensures it's applied before any stylesheet */}
-      <body style={{ overscrollBehavior: "none" }}>{children}</body>
+      <body className="antialiased" style={{ overscrollBehavior: "none" }}>{children}</body>
     </html>
   );
 }

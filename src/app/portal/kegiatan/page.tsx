@@ -92,10 +92,10 @@ export default async function PortalActivitiesPage() {
                       <span
                         className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
                           reg.status === "DITERIMA" || reg.status === "HADIR"
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                            ? "bg-emerald-500/10 text-emerald-600 dark:text-success"
                             : reg.status === "DITOLAK"
-                            ? "bg-red-500/10 text-red-600 dark:text-red-400"
-                            : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                            ? "bg-red-500/10 text-red-600 dark:text-danger"
+                            : "bg-amber-500/10 text-amber-600 dark:text-accent"
                         }`}
                       >
                         {reg.status === "DITERIMA" && <CheckCircle className="h-3.5 w-3.5" />}

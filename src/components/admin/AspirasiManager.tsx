@@ -1,4 +1,6 @@
 "use client";
+import { Pagination } from "@/components/Pagination";
+import { Modal } from "@/components/Modal";
 import { useEffect, useState } from "react";
 import { actionClass, adminApi, errorMessage } from "./api";
 
@@ -39,10 +41,10 @@ const statusLabels: Record<Aspiration["status"], string> = {
 };
 
 const statusColors: Record<Aspiration["status"], string> = {
-  MASUK: "bg-blue-500/20 text-blue-300",
-  DIPROSES: "bg-yellow-500/20 text-yellow-300",
-  SELESAI: "bg-green-500/20 text-green-300",
-  DITOLAK: "bg-red-500/20 text-red-300",
+  MASUK: "bg-blue-500/20 text-foreground",
+  DIPROSES: "bg-yellow-500/20 text-warning",
+  SELESAI: "bg-green-500/20 text-success",
+  DITOLAK: "bg-red-500/20 text-danger",
 };
 
 export function AspirasiManager() {
@@ -192,7 +194,7 @@ export function AspirasiManager() {
               <option value="DITOLAK">Ditolak</option>
             </select>
           </label>
-          <button className={`${actionClass} bg-brand/50`} disabled={loading}>
+          <button type="submit" className={`${actionClass} bg-brand/50`} disabled={loading}>
             {loading ? "Memuat…" : "Terapkan"}
           </button>
         </form>
@@ -229,7 +231,7 @@ export function AspirasiManager() {
                     </td>
                     <td className="py-3">
                       {item.is_anonymous ? (
-                        <span className="inline-block bg-gray-500/20 text-gray-300 text-xs px-2 py-0.5 rounded-full font-medium">
+                        <span className="inline-block bg-gray-500/20 text-muted-foreground text-xs px-2 py-0.5 rounded-full font-medium">
                           🔒 Anonim
                         </span>
                       ) : (
@@ -247,7 +249,7 @@ export function AspirasiManager() {
                       </span>
                     </td>
                     <td className="py-3 text-right">
-                      <button
+                      <button type="button"
                         onClick={() => openRespondModal(item)}
                         className={`${actionClass} py-1 text-xs bg-brand/30`}
                       >
@@ -262,10 +264,12 @@ export function AspirasiManager() {
         )}
       </section>
 
+      {data && <Pagination page={page} pageSize={data.page_size} total={data.total} busy={busy || loading} onPage={setPage} />}
+
       {/* Response Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="glass rounded-3xl p-6 w-full max-w-xl shadow-2xl">
+        <Modal label="Tanggapan aspirasi" busy={busy} onClose={() => setSelectedItem(null)}>
+          <div className="glass rounded-3xl p-6 w-full max-w-xl shadow-sm">
             <div className="flex justify-between items-start gap-4 border-b border-glass-border pb-4">
               <div>
                 <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium mb-2 ${statusColors[selectedItem.status]}`}>
@@ -276,7 +280,7 @@ export function AspirasiManager() {
                   Pengaju: {selectedItem.is_anonymous ? "Mahasiswa Anonim" : `${selectedItem.submitter.name} (${selectedItem.submitter.nim || selectedItem.submitter.email})`}
                 </p>
               </div>
-              <button onClick={() => setSelectedItem(null)} className="text-muted-foreground hover:text-white">✕</button>
+              <button type="button" disabled={busy} aria-label="Tutup tanggapan" onClick={() => setSelectedItem(null)} className="text-muted-foreground hover:text-foreground">✕</button>
             </div>
 
             <div className="mt-4 p-4 rounded-2xl bg-white/5 border border-glass-border text-sm">
@@ -285,6 +289,7 @@ export function AspirasiManager() {
             </div>
 
             <form onSubmit={handleSendResponse} className="mt-4 grid gap-3">
+              {error && <p role="alert" className="rounded-lg border p-3 text-sm">{error}</p>}
               <label className="text-sm">
                 Status Penanganan Aspirasi
                 <select
@@ -330,7 +335,7 @@ export function AspirasiManager() {
               </div>
             </form>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

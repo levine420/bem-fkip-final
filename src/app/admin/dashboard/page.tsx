@@ -75,7 +75,7 @@ export default async function AdminDashboardPage() {
           <div className="rounded-2xl border border-border bg-card p-5 shadow-xs transition hover:border-brand/40">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">Konten / Berita</span>
-              <div className="flex size-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-foreground">
                 <FileText className="size-4" />
               </div>
             </div>
@@ -86,7 +86,7 @@ export default async function AdminDashboardPage() {
           <div className="rounded-2xl border border-border bg-card p-5 shadow-xs transition hover:border-brand/40">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">Event / Kegiatan</span>
-              <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-success">
                 <Calendar className="size-4" />
               </div>
             </div>
@@ -97,7 +97,7 @@ export default async function AdminDashboardPage() {
           <div className="rounded-2xl border border-border bg-card p-5 shadow-xs transition hover:border-brand/40">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">Aspirasi Mahasiswa</span>
-              <div className="flex size-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-accent">
                 <MessageSquare className="size-4" />
               </div>
             </div>
