@@ -39,7 +39,7 @@ export function PublicNavbar() {
         <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" className="group flex min-w-0 items-center gap-3 rounded-lg p-1">
             <motion.span whileHover={{ scale: 1.05, rotate: 1 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.15 }} className="relative grid size-10 shrink-0 place-items-center">
-              <Image src="/images/logo-altiora.png" alt="Logo BEM FKIP UIKA" width={40} height={40} priority className="size-10 object-contain" />
+              <Image src="/images/logo_bem.png" alt="Logo BEM FKIP UIKA" width={40} height={40} priority className="size-10 object-contain" />
             </motion.span>
             <span className="min-w-0">
               <span className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export function PublicNavbar() {
             <motion.div id="public-mobile-menu" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }} className="fixed inset-y-0 right-0 flex w-[85%] max-w-sm flex-col border-l border-slate-100 bg-white p-6 shadow-2xl">
               <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-2.5">
-                  <Image src="/images/logo-altiora.png" alt="" width={32} height={32} className="size-8 object-contain" />
+                  <Image src="/images/logo_bem.png" alt="" width={32} height={32} className="size-8 object-contain" />
                   <div>
                     <p className="text-sm font-bold text-slate-900">BEM FKIP UIKA</p>
                     <p className="text-[10px] text-slate-500">Kabinet Altiora</p>

@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/icon.png", type: "image/png" },
-      { url: "/images/logo-altiora.png", type: "image/png" },
+      { url: "/images/logo_bem.png", type: "image/png" },
     ],
     shortcut: "/icon.png",
     apple: "/icon.png",

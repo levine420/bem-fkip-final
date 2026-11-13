@@ -17,7 +17,7 @@ export function PublicFooter() {
         <div className="grid grid-cols-1 gap-10 border-b border-slate-800 pb-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <Image src="/images/logo-altiora.png" alt="Logo Kabinet Altiora BEM FKIP UIKA" width={40} height={40} className="size-10 object-contain" />
+              <Image src="/images/logo_bem.png" alt="Logo Kabinet Altiora BEM FKIP UIKA" width={40} height={40} className="size-10 object-contain" />
               <div>
                 <p className="text-base font-bold leading-tight tracking-tight text-white">BEM FKIP UIKA BOGOR</p>
                 <p className="text-xs font-medium text-pink-300/80">Kabinet Altiora</p>

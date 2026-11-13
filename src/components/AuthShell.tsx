@@ -30,7 +30,7 @@ export function AuthShell({
           <Link href="/" className="focus-ring inline-flex flex-col items-center gap-3 group">
             <div className="relative size-16 p-2.5 bg-amber-500/10 rounded-3xl border border-amber-500/30 group-hover:scale-[1.03] transition shadow-sm flex items-center justify-center">
               <Image
-                src="/images/logo-altiora.png"
+                src="/images/logo_bem.png"
                 alt="Logo Kabinet Altiora BEM FKIP UIKA"
                 width={64}
                 height={64}

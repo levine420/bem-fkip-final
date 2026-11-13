@@ -39,7 +39,7 @@ export function HomeAbout() {
           <div className="mt-12 grid items-stretch gap-8 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="dark-section relative rounded-2xl p-8 sm:p-12 flex flex-col items-center justify-center">
               <Image
-                src="/images/logo-altiora.png"
+                src="/images/logo_bem.png"
                 alt="Logo Kabinet Altiora"
                 width={600}
                 height={600}
