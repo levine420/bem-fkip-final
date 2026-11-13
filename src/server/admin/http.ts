@@ -26,7 +26,15 @@ export async function respond(work: () => Promise<unknown>, status = 200) {
       return NextResponse.json({ error: { code: "CONFLICT", message: "Data bentrok atau tidak dapat diubah. Muat ulang dan periksa kembali." } }, { status: 409, headers });
     }
     // No Prisma query, request body, token or PII in application logs.
-    console.error("admin.request.failed", { type: error instanceof Error ? error.name : "UnknownError" });
+    const errorInfo: any = { type: error instanceof Error ? error.name : "UnknownError" };
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      errorInfo.code = error.code;
+      errorInfo.meta = error.meta;
+    }
+    if (error instanceof Error) {
+      errorInfo.message = error.message;
+    }
+    console.error("admin.request.failed", errorInfo);
     return NextResponse.json({ error: { code: "UNAVAILABLE", message: "Layanan Admin belum tersedia. Coba lagi atau hubungi pengelola." } }, { status: 503, headers });
   }
 }
