@@ -61,6 +61,25 @@ export function ProgramKerjaManager() {
   const [formIndicator, setFormIndicator] = useState("");
   const [formNotes, setFormNotes] = useState("");
   const [formStatus, setFormStatus] = useState<WorkProgram["status"]>("BELUM_MULAI");
+  const [formDepartmentId, setFormDepartmentId] = useState("");
+
+  // Departments list for Super Admin
+  const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
+  // Fetch departments for dropdown
+  useEffect(() => {
+    adminApi<{ items: { id: string; name: string; slug: string }[] }>("/api/admin/departments?page=1")
+      .then((res) => {
+        setDepartments(res.items);
+        // If there are departments, likely Super Admin
+        setIsSuperAdmin(true);
+      })
+      .catch(() => {
+        // If fetch fails, likely regular admin with limited access
+        setIsSuperAdmin(false);
+      });
+  }, []);
 
   useEffect(() => {
     let live = true;
@@ -89,6 +108,7 @@ export function ProgramKerjaManager() {
     setFormIndicator("");
     setFormNotes("");
     setFormStatus("BELUM_MULAI");
+    setFormDepartmentId("");
     setIsModalOpen(true);
   }
 
@@ -100,6 +120,7 @@ export function ProgramKerjaManager() {
     setFormIndicator(item.success_indicator || "");
     setFormNotes(item.progress_notes || "");
     setFormStatus(item.status);
+    setFormDepartmentId(item.department_id || "");
     setIsModalOpen(true);
   }
 
@@ -117,6 +138,7 @@ export function ProgramKerjaManager() {
       success_indicator: formIndicator || undefined,
       progress_notes: formNotes || undefined,
       status: formStatus,
+      ...(isSuperAdmin && formDepartmentId ? { department_id: formDepartmentId } : {}),
     };
 
     try {
@@ -338,6 +360,23 @@ export function ProgramKerjaManager() {
                   placeholder="Deskripsi tujuan dan cakupan program..."
                 />
               </label>
+              {isSuperAdmin && departments.length > 0 && (
+                <label className="text-sm">
+                  Departemen
+                  <select
+                    className="form-control mt-1"
+                    value={formDepartmentId}
+                    onChange={(e) => setFormDepartmentId(e.target.value)}
+                  >
+                    <option value="">Program Unggulan BEM (Tanpa Departemen)</option>
+                    {departments.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <div className="grid sm:grid-cols-2 gap-3">
                 <label className="text-sm">
                   Target Waktu Execution
