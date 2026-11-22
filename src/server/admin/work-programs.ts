@@ -33,7 +33,8 @@ export async function listWorkPrograms(params: URLSearchParams) {
   const department_id = params.get("department_id");
 
   return adminRead(async (tx, actor) => {
-    await ensureDefaultWorkPrograms(tx);
+    // Temporarily disabled to debug list API error
+    // await ensureDefaultWorkPrograms(tx);
 
     const scope = departmentScope(actor);
 
