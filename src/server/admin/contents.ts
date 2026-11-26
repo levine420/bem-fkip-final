@@ -365,8 +365,8 @@ export async function submitContentReview(request: Request, id: string) {
     if (!existing) return missing();
     if (!canAccessContent(actor, existing)) return missing();
     
-    if (existing.status !== "DRAF") {
-      forbidden("Hanya konten berstatus DRAF yang dapat diajukan untuk review.");
+    if (!["DRAF", "MENUNGGU_REVIEW"].includes(existing.status)) {
+      forbidden("Hanya konten berstatus DRAF atau MENUNGGU_REVIEW yang dapat diajukan untuk review.");
     }
 
     const content = await tx.contents.update({
