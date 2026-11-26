@@ -228,7 +228,7 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
     );
   }
 
-  const canSubmitReview = mode === "create" || (existing && ["DRAF", "REVISI"].includes(existing.status));
+  const canSubmitReview = mode === "create" || (existing && ["DRAF", "REVISI", "MENUNGGU_REVIEW"].includes(existing.status));
 
   return (
     <div className="grid gap-4">
