@@ -98,7 +98,7 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
     }
   }, [mode, contentId]);
 
-  async function save(event: FormEvent<HTMLFormElement>, submitReview = false) {
+  async function save(event: FormEvent<HTMLFormElement>, publishNow = false) {
     event.preventDefault();
     if (busy) return;
 
@@ -126,17 +126,21 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
     try {
       if (mode === "create") {
         const result = await adminApi<Content>("/api/admin/contents", "POST", payload);
-        if (submitReview) {
+        if (publishNow) {
+          // Directly publish the content
           await adminApi(`/api/admin/contents/${result.id}/submit`, "POST");
-          router.push("/admin/konten?submitted=true");
+          await adminApi(`/api/admin/contents/${result.id}/publish`, "POST");
+          router.push("/admin/konten?published=true");
         } else {
           router.push("/admin/konten?created=true");
         }
       } else if (mode === "edit" && contentId) {
         await adminApi(`/api/admin/contents/${contentId}`, "PATCH", payload);
-        if (submitReview) {
+        if (publishNow) {
+          // Directly publish the content
           await adminApi(`/api/admin/contents/${contentId}/submit`, "POST");
-          router.push("/admin/konten?submitted=true");
+          await adminApi(`/api/admin/contents/${contentId}/publish`, "POST");
+          router.push("/admin/konten?published=true");
         } else {
           router.push("/admin/konten?updated=true");
         }
@@ -337,7 +341,7 @@ export function ContentEditor({ mode, contentId }: { mode: "create" | "edit"; co
                     }
                   }}
                 >
-                  Simpan & Submit Review
+                  Terbitkan
                 </button>
               )}
               <button
