@@ -132,9 +132,6 @@ export function ContentManager() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link href="/admin/konten/review" className={`${actionClass} bg-yellow-500/20 text-warning hover:bg-yellow-500/30 border border-yellow-500/40`}>
-              Review &amp; Terbitkan
-            </Link>
             <Link href="/admin/konten/baru" className={`${actionClass} bg-brand`}>
               Buat Konten Baru
             </Link>
